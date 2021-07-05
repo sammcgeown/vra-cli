@@ -1,4 +1,4 @@
-module github.com/vmware/code-stream-cli
+module github.com/sammcgeown/vra-cli
 
 go 1.16
 

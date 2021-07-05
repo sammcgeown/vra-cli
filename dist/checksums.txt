@@ -1,6 +1,0 @@
-06aa9bc18a35edcb4c5320e70603a6e0392a81abe59d221b8b02d2dfce5d9a74  code-stream-cli_v0.1.4-next_Darwin_x86_64.tar.gz
-2c5d09b063562fb0f13bf74ff09d1a28b6e83a648838efd0ebbebf34a852284d  code-stream-cli_v0.1.4-next_Darwin_arm64.tar.gz
-58e3546bebb5c161694fb4d859c4b10426e20709ddf6c043affde51db4c90249  code-stream-cli_v0.1.4-next_Linux_x86_64.tar.gz
-9727d9aae0123f97f50f2ec982780d9e64dc8c10464ff1fc834a8f5d3e668358  code-stream-cli_v0.1.4-next_Linux_arm64.tar.gz
-c2584fbda226f66bd2f526ffb356d8982695bb46e6df63025bd829b5f9f09a66  code-stream-cli_v0.1.4-next_Linux_armv7.tar.gz
-f2fa5724775c9fe54a4b629abe0e02ca86f73e52d466f242fc1de7cd833e0849  code-stream-cli_v0.1.4-next_Windows_x86_64.tar.gz
