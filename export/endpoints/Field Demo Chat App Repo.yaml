@@ -1,0 +1,14 @@
+---
+project: Field Demo
+kind: ENDPOINT
+name: Field Demo Chat App Repo
+description: ''
+type: git
+properties:
+  serverType: GitLab
+  repoURL: https://gitlab.com/mcclanc/fielddemo-chat-app
+  branch: master
+  authType: password
+  userName: mcclanc@gmail.com
+  password: Mazie_123
+  fingerprint: 1E47299CCE0081B73FC6AEA3FD35BA2309A033A858EDD518789477C20C910CA4

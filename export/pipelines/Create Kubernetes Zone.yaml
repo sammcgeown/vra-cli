@@ -1,0 +1,75 @@
+---
+project: Field Demo
+kind: PIPELINE
+name: Create Kubernetes Zone
+icon: organization,left, is-purple
+enabled: true
+concurrency: 10
+input:
+  clusterAddress: ''
+  clusterCACertificate: ''
+  clusterName: ''
+  clusterUserPrivateKey: ''
+  clusterUserPublicKey: ''
+  clusterTag: ''
+_inputMeta:
+  clusterCACertificate:
+    mandatory: false
+    description: ''
+  clusterTag:
+    mandatory: true
+    description: ''
+  clusterName:
+    mandatory: true
+    description: ''
+  clusterUserPrivateKey:
+    mandatory: false
+    description: ''
+  clusterUserPublicKey:
+    mandatory: false
+    description: ''
+  clusterAddress:
+    mandatory: false
+    description: ''
+workspace:
+  endpoint: smcg-sc2-docker-host - TLS
+  image: sammcgeown/codestream-ci-tkg:0.0.10
+  registry: ''
+  path: ''
+  autoCloneForTrigger: false
+  limits:
+    cpu: 1.0
+    memory: 512
+stageOrder:
+- Main
+stages:
+  Main:
+    taskOrder:
+    - Authenticate
+    - Get K8s Cluster,Get K8s Tag
+    tasks:
+      Get K8s Cluster:
+        type: Pipeline
+        input:
+          pipeline: vra-GET
+          inputProperties:
+            vraAccessToken: ${Main.Authenticate.output.outputProperties.vraAccessToken}
+            vraRequestPayload: ''
+            vraRequestUri: https://${var.vraFQDN}/cmx/api/resources/k8s/clusters?$filter=(name eq '${input.clusterName}')
+      Get K8s Tag:
+        type: Pipeline
+        input:
+          pipeline: vra-GET
+          inputProperties:
+            vraAccessToken: ${Main.Authenticate.output.outputProperties.vraAccessToken}
+            vraRequestPayload: ''
+            vraRequestUri: https://${var.vraFQDN}/provisioning/uerp/resources/tags?expand&$filter=((key
+              eq 'k8s') and (value eq '${input.clusterTag}')
+      Authenticate:
+        type: Pipeline
+        input:
+          pipeline: vra-authenticateUser
+          inputProperties:
+            vraFQDN: ${var.vraFQDN}
+            vraUserName: ${var.vraUsername}
+            vraUserPassword: ${var.vraPassword}

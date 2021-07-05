@@ -1,0 +1,164 @@
+project_name: code-stream-cli
+release:
+  github:
+    owner: vmware
+    name: code-stream-cli
+  name_template: '{{.Tag}}'
+milestones:
+- repo:
+    owner: vmware
+    name: code-stream-cli
+  name_template: '{{ .Tag }}'
+brews:
+- name: cs-cli
+  tap:
+    owner: sammcgeown
+    name: homebrew-cs-cli
+  commit_author:
+    name: sammcgeown
+    email: smcgeown@vmware.com
+  install: |
+    bin.install "cs-cli"
+  description: Code Stream CLI is a command line tool written in Go to interact with
+    the vRealize Automation Code Stream APIs
+  homepage: https://github.com/vmware/code-stream-cli
+  license: BSD-2
+  goarm: "6"
+scoop:
+  name: code-stream-cli
+  commit_author:
+    name: goreleaserbot
+    email: goreleaser@carlosbecker.com
+  commit_msg_template: Scoop update for {{ .ProjectName }} version {{ .Tag }}
+builds:
+- id: cs-cli
+  goos:
+  - linux
+  - windows
+  - darwin
+  goarch:
+  - amd64
+  - arm
+  - arm64
+  goarm:
+  - "7"
+  targets:
+  - linux_amd64
+  - linux_arm_7
+  - linux_arm64
+  - windows_amd64
+  - darwin_amd64
+  - darwin_arm64
+  dir: .
+  main: ./cs-cli.go
+  ldflags:
+  - -s -w -X github.com/vmware/code-stream-cli/cmd.version={{.Version}} -X github.com/vmware/code-stream-cli/cmd.commit={{.Commit}}
+    -X github.com/vmware/code-stream-cli/cmd.date={{.Date}} -X github.com/vmware/code-stream-cli/cmd.builtBy=goreleaser
+  binary: cs-cli
+  env:
+  - CGO_ENABLED=0
+  lang: go
+  gobinary: go
+archives:
+- id: default
+  builds:
+  - cs-cli
+  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm
+    }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}'
+  replacements:
+    "386": i386
+    amd64: x86_64
+    darwin: Darwin
+    linux: Linux
+    windows: Windows
+  format: tar.gz
+  files:
+  - licence*
+  - LICENCE*
+  - license*
+  - LICENSE*
+  - readme*
+  - README*
+  - changelog*
+  - CHANGELOG*
+  allow_different_binary_count: false
+snapshot:
+  name_template: '{{ .Tag }}-next'
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+dockers:
+- goos: linux
+  goarch: amd64
+  dockerfile: Dockerfile
+  image_templates:
+  - sammcgeown/cs-cli:latest-amd64
+  - sammcgeown/cs-cli:v{{ .Major }}.{{ .Minor }}-amd64
+  build_flag_templates:
+  - --platform=linux/amd64
+  - --label=org.opencontainers.image.created={{.Date}}
+  - --label=org.opencontainers.image.title={{.ProjectName}}
+  - --label=org.opencontainers.image.revision={{.FullCommit}}
+  - --label=org.opencontainers.image.version={{.Version}}
+  use_buildx: true
+- goos: linux
+  goarch: arm64
+  dockerfile: Dockerfile
+  image_templates:
+  - sammcgeown/cs-cli:latest-arm64v8
+  - sammcgeown/cs-cli:v{{ .Major }}.{{ .Minor }}-arm64v8
+  build_flag_templates:
+  - --platform=linux/arm64/v8
+  - --label=org.opencontainers.image.created={{.Date}}
+  - --label=org.opencontainers.image.title={{.ProjectName}}
+  - --label=org.opencontainers.image.revision={{.FullCommit}}
+  - --label=org.opencontainers.image.version={{.Version}}
+  use_buildx: true
+- goos: linux
+  goarch: arm
+  goarm: "7"
+  dockerfile: Dockerfile
+  image_templates:
+  - sammcgeown/cs-cli:latest-armv7
+  - sammcgeown/cs-cli:v{{ .Major }}.{{ .Minor }}-armv7
+  build_flag_templates:
+  - --platform=linux/arm/v7
+  - --label=org.opencontainers.image.created={{.Date}}
+  - --label=org.opencontainers.image.title={{.ProjectName}}
+  - --label=org.opencontainers.image.revision={{.FullCommit}}
+  - --label=org.opencontainers.image.version={{.Version}}
+  use_buildx: true
+docker_manifests:
+- name_template: sammcgeown/cs-cli:v{{ .Major }}.{{ .Minor }}
+  image_templates:
+  - sammcgeown/cs-cli:v{{ .Major }}.{{ .Minor }}-amd64
+  - sammcgeown/cs-cli:v{{ .Major }}.{{ .Minor }}-armv7
+  - sammcgeown/cs-cli:v{{ .Major }}.{{ .Minor }}-arm64v8
+- name_template: sammcgeown/cs-cli:latest
+  image_templates:
+  - sammcgeown/cs-cli:latest-amd64
+  - sammcgeown/cs-cli:latest-armv7
+  - sammcgeown/cs-cli:latest-arm64v8
+changelog:
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+    - '^typo:'
+    - '^build:'
+  sort: asc
+dist: dist
+env_files:
+  github_token: ~/.config/goreleaser/github_token
+  gitlab_token: ~/.config/goreleaser/gitlab_token
+  gitea_token: ~/.config/goreleaser/gitea_token
+before:
+  hooks:
+  - go mod download
+source:
+  name_template: '{{ .ProjectName }}-{{ .Version }}'
+  format: tar.gz
+github_urls:
+  download: https://github.com
+gitlab_urls:
+  download: https://gitlab.com

@@ -1,0 +1,99 @@
+---
+project: Field Demo
+kind: PIPELINE
+name: MOAD - Configure MetalLB Load Balancer
+icon: organization,left, is-teal
+enabled: true
+concurrency: 10
+input:
+  ClusterAddress: ''
+  ClusterName: ''
+  ClusterToken: ''
+  metallb-end-ip: ''
+  metallb-start-ip: ''
+_inputMeta:
+  ClusterAddress:
+    mandatory: true
+    description: ''
+  ClusterName:
+    mandatory: true
+    description: ''
+  metallb-end-ip:
+    mandatory: true
+    description: Ending IP Address of the range assigned to MetalLB
+  ClusterToken:
+    mandatory: true
+    description: ''
+  metallb-start-ip:
+    mandatory: true
+    description: Starting IP Address of the range assigned to MetalLB
+workspace:
+  endpoint: smcg-sc2-docker-host - TLS
+  image: sammcgeown/codestream-ci-tkg:0.0.9
+  registry: ''
+  path: ''
+  autoCloneForTrigger: false
+  limits:
+    cpu: 1.0
+    memory: 512
+stageOrder:
+- Stage0
+stages:
+  Stage0:
+    taskOrder:
+    - Deploy metallb
+    tasks:
+      Deploy metallb:
+        type: CI
+        input:
+          steps:
+          - yum install openssl -y
+          - '# Setup kubeconf'
+          - kubectl config set-cluster ${input.ClusterName} --server=${input.ClusterAddress}  --insecure-skip-tls-verify
+          - kubectl config set-credentials vrealize-integration --token ${input.ClusterToken}
+          - kubectl config set-context vrealize-integration --cluster ${input.ClusterName} --user vrealize-integration
+          - kubectl config use-context vrealize-integration
+          - ''
+          - '# Create the metallb-system namespace'
+          - kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.5/manifests/namespace.yaml
+          - '# Add credentials for docker hub'
+          - kubectl --namespace metallb-system create secret docker-registry cmbu-docker-credentials --docker-server=https://index.docker.io/v1/
+            --docker-username=${var.docker-hub-username} --docker-password=${var.docker-hub-password}
+            --docker-email=${var.docker-hub-email}
+          - 'kubectl patch serviceaccount default -p ''{"imagePullSecrets": [{"name": "cmbu-docker-credentials"}]}''
+            --namespace metallb-system'
+          - '# Deploy metallb'
+          - wget https://raw.githubusercontent.com/metallb/metallb/v0.9.5/manifests/metallb.yaml
+          - '# Create Service Accounts with the credentials pre-baked'
+          - yq eval '. | select(.kind == "ServiceAccount") | .imagePullSecrets[0].name = "cmbu-docker-credentials"'
+            metallb.yaml > metallb-serviceaccounts.yaml
+          - '# Remove the Service Accounts from the main file'
+          - yq eval -i '. | select(.kind == "ServiceAccount" | not)' metallb.yaml
+          - kubectl apply -f metallb-serviceaccounts.yaml
+          - kubectl apply -f metallb.yaml
+          - '# Create metallb memberlist'
+          - kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl
+            rand -base64 128)"
+          - '# Create metallb configuration'
+          - cat > metallb-config.yaml <<EOF
+          - 'apiVersion: v1'
+          - 'kind: ConfigMap'
+          - 'metadata:'
+          - '  namespace: metallb-system'
+          - '  name: config'
+          - 'data:'
+          - '  config: |'
+          - '    address-pools:'
+          - '    - name: default'
+          - '      protocol: layer2'
+          - '      addresses:'
+          - '      - ${input.metallb-start-ip}-${input.metallb-end-ip}'
+          - EOF
+          - '# Apply metallb configuration'
+          - kubectl apply -f metallb-config.yaml
+          export: [
+            ]
+          artifacts: [
+            ]
+          process: [
+            ]

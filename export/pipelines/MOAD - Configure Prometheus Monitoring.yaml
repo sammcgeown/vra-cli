@@ -1,0 +1,187 @@
+---
+project: Field Demo
+kind: PIPELINE
+name: MOAD - Configure Prometheus Monitoring
+icon: organization,left, is-teal
+enabled: true
+concurrency: 10
+input:
+  ClusterAddress: ''
+  ClusterName: ''
+  ClusterToken: ''
+  ClusterVC: ''
+_inputMeta:
+  ClusterAddress:
+    mandatory: true
+    description: ''
+  ClusterVC:
+    mandatory: true
+    description: ''
+  ClusterName:
+    mandatory: true
+    description: ''
+  ClusterToken:
+    mandatory: true
+    description: ''
+workspace:
+  endpoint: smcg-sc2-docker-host - TLS
+  image: sammcgeown/codestream-ci-tkg:0.0.10
+  registry: ''
+  path: ''
+  autoCloneForTrigger: false
+  limits:
+    cpu: 1.0
+    memory: 512
+stageOrder:
+- Stage0
+stages:
+  Stage0:
+    taskOrder:
+    - Deploy Prometheus
+    - Get vROps Authentication
+    - Add Kubernetes Adapter
+    tasks:
+      Get vROps Authentication:
+        type: Pipeline
+        input:
+          pipeline: vrops-authenticateUser
+          inputProperties:
+            vropsAuthSource: Local
+            vropsFQDN: ${var.vropsFQDN}
+            vropsUserName: ${var.vropsUser}
+            vropsUserPassword: ${var.vropsPassword}
+      Deploy Prometheus:
+        type: CI
+        input:
+          steps:
+          - '# Setup kubeconf'
+          - kubectl config set-cluster ${input.ClusterName} --server=${input.ClusterAddress}  --insecure-skip-tls-verify
+          - kubectl config set-credentials vrealize-integration --token ${input.ClusterToken}
+          - kubectl config set-context vrealize-integration --cluster ${input.ClusterName} --user vrealize-integration
+          - kubectl config use-context vrealize-integration
+          - ''
+          - '# Extract the Node IPs'
+          - kubectl get nodes -o json | jq -r '.items[].status.addresses[] | select(.type=="ExternalIP"
+            or .type=="InternalIP") | .address' > nodeIps.txt
+          - ''
+          - '# Download the Prometheus configuration'
+          - wget https://raw.githubusercontent.com/VMwareCMBUTMM/opencart-demo/master/monitoring/01-prometheus-deployment.yaml
+          - wget https://raw.githubusercontent.com/VMwareCMBUTMM/opencart-demo/master/monitoring/02-policies-telegraf.yaml
+          - wget https://raw.githubusercontent.com/VMwareCMBUTMM/opencart-demo/master/monitoring/prometheus.yml
+          - ''
+          - '# Add the Node IPs as targets'
+          - while IFS= read -r line; do
+          - '  yq eval -i ''.scrape_configs[0].static_configs[0].targets += ["''$line'':31196"]'' prometheus.yml'
+          - done < nodeIps.txt
+          - ''
+          - '# Deploy Prometheus and Telegraf'
+          - kubectl create namespace monitoring
+          - kubectl apply -f 02-policies-telegraf.yaml
+          - kubectl create configmap prometheus-config --from-file prometheus.yml --namespace monitoring
+          - kubectl apply -f 01-prometheus-deployment.yaml
+          - ''
+          - 'sleep 20 # Give the external IP a chance...'
+          - ''
+          - '# Export PrometheusIP for vROps'
+          - export PrometheusIP=$(kubectl get services prometheus --namespace monitoring -o json | jq
+            -r '.status.loadBalancer.ingress[0].ip')
+          - ''
+          - cat << EOF > vROpsEndpoint.json
+          - '{'
+          - '    "name": "${input.ClusterName}",'
+          - '    "description": "${input.ClusterName} - MOAD Tanzu Kubernetes Cluster",'
+          - '    "collectorId": "1",'
+          - '    "adapterKindKey": "KubernetesAdapter",'
+          - '    "resourceIdentifiers": ['
+          - '        {'
+          - '            "name": "K8S_MASTERURL",'
+          - '            "value": "${input.ClusterAddress}"'
+          - '        },'
+          - '        {'
+          - '            "name": "CADVISOR_SERVICE",'
+          - '            "value": "PROMETHEUS"'
+          - '        },'
+          - '        {'
+          - '            "name": "DATA_RETENTION_PLAN",'
+          - '            "value": "PLATFORM"'
+          - '        },'
+          - '        {'
+          - '            "name": "ENABLE_CADVISOR_INSTALL_CHECK",'
+          - '            "value": "true"'
+          - '        },'
+          - '        {'
+          - '            "name": "ENABLE_PROMETHEUS_METRICS_LABELS",'
+          - '            "value": "true"'
+          - '        },'
+          - '        {'
+          - '            "name": "MONITOR_JAVA",'
+          - '            "value": "false"'
+          - '        },'
+          - '        {'
+          - '            "name": "PROMETHEUS_METRIC_LABELS_TO_EXCLUDE",'
+          - '            "value": "beta_kubernetes_io_os,container_label_annotation_io_kubernetes_container_hash,container_label_annotation_io_kubernetes_container_ports,container_label_annotation_io_kubernetes_container_restartCount,container_label_annotation_io_kubernetes_container_terminationMessagePath,container_label_annotation_io_kubernetes_container_terminationMessagePolicy,container_label_annotation_io_kubernetes_pod_terminationGracePeriod,container_label_annotation_kubeadm_kubernetes_io_etcd_advertise_client_urls,container_label_annotation_kubeadm_kubernetes_io_kube_apiserver_advertise_address_endpoint,container_label_annotation_kubernetes_io_config_hash,container_label_annotation_kubernetes_io_config_seen,container_label_annotation_kubernetes_io_config_source,container_label_app,container_label_app_kubernetes_io_name,container_label_app_kubernetes_io_version,container_label_component,container_label_controller_revision_hash,container_label_description,container_label_io_kubernetes_container_logpath,container_label_io_kubernetes_docker_type,container_label_io_kubernetes_pod_uid,container_label_io_kubernetes_sandbox_id,container_label_k8s_app,container_label_maintainer,container_label_maintainers,container_label_pod_template_generation,container_label_pod_template_hash,container_label_purpose,container_label_tier,container_label_version,container_runtime_version,dockerVersion,goversion,image,image_id,instance,timezone,container_label_io_kubernetes_container_name,container_label_io_kubernetes_pod_name,container_label_io_kubernetes_pod_namespace,name"'
+          - '        },'
+          - '        {'
+          - '            "identifierType": {'
+          - '                "name": "VCENTER_SERVER_IDENT",'
+          - '                "dataType": "STRING",'
+          - '                "isPartOfUniqueness": false'
+          - '            },'
+          - '            "value": "${input.ClusterVC}"'
+          - '        }'
+          - '    ],'
+          - '    "credential": {'
+          - '        "name": "${input.ClusterName}",'
+          - '        "adapterKindKey": "KubernetesAdapter",'
+          - '        "credentialKindKey": "KUBE_CREDENTIALS_TOKEN",'
+          - '        "fields": ['
+          - '            {'
+          - '                "name": "BEARER_TOKEN",'
+          - '                "value": "${input.ClusterToken}"'
+          - '            },'
+          - '            {'
+          - '                "name": "PROXY_HOST",'
+          - '                "value": ""'
+          - '            },'
+          - '            {'
+          - '                "name": "PROXY_PORT",'
+          - '                "value": ""'
+          - '            },'
+          - '            {'
+          - '                "name": "PROXY_USERNAME",'
+          - '                "value": ""'
+          - '            },'
+          - '            {'
+          - '                "name": "PROXY_PASSWORD"'
+          - '            },'
+          - '            {'
+          - '                "name": "PROMETHEUS_SERVER",'
+          - '                "value": "http://$PrometheusIP:9090/"'
+          - '            },'
+          - '            {'
+          - '                "name": "PROMETHEUS_SERVER_USERNAME",'
+          - '                "value": ""'
+          - '            },'
+          - '            {'
+          - '                "name": "PROMETHEUS_SERVER_PASSWORD"'
+          - '            }'
+          - '        ]'
+          - '    }'
+          - '}'
+          - EOF
+          - ''
+          - export endpointConfig=$(jq -c . vROpsEndpoint.json)
+          export:
+          - endpointConfig
+          artifacts: [
+            ]
+          process: [
+            ]
+      Add Kubernetes Adapter:
+        type: Pipeline
+        input:
+          pipeline: vrops-POST
+          inputProperties:
+            vropsAccessToken: ${Stage0.Get vROps Authentication.output.outputProperties.vropsAccessToken}
+            vropsRequestPayload: ${Stage0.Deploy Prometheus.output.exports.endpointConfig}
+            vropsRequestUri: https://${var.vropsFQDN}/suite-api/api/adapters

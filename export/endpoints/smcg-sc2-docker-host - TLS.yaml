@@ -1,0 +1,10 @@
+---
+project: Field Demo
+kind: ENDPOINT
+name: smcg-sc2-docker-host - TLS
+description: Ubuntu 18.04 Docker host configured with TLS and firewall rules restricting access.
+type: docker
+properties:
+  url: https://smcg-sc2-docker-host.cmbu.local:2376
+  sharedPath: /sharedPath
+  fingerprint: DE163AF20B80A5F2F514BB1C1927DCF299F3BC6443FDDF6F667825C2C4F5F2D9

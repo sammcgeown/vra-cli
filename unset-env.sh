@@ -1,0 +1,4 @@
+unset CS_SERVER
+unset CS_USERNAME
+unset CS_PASSWORD
+unset CS_DOMAIN

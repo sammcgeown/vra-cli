@@ -1,0 +1,48 @@
+---
+project: Field Demo
+kind: PIPELINE
+name: Learn Code Stream
+icon: organization,left, is-orange
+enabled: true
+concurrency: 10
+workspace:
+  endpoint: smcg-sc2-docker-host - TLS
+  image: harbor-repo.vmware.com/dockerhub-proxy-cache/sammcgeown/codestream-ci-k8s:latest
+  registry: ''
+  path: ''
+  autoCloneForTrigger: false
+  limits:
+    cpu: 1.0
+    memory: 512
+stageOrder:
+- Stage0
+stages:
+  Stage0:
+    taskOrder:
+    - Task0
+    tasks:
+      Task0:
+        type: CI
+        input:
+          steps:
+          - echo "Preserve me!" > preserve.txt
+          - ''
+          export: [
+            ]
+          artifacts:
+          - preserve.txt
+          process: [
+            ]
+notifications:
+  email:
+  - endpoint: Office365 Notification - smcgeown
+    body: |-
+      <p>Hi ${requestBy},</p>
+
+      <p>Please download your preserved file from <a href="https://smcg-sc2-docker-host.cmbu.local${Stage0.Task0.output.artifacts[0]}">https://smcg-sc2-docker-host.cmbu.local${Stage0.Task0.output.artifacts[0]}</a>.</p>
+
+      <p>Code Stream</p>
+    subject: Download your Preserve.txt
+    event: SUCCESS
+    to:
+    - smcgeown@vmware.com

@@ -1,0 +1,65 @@
+---
+project: Field Demo
+kind: PIPELINE
+name: Add Kubernetes Endpoint to Code Stream - Token
+icon: organization,left, is-purple
+enabled: true
+concurrency: 10
+input:
+  clusterAddress: ''
+  clusterFingerprint: ''
+  clusterName: ''
+  clusterProject: ''
+  clusterUserToken: ''
+_inputMeta:
+  clusterProject:
+    mandatory: true
+    description: ''
+  clusterUserToken:
+    mandatory: true
+    description: ''
+  clusterName:
+    mandatory: true
+    description: ''
+  clusterFingerprint:
+    mandatory: true
+    description: ''
+  clusterAddress:
+    mandatory: true
+    description: ''
+workspace:
+  endpoint: smcg-sc2-docker-host - TLS
+  image: sammcgeown/codestream-ci-k8s:latest
+  registry: ''
+  path: ''
+  autoCloneForTrigger: false
+  limits:
+    cpu: 1.0
+    memory: 512
+stageOrder:
+- Main
+stages:
+  Main:
+    taskOrder:
+    - Authenticate
+    - CreateEndpoint
+    tasks:
+      Authenticate:
+        type: Pipeline
+        input:
+          pipeline: vra-authenticateUser
+          inputProperties:
+            vraFQDN: ${var.vraFQDN}
+            vraUserName: ${var.vraUsername}
+            vraUserPassword: ${var.vraPassword}
+      CreateEndpoint:
+        type: Pipeline
+        input:
+          pipeline: vra-POST
+          inputProperties:
+            vraAccessToken: ${Main.Authenticate.output.outputProperties.vraAccessToken}
+            vraRequestPayload: '{     "name": "${input.clusterName}",     "project": "${input.clusterProject}",     "description":
+              "Added from Code Stream",     "type": "k8s",     "properties": {         "kubernetesURL":
+              "${input.clusterAddress}",         "authType": "token",         "token": "${input.clusterUserToken}",         "fingerprint":
+              "${input.clusterFingerprint}"     } }'
+            vraRequestUri: https://${var.vraFQDN}/pipeline/api/endpoints

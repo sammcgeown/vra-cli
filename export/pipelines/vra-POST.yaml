@@ -1,0 +1,49 @@
+---
+project: Field Demo
+kind: PIPELINE
+name: vra-POST
+icon: organization,left, is-warning is-solid
+enabled: true
+concurrency: 10
+input:
+  vraAccessToken: ''
+  vraRequestPayload: ''
+  vraRequestUri: ''
+_inputMeta:
+  vraRequestPayload:
+    mandatory: true
+    description: ''
+  vraRequestUri:
+    mandatory: true
+    description: ''
+  vraAccessToken:
+    mandatory: true
+    description: ''
+output:
+  vraResponseJson: ${REST.Execute Post.output.responseJson}
+workspace:
+  endpoint: smcg-sc2-docker-host - TLS
+  image: sammcgeown/codestream-ci
+  registry: ''
+  path: ''
+  autoCloneForTrigger: false
+  limits:
+    cpu: 1.0
+    memory: 512
+stageOrder:
+- REST
+stages:
+  REST:
+    taskOrder:
+    - Execute Post
+    tasks:
+      Execute Post:
+        type: REST
+        input:
+          action: post
+          url: ${input.vraRequestUri}
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+            Authorization: ${input.vraAccessToken}
+          payload: ${input.vraRequestPayload}
