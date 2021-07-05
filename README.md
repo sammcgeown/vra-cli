@@ -1,16 +1,16 @@
 <img src="images/cs-cli-logo.png" alt="cs-cli logo" width="200px" />
 
-# Code Stream CLI (cs-cli)
+# vRealize Automation CLI (cs-cli)
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/vmware/code-stream-cli/release) [![Go Report Card](https://goreportcard.com/badge/github.com/vmware/code-stream-cli)](https://goreportcard.com/report/github.com/vmware/code-stream-cli) ![GitHub issues](https://img.shields.io/github/issues/vmware/code-stream-cli) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/vmware/code-stream-cli) [![Published VMware Fling](https://img.shields.io/badge/VMware-Fling-green)](https://flings.vmware.com/vrealize-automation-code-stream-cli)
 
 
-The Code Stream CLI is a command line tool written in Go to interact with the vRealize Automation Code Stream APIs. It is written to help automate Code Stream and provide a simple way to migrate content between Code Stream instances and projects.
+The vRealize Automation CLI is a command line tool written in Go to interact with the vRealize Automation Code Stream APIs. It is written to help automate Code Stream and provide a simple way to migrate content between Code Stream instances and projects.
 * Import and Export Code Stream artefacts such as Pipelines, Variables, Endpoints
 * Perform CRUD operations on Code Stream artefacts such as Pipelines, Variables, Endpoints
 * Trigger Executions of Pipelines
 
-![Code Stream CLI](images/cs-cli-screenshot.png)
+![vRealize Automation CLI](images/cs-cli-screenshot.png)
 
 Currently implemented commands:
 * [Configuration](#Configuration)

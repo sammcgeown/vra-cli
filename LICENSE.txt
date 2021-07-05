@@ -1,7 +1,7 @@
-Code Stream CLI
+vRealize Automation CLI
 Copyright 2021 VMware, Inc.
 
-The BSD-2 license (the "License") set forth below applies to all parts of the Code Stream CLI project. You may not use this file except in compliance with the License.
+The BSD-2 license (the "License") set forth below applies to all parts of the vRealize Automation CLI project. You may not use this file except in compliance with the License.
 
 BSD-2 License 
 
