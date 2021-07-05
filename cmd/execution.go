@@ -25,9 +25,9 @@ var getExecutionCmd = &cobra.Command{
 	Short: "Get Pipeline Executions",
 	Long: `Get Code Stream Pipeline Executions by ID, Pipeline name, Project and Status
 	Get only failed executions:
-	  cs-cli get execution --status FAILED
+	  vra-cli get execution --status FAILED
 	Get an execution by ID:
-	  cs-cli get execution --id bb3f6aff-311a-45fe-8081-5845a529068d
+	  vra-cli get execution --id bb3f6aff-311a-45fe-8081-5845a529068d
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := ensureTargetConnection(); err != nil {

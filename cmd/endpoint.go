@@ -56,7 +56,7 @@ var createEndpointCmd = &cobra.Command{
 	Long: `Create an Endpoint by importing a YAML specification.
 	
 	Create from YAML
-	  cs-cli create endpoint --importPath "/Users/sammcgeown/Desktop/endpoint.yaml"
+	  vra-cli create endpoint --importPath "/Users/sammcgeown/Desktop/endpoint.yaml"
 	`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		return nil
@@ -91,9 +91,9 @@ var updateEndpointCmd = &cobra.Command{
 	Long: `Update an Endpoint by importing the YAML specification
 
 	Update from a YAML file
-	cs-cli update endpoint --importPath "/Users/sammcgeown/cs-cli/endpoints/updated-endpoint.yaml"
+	vra-cli update endpoint --importPath "/Users/sammcgeown/vra-cli/endpoints/updated-endpoint.yaml"
 	Update from a folder of YAML files
-	cs-cli update endpoint --importPath "/Users/sammcgeown/cs-cli/endpoints"
+	vra-cli update endpoint --importPath "/Users/sammcgeown/vra-cli/endpoints"
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := ensureTargetConnection(); err != nil {

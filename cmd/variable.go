@@ -20,13 +20,13 @@ var getVariableCmd = &cobra.Command{
 	Long: `Get Code Stream Variables by name, project or by id - e.g:
 
 Get by ID
-	cs-cli get variable --id 6b7936d3-a19d-4298-897a-65e9dc6620c8
+	vra-cli get variable --id 6b7936d3-a19d-4298-897a-65e9dc6620c8
 	
 Get by Name
-	cs-cli get variable --name my-variable
+	vra-cli get variable --name my-variable
 	
 Get by Project
-	cs-cli get variable --project production`,
+	vra-cli get variable --project production`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := ensureTargetConnection(); err != nil {
 			log.Fatalln(err)

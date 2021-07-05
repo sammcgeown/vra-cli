@@ -58,7 +58,7 @@ type config struct {
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "cs-cli",
+	Use:   "vra-cli",
 	Short: "CLI Interface for VMware vRealize Automation Code Stream",
 	Long:  `Command line interface for VMware vRealize Automation Code Stream`,
 }
@@ -73,7 +73,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cs-cli.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.vra-cli.yaml)")
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Enable debug logging")
 	rootCmd.PersistentFlags().BoolVar(&ignoreCert, "ignoreCertificateWarnings", false, "Disable HTTPS Certificate Validation")
 }
@@ -92,7 +92,7 @@ func initConfig() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	viper.SetConfigName(".cs-cli")
+	viper.SetConfigName(".vra-cli")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(home)
 
@@ -123,7 +123,7 @@ func initConfig() {
 		if err := viper.ReadInConfig(); err != nil {
 			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 				viper.SetConfigType("yaml")
-				viper.WriteConfigAs(filepath.Join(home, ".cs-cli"))
+				viper.WriteConfigAs(filepath.Join(home, ".vra-cli"))
 				viper.ReadInConfig()
 			} else {
 				log.Fatalln(err)

@@ -30,13 +30,13 @@ var getPipelineCmd = &cobra.Command{
 	Short: "Get Pipelines",
 	Long: `Get Code Stream Pipelines by ID, name or status
 # List all executions
-cs-cli get execution
+vra-cli get execution
 # View an execution by ID
-cs-cli get execution --id 9cc5aedc-db48-4c02-a5e4-086de3160dc0
+vra-cli get execution --id 9cc5aedc-db48-4c02-a5e4-086de3160dc0
 # View executions of a specific pipeline
 get execution --name vra-authenticateUser
 # View executions by status
-cs-cli get execution --status Failed`,
+vra-cli get execution --status Failed`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := ensureTargetConnection(); err != nil {
 			log.Fatalln(err)
@@ -150,9 +150,9 @@ var updatePipelineCmd = &cobra.Command{
 	Short: "Update a Pipeline",
 	Long: `Update a Pipeline
 	Enable/Disable/Release:
-	cs-cli update pipeline --id d0185f04-2e87-4f3c-b6d7-ee58abba3e92 --state enabled/disabled/released
+	vra-cli update pipeline --id d0185f04-2e87-4f3c-b6d7-ee58abba3e92 --state enabled/disabled/released
 	Update from YAML
-	cs-cli update pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Exports.yaml"
+	vra-cli update pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Exports.yaml"
 	`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if state != "" {
@@ -200,7 +200,7 @@ var createPipelineCmd = &cobra.Command{
 	Long: `Create a Pipeline by importing a YAML specification.
 	
 	Create from YAML
-	  cs-cli create pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Exports.yaml"
+	  vra-cli create pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Exports.yaml"
 	`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		return nil

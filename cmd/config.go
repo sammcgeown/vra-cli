@@ -21,7 +21,7 @@ var currentTargetCmd = &cobra.Command{
 
 Examples:
 	# Display the current-target
-	cs-cli config current-target
+	vra-cli config current-target
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		var currentTargetName = viper.GetString("currentTargetName")
@@ -39,7 +39,7 @@ var useTargetCmd = &cobra.Command{
 
 Examples:
 	# Display the current-target
-	cs-cli config use-target --name vra8-test-ga
+	vra-cli config use-target --name vra8-test-ga
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		var target = viper.Get("target." + name)
@@ -60,7 +60,7 @@ var getConfigTargetCmd = &cobra.Command{
 	Long: `Displays a list of the available target configs
 
 Examples:
-	cs-cli config get-target
+	vra-cli config get-target
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if name != "" {
@@ -95,8 +95,8 @@ var setTargetCmd = &cobra.Command{
 	Long: `Creates or updates a target configuration.
 
 Examples:
-	cs-cli config set-target --name vra-test-ga --server vra8-test-ga.cmbu.local --username test-user --password VMware1! --domain cmbu.local
-	cs-cli config set-target --name vrac-org --server api.mgmt.cloud.vmware.com --apitoken JhbGciOiJSUzI1NiIsImtpZCI6IjEzNjY3NDcwMTA2Mzk2MTUxNDk0In0
+	vra-cli config set-target --name vra-test-ga --server vra8-test-ga.cmbu.local --username test-user --password VMware1! --domain cmbu.local
+	vra-cli config set-target --name vrac-org --server api.mgmt.cloud.vmware.com --apitoken JhbGciOiJSUzI1NiIsImtpZCI6IjEzNjY3NDcwMTA2Mzk2MTUxNDk0In0
 `, Args: func(cmd *cobra.Command, args []string) error {
 		// if apiToken != "" && server != "" && username == "" && password == "" {
 		// 	return nil
@@ -112,7 +112,7 @@ Examples:
 		} else {
 			fmt.Println("Creating new target", newTargetName)
 		}
-		fmt.Println("Use `cs-cli config use-target --name " + newTargetName + "` to use this target")
+		fmt.Println("Use `vra-cli config use-target --name " + newTargetName + "` to use this target")
 		if newServer != "" {
 			viper.Set("target."+newTargetName+".server", newServer)
 		}
@@ -144,7 +144,7 @@ Examples:
 // 	Long: `Deletes an target config
 
 // Examples:
-// 	cs-cli config delete-target --name vra-test-ga
+// 	vra-cli config delete-target --name vra-test-ga
 // `,
 // 	Run: func(cmd *cobra.Command, args []string) {
 // 		if viper.IsSet("target." + name) {

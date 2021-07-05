@@ -42,7 +42,7 @@ var getProjectCommand = &cobra.Command{
 		for _, p := range response {
 			// table.Append([]string{p.ID, p.Name, p.Description})
 			if exportPath != "" {
-				tmpDir, err := ioutil.TempDir(os.TempDir(), "cs-cli-*")
+				tmpDir, err := ioutil.TempDir(os.TempDir(), "vra-cli-*")
 				if err != nil {
 					log.Fatalln(err)
 				}

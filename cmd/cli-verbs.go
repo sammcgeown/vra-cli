@@ -14,7 +14,7 @@ import (
 // getCmd represents the get command
 var getCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get resources in Code Stream",
+	Short: "Get resources",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -28,7 +28,7 @@ to quickly create a Cobra application.`,
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
 	Use:   "update",
-	Short: "Update resources in Code Stream",
+	Short: "Update resources",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -42,7 +42,7 @@ to quickly create a Cobra application.`,
 // createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create resources in Code Stream",
+	Short: "Create resources",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -56,7 +56,7 @@ to quickly create a Cobra application.`,
 // deleteCmd represents the delete command
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete resources in Code Stream",
+	Short: "Delete resources",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -70,7 +70,7 @@ to quickly create a Cobra application.`,
 // configCmd represents the config command
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "Modify the configuration of cs-cli",
+	Short: "Modify the configuration of vra-cli",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -87,7 +87,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print the current version information",
 	Long:  `Print the current version information`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("*** cs-cli ***")
+		fmt.Println("*** vra-cli ***")
 		fmt.Println("Build version :", version)
 		fmt.Println("Build date    :", date)
 		fmt.Println("Build commit  :", commit)
@@ -103,13 +103,13 @@ var completionCmd = &cobra.Command{
 
 Bash:
 
-  $ source <(cs-cli completion bash)
+  $ source <(vra-cli completion bash)
 
   # To load completions for each session, execute once:
   # Linux:
-  $ cs-cli completion bash > /etc/bash_completion.d/cs-cli
+  $ vra-cli completion bash > /etc/bash_completion.d/vra-cli
   # macOS:
-  $ cs-cli completion bash > /usr/local/etc/bash_completion.d/cs-cli
+  $ vra-cli completion bash > /usr/local/etc/bash_completion.d/vra-cli
 
 Zsh:
 
@@ -119,23 +119,23 @@ Zsh:
   $ echo "autoload -U compinit; compinit" >> ~/.zshrc
 
   # To load completions for each session, execute once:
-  $ cs-cli completion zsh > "${fpath[1]}/_cs-cli"
+  $ vra-cli completion zsh > "${fpath[1]}/_vra-cli"
 
   # You will need to start a new shell for this setup to take effect.
 
 fish:
 
-  $ cs-cli completion fish | source
+  $ vra-cli completion fish | source
 
   # To load completions for each session, execute once:
-  $ cs-cli completion fish > ~/.config/fish/completions/cs-cli.fish
+  $ vra-cli completion fish > ~/.config/fish/completions/vra-cli.fish
 
 PowerShell:
 
-  PS> cs-cli completion powershell | Out-String | Invoke-Expression
+  PS> vra-cli completion powershell | Out-String | Invoke-Expression
 
   # To load completions for every new session, run:
-  PS> cs-cli completion powershell > cs-cli.ps1
+  PS> vra-cli completion powershell > vra-cli.ps1
   # and source this file from your PowerShell profile.
 `,
 	DisableFlagsInUseLine: true,

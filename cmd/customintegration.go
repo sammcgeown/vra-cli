@@ -20,13 +20,13 @@ var getCustomIntegrationCmd = &cobra.Command{
 	Long: `Get Code Stream Custom Integrations by name, project or by id - e.g:
 
 Get by ID
-	cs-cli get customintegration --id 6b7936d3-a19d-4298-897a-65e9dc6620c8
+	vra-cli get customintegration --id 6b7936d3-a19d-4298-897a-65e9dc6620c8
 	
 Get by Name
-	cs-cli get customintegration --name my-customintegration
+	vra-cli get customintegration --name my-customintegration
 	
 Get by Project
-	cs-cli get customintegration --project production`,
+	vra-cli get customintegration --project production`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := ensureTargetConnection(); err != nil {
 			log.Fatalln(err)
