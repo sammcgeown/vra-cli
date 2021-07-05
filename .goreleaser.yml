@@ -1,0 +1,123 @@
+before:
+  hooks:
+    - go mod download
+  
+release:
+  github:
+    owner: sammcgeown
+    name: vra-cli
+
+builds:
+  - id: vra-cli
+    main: ./main.go
+    binary: vra-cli
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    goarm:
+      - 7
+    # Default is `-s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser`.
+    ldflags:
+      - -s -w -X github.com/sammcgeown/vra-cli/cmd.version={{.Version}} -X github.com/sammcgeown/vra-cli/cmd.commit={{.Commit}} -X github.com/sammcgeown/vra-cli/cmd.date={{.Date}} -X github.com/sammcgeown/vra-cli/cmd.builtBy=goreleaser
+
+dockers:
+  -
+    goos: linux
+    goarch: amd64
+    dockerfile: Dockerfile
+    build_flag_templates:
+    - "--platform=linux/amd64"
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    image_templates:
+    - "sammcgeown/vra-cli:latest-amd64"
+    - "sammcgeown/vra-cli:v{{ .Major }}.{{ .Minor }}-amd64"
+    use_buildx: true
+  -
+    goos: linux
+    goarch: arm64
+    dockerfile: Dockerfile
+    build_flag_templates:
+    - "--platform=linux/arm64/v8"
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    image_templates:
+    - "sammcgeown/vra-cli:latest-arm64v8"
+    - "sammcgeown/vra-cli:v{{ .Major }}.{{ .Minor }}-arm64v8"
+    use_buildx: true
+  -
+    goos: linux
+    goarch: arm
+    goarm: 7
+    dockerfile: Dockerfile
+    build_flag_templates:
+    - "--platform=linux/arm/v7"
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    image_templates:
+    - "sammcgeown/vra-cli:latest-armv7"
+    - "sammcgeown/vra-cli:v{{ .Major }}.{{ .Minor }}-armv7"
+    use_buildx: true
+
+docker_manifests:
+  - name_template: sammcgeown/vra-cli:v{{ .Major }}.{{ .Minor }}
+    image_templates:
+    - sammcgeown/vra-cli:v{{ .Major }}.{{ .Minor }}-amd64
+    - sammcgeown/vra-cli:v{{ .Major }}.{{ .Minor }}-armv7
+    - sammcgeown/vra-cli:v{{ .Major }}.{{ .Minor }}-arm64v8
+  - name_template: sammcgeown/vra-cli:latest
+    image_templates:
+    - sammcgeown/vra-cli:latest-amd64
+    - sammcgeown/vra-cli:latest-armv7
+    - sammcgeown/vra-cli:latest-arm64v8
+
+# brews:
+#   -
+#     name: vra-cli
+#     tap:
+#       owner: sammcgeown
+#       name: homebrew-vra-cli
+#       # token:  "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+#     commit_author:
+#       name: sammcgeown
+#       email: smcgeown@vmware.com
+#     license: "BSD-2"
+#     homepage: "https://github.com/sammcgeown/vra-cli"
+#     description: "Code Stream CLI is a command line tool written in Go to interact with the vRealize Automation Code Stream APIs"
+#     install: |
+#       bin.install "vra-cli"
+# archives:
+#   - replacements:
+#       darwin: Darwin
+#       linux: Linux
+#       windows: Windows
+#       386: i386
+#       amd64: x86_64
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^typo:'
+      - '^build:'
