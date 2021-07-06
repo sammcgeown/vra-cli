@@ -442,3 +442,11 @@ type CloudAssemblyCloudTemplate struct {
 	ContentSourceSyncMessages []string      `json:"contentSourceSyncMessages"`
 	ContentSourceSyncAt       time.Time     `json:"contentSourceSyncAt"`
 }
+
+type CloudAssemblyCloudTemplateRequest struct {
+	ProjectID   string `json:"projectId"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
+	Content     string `json:"content"`
+}

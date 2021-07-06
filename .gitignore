@@ -3,3 +3,4 @@ unset-env.sh
 vra-cli
 export/
 dist/
+test/

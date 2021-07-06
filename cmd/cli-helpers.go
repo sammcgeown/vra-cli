@@ -19,6 +19,24 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// isInputFromPipe - pipeline detection
+func isInputFromPipe() bool {
+	fileInfo, _ := os.Stdin.Stat()
+	return fileInfo.Mode()&os.ModeCharDevice == 0
+}
+
+// // readInputFromPipe
+// func readInputFromPipe(r io.Reader, w io.Writer) error {
+// 	pipeScanner := bufio.NewScanner(bufio.NewReader(r))
+// 	for pipeScanner.Scan() {
+// 		_, e := fmt.Fprintln(w, pipeScanner.Text())
+// 		if e != nil {
+// 			return e
+// 		}
+// 	}
+// 	return nil
+// }
+
 // PrettyPrint prints interfaces
 func PrettyPrint(v interface{}) (err error) {
 	b, err := json.MarshalIndent(v, "", "  ")

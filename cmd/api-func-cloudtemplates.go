@@ -126,3 +126,27 @@ func deleteCloudTemplate(id string) error {
 	}
 	return nil
 }
+
+// createVariable - Create a new Code Stream Variable
+// func createCloudTemplate(name string, description string, projectId string, content string) (*CloudAssemblyCloudTemplate, error) {
+// 	client := resty.New()
+// 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
+// 		SetQueryParams(qParams).
+// 		SetBody(
+// 			CloudAssemblyCloudTemplateRequest{
+// 				ProjectID:   project,
+// 				Name:        name,
+// 				Description: description,
+// 				Status:      "DRAFT",
+// 				Content:     content,
+// 			}).
+// 		SetHeader("Accept", "application/json").
+// 		SetResult(&CloudAssemblyCloudTemplate{}).
+// 		SetError(&CloudAssemblyException{}).
+// 		SetAuthToken(targetConfig.accesstoken).
+// 		Post("https://" + targetConfig.server + "/blueprint/api/blueprints")
+// 	if queryResponse.IsError() {
+// 		return nil, errors.New(queryResponse.Error().(*CloudAssemblyException).Message)
+// 	}
+// 	return queryResponse.Result().(*CloudAssemblyCloudTemplate), err
+// }

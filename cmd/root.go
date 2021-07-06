@@ -36,11 +36,9 @@ var (
 	value       string
 	description string
 	status      string
-	// exportFile  string
-	// importFile  string
-	printJson  bool
-	exportPath string
-	importPath string
+	printJson   bool
+	exportPath  string
+	importPath  string
 )
 
 var qParams = map[string]string{
@@ -66,7 +64,7 @@ var rootCmd = &cobra.Command{
 // Execute is the main process
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatalln(err)
+		log.Warnln(err)
 	}
 }
 
