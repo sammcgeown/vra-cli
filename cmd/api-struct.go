@@ -4,6 +4,10 @@ SPDX-License-Identifier: BSD-2-Clause
 */
 package cmd
 
+import (
+	"time"
+)
+
 // UserPreferences -
 type UserPreferences struct {
 	Link               string      `json:"_link"`
@@ -70,6 +74,36 @@ type documentsList struct {
 	TotalCount int                    `json:"totalCount"`
 	Links      []string               `json:"links"`
 	Documents  map[string]interface{} `json:"documents"`
+}
+
+// contentsList - Generic Contents List Structure
+type contentsList struct {
+	Content  []interface{} `json:"content"`
+	Pageable struct {
+		Sort struct {
+			Sorted   bool `json:"sorted"`
+			Unsorted bool `json:"unsorted"`
+			Empty    bool `json:"empty"`
+		} `json:"sort"`
+		PageNumber int  `json:"pageNumber"`
+		PageSize   int  `json:"pageSize"`
+		Offset     int  `json:"offset"`
+		Paged      bool `json:"paged"`
+		Unpaged    bool `json:"unpaged"`
+	} `json:"pageable"`
+	TotalElements int  `json:"totalElements"`
+	TotalPages    int  `json:"totalPages"`
+	Last          bool `json:"last"`
+	Sort          struct {
+		Sorted   bool `json:"sorted"`
+		Unsorted bool `json:"unsorted"`
+		Empty    bool `json:"empty"`
+	} `json:"sort"`
+	First            bool `json:"first"`
+	Number           int  `json:"number"`
+	NumberOfElements int  `json:"numberOfElements"`
+	Size             int  `json:"size"`
+	Empty            bool `json:"empty"`
 }
 
 // CodestreamAPIExecutions - Code Stream Execution document structure
@@ -370,4 +404,37 @@ type CodeStreamEndpointYaml struct {
 	Description string            `yaml:"description"`
 	Type        string            `yaml:"type"`
 	Properties  map[string]string `yaml:"properties"`
+}
+
+//  *** Cloud Assembly ***
+
+// CloudAssemblyException - Generic exception struct
+type CloudAssemblyException struct {
+	Message     string      `json:"message"`
+	StatusCode  int         `json:"statusCode"`
+	ErrorCode   int         `json:"errorCode"`
+	ReferenceID interface{} `json:"referenceId"`
+}
+
+// CloudAssemblyCloudTemplate - Struct
+type CloudAssemblyCloudTemplate struct {
+	Id                        string        `json:"id"`
+	CreatedAt                 time.Time     `json:"createdAt"`
+	CreatedBy                 string        `json:"createdBy"`
+	UpdatedAt                 time.Time     `json:"updatedAt"`
+	UpdatedBy                 string        `json:"updatedBy"`
+	OrgId                     string        `json:"orgId"`
+	ProjectId                 string        `json:"projectId"`
+	ProjectName               string        `json:"projectName"`
+	SelfLink                  string        `json:"selfLink"`
+	Name                      string        `json:"name"`
+	Description               string        `json:"description"`
+	Content                   string        `json:"content"`
+	Status                    string        `json:"status"`
+	Valid                     bool          `json:"valid"`
+	ValidationMessages        []interface{} `json:"validationMessages"`
+	TotalVersions             int           `json:"totalVersions"`
+	TotalReleasedVersions     int           `json:"totalReleasedVersions"`
+	RequestScopeOrg           bool          `json:"requestScopeOrg"`
+	ContentSourceSyncMessages []interface{} `json:"contentSourceSyncMessages"`
 }
