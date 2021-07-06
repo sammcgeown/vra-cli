@@ -127,9 +127,9 @@ var deleteCloudTemplateCmd = &cobra.Command{
 		}
 
 		if err := deleteCloudTemplate(id); err != nil {
-			log.Errorln("Unable to delete Endpoint: ", err)
+			log.Errorln("Unable to delete Cloud Template: ", err)
 		} else {
-			log.Infoln("Endpoint with id " + id + " deleted")
+			log.Infoln("Cloud Template with id " + id + " deleted")
 		}
 
 	},
