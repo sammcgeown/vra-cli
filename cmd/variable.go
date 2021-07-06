@@ -76,17 +76,18 @@ var createVariableCmd = &cobra.Command{
 				}
 				createResponse, err := createVariable(value.Name, value.Description, value.Type, value.Project, value.Value)
 				if err != nil {
-					log.Println("Unable to create Code Stream Variable: ", err)
+					log.Warnln("Unable to create Code Stream Variable: ", err)
 				} else {
-					log.Println("Created variable", createResponse.Name, "in", createResponse.Project)
+					log.Infoln("Created variable", createResponse.Name, "in", createResponse.Project)
 				}
 			}
 		} else {
 			createResponse, err := createVariable(name, description, typename, project, value)
 			if err != nil {
-				log.Println("Unable to create Code Stream Variable: ", err)
+				log.Errorln("Unable to create Code Stream Variable: ", err)
+			} else {
+				PrettyPrint(createResponse)
 			}
-			PrettyPrint(createResponse)
 		}
 	},
 }
@@ -106,22 +107,22 @@ var updateVariableCmd = &cobra.Command{
 			for _, value := range variables {
 				exisitingVariable, err := getVariable("", value.Name, value.Project, "")
 				if err != nil {
-					log.Println("Update failed - unable to find existing Code Stream Variable", value.Name, "in", value.Project)
+					log.Errorln("Update failed - unable to find existing Code Stream Variable", value.Name, "in", value.Project)
 				} else {
 					_, err := updateVariable(exisitingVariable[0].ID, value.Name, value.Description, value.Type, value.Value)
 					if err != nil {
-						log.Println("Unable to update Code Stream Variable: ", err)
+						log.Errorln("Unable to update Code Stream Variable: ", err)
 					} else {
-						log.Println("Updated variable", value.Name)
+						log.Infoln("Updated variable", value.Name)
 					}
 				}
 			}
 		} else { // Else we are updating using flags
 			updateResponse, err := updateVariable(id, name, description, typename, value)
 			if err != nil {
-				log.Println("Unable to update Code Stream Variable: ", err)
+				log.Errorln("Unable to update Code Stream Variable: ", err)
 			}
-			log.Println("Updated variable", updateResponse.Name)
+			log.Infoln("Updated variable", updateResponse.Name)
 		}
 	},
 }
@@ -138,9 +139,10 @@ var deleteVariableCmd = &cobra.Command{
 
 		response, err := deleteVariable(id)
 		if err != nil {
-			log.Fatalln("Unable to delete variable: ", err)
+			log.Errorln("Unable to delete variable: ", err)
+		} else {
+			log.Infoln("Variable with id " + response.ID + " deleted")
 		}
-		log.Println("Variable with id " + response.ID + " deleted")
 	},
 }
 

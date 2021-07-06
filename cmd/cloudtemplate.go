@@ -30,7 +30,7 @@ var getCloudTemplateCmd = &cobra.Command{
 		var resultCount = len(response)
 		if resultCount == 0 {
 			// No results
-			log.Println("No results found")
+			log.Infoln("No results found")
 		} else if resultCount == 1 {
 			PrettyPrint(response[0])
 		} else {
@@ -106,20 +106,34 @@ var getCloudTemplateCmd = &cobra.Command{
 // 	},
 // }
 
-// // deleteCloudTemplateCmd represents the delete Blueprint command
-// var deleteCloudTemplateCmd = &cobra.Command{
-// 	Use:   "Blueprint",
-// 	Short: "Delete a Blueprint",
-// 	Long: `Delete a Blueprint with a specific ID
+// deleteCloudTemplateCmd represents the delete Blueprint command
+var deleteCloudTemplateCmd = &cobra.Command{
+	Use:   "cloudtemplate",
+	Short: "Delete a Cloud Template",
+	Long: `Delete a Blueprint with a specific ID, or Name and Project.
 
-// 	`,
-// 	Run: func(cmd *cobra.Command, args []string) {
-// 		if err := ensureTargetConnection(); err != nil {
-// 			log.Fatalln(err)
-// 		}
+	`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := ensureTargetConnection(); err != nil {
+			log.Fatalln(err)
+		}
 
-// 	},
-// }
+		if name != "" {
+			response, err := getEndpoint(id, name, project, typename, exportPath)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			id = response[0].ID
+		}
+
+		if err := deleteCloudTemplate(id); err != nil {
+			log.Errorln("Unable to delete Endpoint: ", err)
+		} else {
+			log.Infoln("Endpoint with id " + id + " deleted")
+		}
+
+	},
+}
 
 func init() {
 	// Get
@@ -142,8 +156,8 @@ func init() {
 	// updateCloudTemplateCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Blueprint to list")
 	// updateCloudTemplateCmd.Flags().StringVarP(&importPath, "importPath", "", "", "Configuration file to import")
 	// updateCloudTemplateCmd.Flags().StringVarP(&state, "state", "s", "", "Set the state of the Blueprint (ENABLED|DISABLED|RELEASED")
-	// // Delete
-	// deleteCmd.AddCommand(deleteCloudTemplateCmd)
-	// deleteCloudTemplateCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Blueprint to delete")
+	// Delete
+	deleteCmd.AddCommand(deleteCloudTemplateCmd)
+	deleteCloudTemplateCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Cloud Template to delete")
 
 }

@@ -25,7 +25,7 @@ var getProjectCommand = &cobra.Command{
 
 		response, err := getProject(id, name)
 		if err != nil {
-			log.Println("Unable to get Code Stream Projects: ", err)
+			log.Errorln("Unable to get Code Stream Projects: ", err)
 		}
 		var resultCount = len(response)
 		if resultCount == 0 {
@@ -48,7 +48,7 @@ var getProjectCommand = &cobra.Command{
 				}
 				zipFile := filepath.Join(exportPath, p.Name+".zip")
 				var zipFiles []string
-				log.Println(zipFile)
+				log.Debugln(zipFile)
 				pipelines, _ := getPipelines("", "", p.Name, filepath.Join(tmpDir, p.Name, "pipelines"))
 				//pipelineTable.SetHeader([]string{"Id", "Name", "Project", "Description"})
 				for _, c := range pipelines {

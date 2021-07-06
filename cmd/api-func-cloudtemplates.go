@@ -114,16 +114,15 @@ func getCloudTemplates(id string, name string, project string, exportPath string
 // 	return queryResponse.Result().(*CodeStreamBlueprint), err
 // }
 
-// func deleteBlueprint(id string) (*CodeStreamBlueprint, error) {
-// 	client := resty.New()
-// 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-// 		SetQueryParams(qParams).
-// 		SetHeader("Accept", "application/json").
-// 		SetResult(&CodeStreamBlueprint{}).
-// 		SetAuthToken(targetConfig.accesstoken).
-// 		Delete("https://" + targetConfig.server + "/Blueprint/api/Blueprints/" + id)
-// 	if queryResponse.IsError() {
-// 		return nil, queryResponse.Error().(error)
-// 	}
-// 	return queryResponse.Result().(*CodeStreamBlueprint), err
-// }
+func deleteCloudTemplate(id string) error {
+	client := resty.New()
+	queryResponse, _ := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
+		SetQueryParams(qParams).
+		SetAuthToken(targetConfig.accesstoken).
+		SetError(&CloudAssemblyException{}).
+		Delete("https://" + targetConfig.server + "/blueprint/api/blueprints/" + id)
+	if queryResponse.IsError() {
+		return errors.New(queryResponse.Error().(*CloudAssemblyException).Message)
+	}
+	return nil
+}

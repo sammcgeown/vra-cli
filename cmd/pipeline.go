@@ -44,7 +44,7 @@ vra-cli get execution --status Failed`,
 
 		response, err := getPipelines(id, name, project, exportPath)
 		if err != nil {
-			log.Println("Unable to get Code Stream Pipelines: ", err)
+			log.Errorln("Unable to get Code Stream Pipelines: ", err)
 		}
 		var resultCount = len(response)
 		if resultCount == 0 {
@@ -101,14 +101,14 @@ vra-cli get execution --status Failed`,
 						if task.Type == "Custom" {
 							customintegrations = append(customintegrations, task.Input.Name)
 						}
-						log.Println("-- [Task]", n, "(", task.Type, ")")
+						log.Infoln("-- [Task]", n, "(", task.Type, ")")
 					}
 				}
 				if dependencies {
 					variables = removeDuplicateStrings(variables)
 					sort.Strings(variables)
 					if len(variables) > 0 {
-						log.Println(c.Name, "depends on Variables:", strings.Join(variables, ", "))
+						log.Infoln(c.Name, "depends on Variables:", strings.Join(variables, ", "))
 						for _, v := range variables {
 							getVariable("", v, c.Project, exportPath)
 						}
@@ -116,7 +116,7 @@ vra-cli get execution --status Failed`,
 					pipelines = removeDuplicateStrings(pipelines)
 					sort.Strings(pipelines)
 					if len(pipelines) > 0 {
-						log.Println(c.Name, "depends on Pipelines:", strings.Join(pipelines, ", "))
+						log.Infoln(c.Name, "depends on Pipelines:", strings.Join(pipelines, ", "))
 						for _, p := range pipelines {
 							getPipelines("", p, c.Project, filepath.Join(exportPath, "pipelines"))
 						}
@@ -124,7 +124,7 @@ vra-cli get execution --status Failed`,
 					endpoints = removeDuplicateStrings(endpoints)
 					sort.Strings(endpoints)
 					if len(endpoints) > 0 {
-						log.Println(c.Name, "depends on Endpoints:", strings.Join(endpoints, ", "))
+						log.Infoln(c.Name, "depends on Endpoints:", strings.Join(endpoints, ", "))
 						for _, e := range endpoints {
 							getEndpoint("", e, c.Project, "", filepath.Join(exportPath, "endpoints"))
 						}
@@ -132,7 +132,7 @@ vra-cli get execution --status Failed`,
 					customintegrations = removeDuplicateStrings(customintegrations)
 					sort.Strings(customintegrations)
 					if len(customintegrations) > 0 {
-						log.Println(c.Name, "depends on Custom Integrations:", strings.Join(customintegrations, ", "))
+						log.Infoln(c.Name, "depends on Custom Integrations:", strings.Join(customintegrations, ", "))
 						for _, ci := range customintegrations {
 							getCustomIntegration("", ci)
 						}
@@ -173,9 +173,9 @@ var updatePipelineCmd = &cobra.Command{
 		if state != "" {
 			response, err := patchPipeline(id, `{"state":"`+state+`"}`)
 			if err != nil {
-				log.Println("Unable to update Code Stream Pipeline: ", err)
+				log.Errorln("Unable to update Code Stream Pipeline: ", err)
 			}
-			log.Println("Setting pipeline " + response.Name + " to " + state)
+			log.Infoln("Setting pipeline " + response.Name + " to " + state)
 		}
 
 		yamlFilePaths := getYamlFilePaths(importPath)
@@ -239,9 +239,9 @@ var deletePipelineCmd = &cobra.Command{
 
 		response, err := deletePipeline(id)
 		if err != nil {
-			log.Fatalln("Delete Pipeline failed:", err)
+			log.Errorln("Delete Pipeline failed:", err)
 		}
-		log.Println("Pipeline with id " + response.ID + " deleted")
+		log.Infoln("Pipeline with id " + response.ID + " deleted")
 
 	},
 }

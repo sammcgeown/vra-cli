@@ -28,12 +28,12 @@ var getEndpointCmd = &cobra.Command{
 
 		response, err := getEndpoint(id, name, project, typename, exportPath)
 		if err != nil {
-			log.Println("Unable to get endpoints: ", err)
+			log.Infoln("Unable to get endpoints: ", err)
 		}
 		var resultCount = len(response)
 		if resultCount == 0 {
 			// No results
-			log.Println("No results found")
+			log.Infoln("No results found")
 		} else if resultCount == 1 {
 			PrettyPrint(response[0])
 		} else {
@@ -149,7 +149,7 @@ var deleteEndpointCmd = &cobra.Command{
 
 		response, err := deleteEndpoint(id)
 		if err != nil {
-			log.Println("Unable to delete Endpoint: ", err)
+			log.Infoln("Unable to delete Endpoint: ", err)
 		}
 		fmt.Println("Endpoint with id " + response.ID + " deleted")
 	},
