@@ -201,3 +201,32 @@ func importYaml(yamlPath, action, project, importType string) error {
 	}
 	return nil
 }
+
+func exportCloudTemplate(name, project, content, path string) error {
+	var exportPath string
+	if path != "" {
+		exportPath = path
+		_, folderError := os.Stat(exportPath) // Get file system info
+		if os.IsNotExist(folderError) {       // If it doesn't exist
+			log.Debugln("Folder doesn't exist - creating")
+			mkdirErr := os.MkdirAll(exportPath, os.FileMode(0755)) // Attempt to make it
+			if mkdirErr != nil {
+				return mkdirErr
+			}
+		}
+	} else {
+		// If path is not specified, use the current path
+		exportPath, _ = os.Getwd()
+	}
+	exportPath = filepath.Join(exportPath, project+" - "+name+".yaml")
+	f, cerr := os.Create(exportPath) // Open the file for writing
+	if cerr != nil {
+		return cerr
+	}
+	defer f.Close() // Defer closing until just before this function returns
+	_, werr := f.WriteString(content)
+	if werr != nil {
+		return werr
+	}
+	return nil
+}

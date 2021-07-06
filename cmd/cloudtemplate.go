@@ -25,7 +25,7 @@ var getCloudTemplateCmd = &cobra.Command{
 		}
 		response, err := getCloudTemplates(id, name, project, exportPath)
 		if err != nil {
-			log.Warnln("Unable to get Blueprints: ", err)
+			log.Warnln("Unable to get Cloud Template(s): ", err)
 		}
 		var resultCount = len(response)
 		if resultCount == 0 {
@@ -38,7 +38,7 @@ var getCloudTemplateCmd = &cobra.Command{
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Id", "Name", "Project", "Status", "Valid"})
 			for _, c := range response {
-				table.Append([]string{c.Id, c.Name, c.ProjectName, c.Status, strconv.FormatBool(c.Valid)})
+				table.Append([]string{c.ID, c.Name, c.ProjectName, c.Status, strconv.FormatBool(c.Valid)})
 			}
 			table.Render()
 		}
@@ -124,13 +124,13 @@ var getCloudTemplateCmd = &cobra.Command{
 func init() {
 	// Get
 	getCmd.AddCommand(getCloudTemplateCmd)
-	getCloudTemplateCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Cloud Temlpate to list executions for")
-	getCloudTemplateCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Cloud Temlpate to list")
-	getCloudTemplateCmd.Flags().StringVarP(&project, "project", "p", "", "List Cloud Temlpate in project")
+	getCloudTemplateCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Cloud Template to list executions for")
+	getCloudTemplateCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Cloud Template to list")
+	getCloudTemplateCmd.Flags().StringVarP(&project, "project", "p", "", "List Cloud Template in project")
 	getCloudTemplateCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
-	getCloudTemplateCmd.Flags().BoolVarP(&printForm, "form", "f", false, "Return Cloud Temlpate inputs form(s)")
-	getCloudTemplateCmd.Flags().BoolVarP(&printJson, "json", "", false, "Return JSON formatted Cloud Temlpate(s)")
-	getCloudTemplateCmd.Flags().BoolVarP(&dependencies, "exportDependencies", "", false, "Export Cloud Temlpate dependencies (Endpoint, Blueprints, Variables, Custom Integrations)")
+	getCloudTemplateCmd.Flags().BoolVarP(&printForm, "form", "f", false, "Return Cloud Template inputs form(s)")
+	getCloudTemplateCmd.Flags().BoolVarP(&printJson, "json", "", false, "Return JSON formatted Cloud Template(s)")
+	getCloudTemplateCmd.Flags().BoolVarP(&dependencies, "exportDependencies", "", false, "Export Cloud Template dependencies (Endpoint, Blueprints, Variables, Custom Integrations)")
 
 	// // Create
 	// createCmd.AddCommand(createCloudTemplateCmd)

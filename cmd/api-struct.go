@@ -418,23 +418,27 @@ type CloudAssemblyException struct {
 
 // CloudAssemblyCloudTemplate - Struct
 type CloudAssemblyCloudTemplate struct {
-	Id                        string        `json:"id"`
+	ID                        string        `json:"id"`
 	CreatedAt                 time.Time     `json:"createdAt"`
 	CreatedBy                 string        `json:"createdBy"`
 	UpdatedAt                 time.Time     `json:"updatedAt"`
 	UpdatedBy                 string        `json:"updatedBy"`
-	OrgId                     string        `json:"orgId"`
-	ProjectId                 string        `json:"projectId"`
+	OrgID                     string        `json:"orgId"`
+	ProjectID                 string        `json:"projectId"`
 	ProjectName               string        `json:"projectName"`
 	SelfLink                  string        `json:"selfLink"`
 	Name                      string        `json:"name"`
-	Description               string        `json:"description"`
-	Content                   string        `json:"content"`
 	Status                    string        `json:"status"`
+	Content                   string        `json:"content"`
 	Valid                     bool          `json:"valid"`
 	ValidationMessages        []interface{} `json:"validationMessages"`
 	TotalVersions             int           `json:"totalVersions"`
 	TotalReleasedVersions     int           `json:"totalReleasedVersions"`
 	RequestScopeOrg           bool          `json:"requestScopeOrg"`
-	ContentSourceSyncMessages []interface{} `json:"contentSourceSyncMessages"`
+	ContentSourceID           string        `json:"contentSourceId"`
+	ContentSourcePath         string        `json:"contentSourcePath"`
+	ContentSourceType         string        `json:"contentSourceType"`
+	ContentSourceSyncStatus   string        `json:"contentSourceSyncStatus"`
+	ContentSourceSyncMessages []string      `json:"contentSourceSyncMessages"`
+	ContentSourceSyncAt       time.Time     `json:"contentSourceSyncAt"`
 }
