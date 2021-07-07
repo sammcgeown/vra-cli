@@ -15,7 +15,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var cloudTemplate CloudAssemblyCloudTemplate
+var (
+	content string
+	scope   string
+)
 
 // getCloudTemplateCmd represents the Blueprint command
 var getCloudTemplateCmd = &cobra.Command{
@@ -26,7 +29,7 @@ var getCloudTemplateCmd = &cobra.Command{
 		if err := ensureTargetConnection(); err != nil {
 			log.Fatalln(err)
 		}
-		response, err := getCloudTemplates(id, name, project, exportPath)
+		response, err := getCloudTemplate(id, name, project, exportPath)
 		if err != nil {
 			log.Warnln("Unable to get Cloud Template(s): ", err)
 		}
@@ -87,18 +90,51 @@ var createCloudTemplateCmd = &cobra.Command{
 	  vra-cli create Blueprint --importPath "/Users/sammcgeown/Desktop/Blueprints/SSH Exports.yaml"
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
+		var cloudTemplateReq CloudAssemblyCloudTemplateRequest
+		var projectId string
+
 		if err := ensureTargetConnection(); err != nil {
 			log.Fatalln(err)
 		}
 
 		if isInputFromPipe() {
-			if err := json.NewDecoder(os.Stdin).Decode(&cloudTemplate); err != nil {
+			if err := json.NewDecoder(os.Stdin).Decode(&cloudTemplateReq); err != nil {
 				log.Warnln(err)
 			}
 		}
 
-		log.Infoln(cloudTemplate.Name)
+		if project != "" {
+			log.Debugln("Project: " + project)
+			projectObj, pErr := getProject("", project)
+			if pErr != nil {
+				log.Errorln("Unable to get Project ID for "+project, pErr)
+			} else {
+				projectId = projectObj[0].ID
+			}
+			log.Debugln("Project ID: " + projectId)
+			cloudTemplateReq.ProjectID = projectId
+		}
 
+		if name != "" {
+			cloudTemplateReq.Name = name
+		}
+		if description != "" {
+			cloudTemplateReq.Description = description
+		}
+		if content != "" {
+			cloudTemplateReq.Content = content
+		}
+		if scope == "org" {
+			cloudTemplateReq.RequestScopeOrg = true
+		} else if scope == "project" {
+			cloudTemplateReq.RequestScopeOrg = false
+		}
+
+		cloudTemplate, err := createCloudTemplate(cloudTemplateReq.Name, cloudTemplateReq.Description, cloudTemplateReq.ProjectID, cloudTemplateReq.Content, cloudTemplateReq.RequestScopeOrg)
+		if err != nil {
+			log.Errorln("Unable to create Cloud Template(s): ", err)
+		}
+		PrettyPrint(cloudTemplate)
 		// yamlFilePaths := getYamlFilePaths(importPath)
 		// if len(yamlFilePaths) == 0 {
 		// 	log.Warnln("No YAML files were found in", importPath)
@@ -127,17 +163,29 @@ var deleteCloudTemplateCmd = &cobra.Command{
 		}
 
 		if name != "" {
-			response, err := getEndpoint(id, name, project, typename, exportPath)
+			response, err := getCloudTemplate(id, name, project, "")
 			if err != nil {
 				log.Fatalln(err)
 			}
-			id = response[0].ID
+			if len(response) > 1 {
+				log.Warnln("There are multiple Cloud Templates matching your criteria, please use the Cloud Template ID")
+				// Print result table
+				table := tablewriter.NewWriter(os.Stdout)
+				table.SetHeader([]string{"Id", "Name", "Project", "Status", "Valid"})
+				for _, c := range response {
+					table.Append([]string{c.ID, c.Name, c.ProjectName, c.Status, strconv.FormatBool(c.Valid)})
+				}
+				table.Render()
+			} else {
+				id = response[0].ID
+			}
 		}
-
-		if err := deleteCloudTemplate(id); err != nil {
-			log.Errorln("Unable to delete Cloud Template: ", err)
-		} else {
-			log.Infoln("Cloud Template with id " + id + " deleted")
+		if id != "" {
+			if err := deleteCloudTemplate(id); err != nil {
+				log.Errorln("Unable to delete Cloud Template: ", err)
+			} else {
+				log.Infoln("Cloud Template with id " + id + " deleted")
+			}
 		}
 
 	},
@@ -149,12 +197,16 @@ func init() {
 	getCloudTemplateCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Cloud Template to list executions for")
 	getCloudTemplateCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Cloud Template to list")
 	getCloudTemplateCmd.Flags().StringVarP(&project, "project", "p", "", "List Cloud Template in project")
-	getCloudTemplateCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
+	getCloudTemplateCmd.Flags().StringVar(&exportPath, "exportPath", "", "Path to export objects - relative or absolute location")
 
 	// Create
 	createCmd.AddCommand(createCloudTemplateCmd)
-	createCloudTemplateCmd.Flags().StringVarP(&importPath, "importPath", "", "", "YAML configuration file to import")
-	createCloudTemplateCmd.Flags().StringVarP(&project, "project", "p", "", "Manually specify the Project in which to create the Blueprint (overrides YAML)")
+	// createCloudTemplateCmd.Flags().StringVarP(&importPath, "importPath", "", "", "YAML configuration file to import")
+	createCloudTemplateCmd.Flags().StringVarP(&project, "project", "p", "", "Project in which to create the Cloud Template (overrides piped JSON)")
+	createCloudTemplateCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Cloud Template (overrides piped JSON)")
+	createCloudTemplateCmd.Flags().StringVarP(&description, "description", "d", "", "Description of the Cloud Template (overrides piped JSON)")
+	createCloudTemplateCmd.Flags().StringVarP(&content, "content", "c", "", "Content of the Cloud Template - YAML as a string (overrides piped JSON)")
+	createCloudTemplateCmd.Flags().StringVarP(&scope, "orgscope", "", "", "Scope of the Cloud Template, false is project, true is any project in the organization (overrides piped JSON)")
 
 	// // Update
 	// updateCmd.AddCommand(updateCloudTemplateCmd)
@@ -165,5 +217,7 @@ func init() {
 	// Delete
 	deleteCmd.AddCommand(deleteCloudTemplateCmd)
 	deleteCloudTemplateCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Cloud Template to delete")
+	deleteCloudTemplateCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Cloud Template to delete")
+	deleteCloudTemplateCmd.Flags().StringVarP(&project, "project", "p", "", "Project of the Cloud Template to delete")
 
 }

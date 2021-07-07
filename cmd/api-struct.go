@@ -444,9 +444,9 @@ type CloudAssemblyCloudTemplate struct {
 }
 
 type CloudAssemblyCloudTemplateRequest struct {
-	ProjectID   string `json:"projectId"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Status      string `json:"status"`
-	Content     string `json:"content"`
+	Content         string `json:"content"`
+	Description     string `json:"description"`
+	Name            string `json:"name"`
+	ProjectID       string `json:"projectId"`
+	RequestScopeOrg bool   `json:"requestScopeOrg"`
 }
