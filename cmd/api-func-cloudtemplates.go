@@ -97,6 +97,28 @@ func getCloudTemplate(id string, name string, project string, exportPath string)
 
 }
 
+// getCloudTemplateSchema
+func getCloudTemplateInputSchema(id string) (*CloudAssemblyCloudTemplateInputSchema, error) {
+	client := resty.New()
+
+	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
+		SetQueryParams(qParams).
+		SetHeader("Accept", "application/json").
+		SetResult(&CloudAssemblyCloudTemplateInputSchema{}).
+		SetAuthToken(targetConfig.accesstoken).
+		SetError(&CloudAssemblyException{}).
+		Get("https://" + targetConfig.server + "/blueprint/api/blueprints/" + id + "/inputs-schema")
+
+	log.Debugln(queryResponse.Request.RawRequest.URL)
+
+	if queryResponse.IsError() {
+		return nil, errors.New(queryResponse.Error().(*CloudAssemblyException).Message)
+	}
+
+	return queryResponse.Result().(*CloudAssemblyCloudTemplateInputSchema), err
+
+}
+
 // // patchBlueprint - Patch Code Stream Blueprint by ID
 // func patchBlueprint(id string, payload string) (*CodeStreamBlueprint, error) {
 // 	client := resty.New()

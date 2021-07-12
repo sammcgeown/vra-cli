@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"archive/zip"
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -152,4 +153,38 @@ func AddFileToZip(zipWriter *zip.Writer, filename string, basedir string) error 
 	}
 	_, err = io.Copy(writer, fileToZip)
 	return err
+}
+
+func getInputsFromSchema(schema *CloudAssemblyCloudTemplateInputSchema) DeploymentInput {
+	var inputs DeploymentInput
+	for name, _ := range schema.Properties {
+		log.Infoln(name)
+		// c := CloudAssemblyCloudTemplateInputProperty{}
+		// mapstructure.Decode(value, &c)
+		inputs.Inputs[name] = "test"
+	}
+
+	return inputs
+}
+
+// Credit - https://gist.github.com/r0l1/3dcbb0c8f6cfe9c66ab8008f55f8f28b
+func askForConfirmation(s string) bool {
+	reader := bufio.NewReader(os.Stdin)
+
+	for {
+		log.Warnf("%s [y/n]: ", s)
+
+		response, err := reader.ReadString('\n')
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		response = strings.ToLower(strings.TrimSpace(response))
+
+		if response == "y" || response == "yes" {
+			return true
+		} else if response == "n" || response == "no" {
+			return false
+		}
+	}
 }

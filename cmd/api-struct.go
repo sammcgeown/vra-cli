@@ -450,3 +450,35 @@ type CloudAssemblyCloudTemplateRequest struct {
 	ProjectID       string `json:"projectId"`
 	RequestScopeOrg bool   `json:"requestScopeOrg"`
 }
+
+type CloudAssemblyCloudTemplateInputSchema struct {
+	Type       string                 `json:"type"`
+	Encrypted  bool                   `json:"encrypted"`
+	Required   []string               `json:"required"`
+	Properties map[string]interface{} `json:"properties"`
+}
+
+type CloudAssemblyCloudTemplateInputProperty struct {
+	Type      string `json:"type"`
+	Encrypted bool   `json:"encrypted"`
+	OneOf     []struct {
+		Encrypted        bool   `json:"encrypted"`
+		Computed         bool   `json:"computed"`
+		RecreateOnUpdate bool   `json:"recreateOnUpdate"`
+		IgnoreOnUpdate   bool   `json:"ignoreOnUpdate"`
+		IgnoreCaseOnDiff bool   `json:"ignoreCaseOnDiff"`
+		Title            string `json:"title"`
+		Const            string `json:"const"`
+	} `json:"oneOf"`
+	Enum        []string `json:"enum"`
+	Title       string   `json:"title"`
+	Default     string   `json:"default"`
+	Description string   `json:"description"`
+	Pattern     string   `json:"pattern"`
+	MaxLength   int      `json:"maxLength"`
+	MinLength   int      `json:"minLength"`
+}
+
+type DeploymentInput struct {
+	Inputs map[string]interface{} `json:"inputs"`
+}

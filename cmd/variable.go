@@ -137,11 +137,20 @@ var deleteVariableCmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 
-		response, err := deleteVariable(id)
-		if err != nil {
-			log.Errorln("Unable to delete variable: ", err)
-		} else {
-			log.Infoln("Variable with id " + response.ID + " deleted")
+		if id != "" {
+			response, err := deleteVariable(id)
+			if err != nil {
+				log.Errorln("Unable to delete variable: ", err)
+			} else {
+				log.Infoln("Variable with id " + response.ID + " deleted")
+			}
+		} else if project != "" {
+			response, err := deleteVariableByProject(project)
+			if err != nil {
+				log.Errorln("Delete Variables in "+project+" failed:", err)
+			} else {
+				log.Infoln(len(response), "Variables deleted")
+			}
 		}
 	},
 }
@@ -171,8 +180,10 @@ func init() {
 	updateVariableCmd.Flags().StringVarP(&description, "description", "d", "", "Update the description of the variable")
 	updateVariableCmd.Flags().StringVarP(&importPath, "importpath", "", "", "Path to a YAML file with the variables to import")
 	//updateVariableCmd.MarkFlagRequired("id")
+
 	// Delete Variable
 	deleteCmd.AddCommand(deleteVariableCmd)
 	deleteVariableCmd.Flags().StringVarP(&id, "id", "i", "", "Delete variable by id")
-	deleteVariableCmd.MarkFlagRequired("id")
+	deleteVariableCmd.Flags().StringVarP(&project, "project", "p", "", "The project in which to delete the variable, or delete all variables in project")
+
 }

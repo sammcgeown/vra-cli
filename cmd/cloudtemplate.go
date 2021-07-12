@@ -18,6 +18,7 @@ import (
 var (
 	content string
 	scope   string
+	schema  bool
 )
 
 // getCloudTemplateCmd represents the Blueprint command
@@ -38,7 +39,16 @@ var getCloudTemplateCmd = &cobra.Command{
 			// No results
 			log.Infoln("No results found")
 		} else if resultCount == 1 {
-			PrettyPrint(response[0])
+			if schema {
+				if inputSchema, err := getCloudTemplateInputSchema(response[0].ID); err != nil {
+					log.Errorln("Unable to retrieve input schema: ", err)
+				} else {
+					inputs := getInputsFromSchema(inputSchema)
+					PrettyPrint(inputs)
+				}
+			} else {
+				PrettyPrint(response[0])
+			}
 		} else {
 			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)
@@ -84,10 +94,14 @@ var getCloudTemplateCmd = &cobra.Command{
 var createCloudTemplateCmd = &cobra.Command{
 	Use:   "cloudtemplate",
 	Short: "Create a Cloud Template",
-	Long: `Create a Cloud Template by importing a JSON specification.
+	Long: `Create a Cloud Template.
 
-	Create from YAML
-	  vra-cli create Blueprint --importPath "/Users/sammcgeown/Desktop/Blueprints/SSH Exports.yaml"
+	Create from piped JSON:
+	  cat test/blueprint.json | vra-cli create cloud template
+	Create from piped JSON, overriding project:
+	  cat test/blueprint.json | vra-cli create cloud template --project Test
+	Create from flags:
+	  vra-cli create cloudtemplate --name Test --project Development --description "My new template" --content "{formatVersion: 1, inputs: {}, resources: {}}" --scope project
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var cloudTemplateReq CloudAssemblyCloudTemplateRequest
@@ -97,12 +111,13 @@ var createCloudTemplateCmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 
+		// Check if input is piped JSON
 		if isInputFromPipe() {
 			if err := json.NewDecoder(os.Stdin).Decode(&cloudTemplateReq); err != nil {
 				log.Warnln(err)
 			}
 		}
-
+		// If project flag is set, get the project ID and update the request
 		if project != "" {
 			log.Debugln("Project: " + project)
 			projectObj, pErr := getProject("", project)
@@ -114,40 +129,30 @@ var createCloudTemplateCmd = &cobra.Command{
 			log.Debugln("Project ID: " + projectId)
 			cloudTemplateReq.ProjectID = projectId
 		}
-
+		// If name flag is set, update the request
 		if name != "" {
 			cloudTemplateReq.Name = name
 		}
+		// If description flag is set, update the request
 		if description != "" {
 			cloudTemplateReq.Description = description
 		}
+		// If content flag is set, update the request
 		if content != "" {
 			cloudTemplateReq.Content = content
 		}
+		// If scope flag is set, update the request
 		if scope == "org" {
 			cloudTemplateReq.RequestScopeOrg = true
 		} else if scope == "project" {
 			cloudTemplateReq.RequestScopeOrg = false
 		}
-
+		// Create the cloud template
 		cloudTemplate, err := createCloudTemplate(cloudTemplateReq.Name, cloudTemplateReq.Description, cloudTemplateReq.ProjectID, cloudTemplateReq.Content, cloudTemplateReq.RequestScopeOrg)
 		if err != nil {
 			log.Errorln("Unable to create Cloud Template(s): ", err)
 		}
 		PrettyPrint(cloudTemplate)
-		// yamlFilePaths := getYamlFilePaths(importPath)
-		// if len(yamlFilePaths) == 0 {
-		// 	log.Warnln("No YAML files were found in", importPath)
-		// }
-		// for _, yamlFilePath := range yamlFilePaths {
-		// 	yamlFileName := filepath.Base(yamlFilePath)
-		// 	err := importYaml(yamlFilePath, "create", project, "Blueprint")
-		// 	if err != nil {
-		// 		log.Warnln("Failed to import", yamlFilePath, "as Blueprint", err)
-		// 	} else {
-		// 		fmt.Println("Imported", yamlFileName, "successfully - Blueprint created.")
-		// 	}
-		// }
 	},
 }
 
@@ -198,6 +203,7 @@ func init() {
 	getCloudTemplateCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Cloud Template to list")
 	getCloudTemplateCmd.Flags().StringVarP(&project, "project", "p", "", "List Cloud Template in project")
 	getCloudTemplateCmd.Flags().StringVar(&exportPath, "exportPath", "", "Path to export objects - relative or absolute location")
+	getCloudTemplateCmd.Flags().BoolVar(&schema, "schema", false, "Get the Cloud Template Input Schema")
 
 	// Create
 	createCmd.AddCommand(createCloudTemplateCmd)
@@ -206,7 +212,7 @@ func init() {
 	createCloudTemplateCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Cloud Template (overrides piped JSON)")
 	createCloudTemplateCmd.Flags().StringVarP(&description, "description", "d", "", "Description of the Cloud Template (overrides piped JSON)")
 	createCloudTemplateCmd.Flags().StringVarP(&content, "content", "c", "", "Content of the Cloud Template - YAML as a string (overrides piped JSON)")
-	createCloudTemplateCmd.Flags().StringVarP(&scope, "orgscope", "", "", "Scope of the Cloud Template, false is project, true is any project in the organization (overrides piped JSON)")
+	createCloudTemplateCmd.Flags().StringVarP(&scope, "scope", "", "", "Scope of the Cloud Template, false is project, true is any project in the organization (overrides piped JSON)")
 
 	// // Update
 	// updateCmd.AddCommand(updateCloudTemplateCmd)

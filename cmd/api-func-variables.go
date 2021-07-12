@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -149,6 +150,28 @@ func deleteVariable(id string) (*CodeStreamVariableResponse, error) {
 		return nil, queryResponse.Error().(error)
 	}
 	return queryResponse.Result().(*CodeStreamVariableResponse), err
+}
+
+func deleteVariableByProject(project string) ([]*CodeStreamVariableResponse, error) {
+	var deletedVariables []*CodeStreamVariableResponse
+	Variables, err := getVariable("", "", project, "")
+	if err != nil {
+		return nil, err
+	}
+	confirm := askForConfirmation("This will attempt to delete " + fmt.Sprint(len(Variables)) + " variables in " + project + ", are you sure?")
+	if confirm {
+
+		for _, Variable := range Variables {
+			deletedVariable, err := deleteVariable(Variable.ID)
+			if err != nil {
+				log.Warnln("Unable to delete "+Variable.Name, err)
+			}
+			deletedVariables = append(deletedVariables, deletedVariable)
+		}
+		return deletedVariables, nil
+	} else {
+		return nil, errors.New("user declined")
+	}
 }
 
 // exportVariable - Export a variable to YAML

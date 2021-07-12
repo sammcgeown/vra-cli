@@ -236,12 +236,21 @@ var deletePipelineCmd = &cobra.Command{
 		if err := ensureTargetConnection(); err != nil {
 			log.Fatalln(err)
 		}
+		if id != "" {
+			response, err := deletePipeline(id)
+			if err != nil {
+				log.Errorln("Delete Pipeline failed:", err)
+			}
+			log.Infoln("Pipeline with id " + response.ID + " deleted")
+		} else if project != "" {
+			response, err := deletePipelineInProject(project)
+			if err != nil {
+				log.Errorln("Delete Pipelines in "+project+" failed:", err)
+			} else {
+				log.Infoln(len(response), "Pipelines deleted")
+			}
 
-		response, err := deletePipeline(id)
-		if err != nil {
-			log.Errorln("Delete Pipeline failed:", err)
 		}
-		log.Infoln("Pipeline with id " + response.ID + " deleted")
 
 	},
 }
@@ -270,5 +279,6 @@ func init() {
 	// Delete
 	deleteCmd.AddCommand(deletePipelineCmd)
 	deletePipelineCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Pipeline to delete")
+	deletePipelineCmd.Flags().StringVarP(&project, "project", "p", "", "Delete all Pipelines in the specified Project")
 
 }
