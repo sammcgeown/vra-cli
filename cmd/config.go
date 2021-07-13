@@ -108,11 +108,11 @@ Examples:
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if viper.IsSet("target." + newTargetName) {
-			fmt.Println("Updating", newTargetName)
+			log.Infoln("Updating", newTargetName)
 		} else {
-			fmt.Println("Creating new target", newTargetName)
+			log.Infoln("Creating new target", newTargetName)
 		}
-		fmt.Println("Use `vra-cli config use-target --name " + newTargetName + "` to use this target")
+		log.Infoln("Use `vra-cli config use-target --name " + newTargetName + "` to use this target")
 		if newServer != "" {
 			viper.Set("target."+newTargetName+".server", newServer)
 		}
