@@ -122,7 +122,18 @@ var deleteEndpointCmd = &cobra.Command{
 	Use:   "endpoint",
 	Short: "Delete an Endpoint",
 	Long: `Delete an Endpoint with a specific Endpoint ID or Name
-	
+
+# Delete Endpoint by ID:
+vra-cli delete endpoint --id "Endpoint ID"
+
+# Delete Endpoint by Name:
+vra-cli delete endpoint --name "Endpoint Name"
+
+# Delete Endpoint by Project and Name:
+vra-cli delete endpoint --project "My Project" --name "Endpoint Name"
+
+# Delete all Endpoints in Project (prompts for confirmation):
+vra-cli delete endpoint --project "My Project"
 	`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		// if id != "" && name != "" {
