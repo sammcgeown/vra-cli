@@ -101,7 +101,7 @@ vra-cli get execution --status Failed`,
 						if task.Type == "Custom" {
 							customintegrations = append(customintegrations, task.Input.Name)
 						}
-						log.Infoln("-- [Task]", n, "(", task.Type, ")")
+						log.Debugln("-- [Task]", n, "(", task.Type, ")")
 					}
 				}
 				if dependencies {
@@ -149,10 +149,10 @@ var updatePipelineCmd = &cobra.Command{
 	Use:   "pipeline",
 	Short: "Update a Pipeline",
 	Long: `Update a Pipeline
-	Enable/Disable/Release:
-	vra-cli update pipeline --id d0185f04-2e87-4f3c-b6d7-ee58abba3e92 --state enabled/disabled/released
-	Update from YAML
-	vra-cli update pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Exports.yaml"
+# Enable/Disable/Release:
+vra-cli update pipeline --id d0185f04-2e87-4f3c-b6d7-ee58abba3e92 --state enabled/disabled/released
+# Update from YAML
+vra-cli update pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Exports.yaml"
 	`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if state != "" {
@@ -199,8 +199,8 @@ var createPipelineCmd = &cobra.Command{
 	Short: "Create a Pipeline",
 	Long: `Create a Pipeline by importing a YAML specification.
 	
-	Create from YAML
-	  vra-cli create pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Exports.yaml"
+# Create from YAML
+vra-cli create pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Exports.yaml"
 	`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		return nil
@@ -229,9 +229,20 @@ var createPipelineCmd = &cobra.Command{
 var deletePipelineCmd = &cobra.Command{
 	Use:   "pipeline",
 	Short: "Delete a Pipeline",
-	Long: `Delete a Pipeline with a specific ID
-	
-	`,
+	Long: `Delete a Pipeline with a specific ID, Name or by Project
+
+# Delete by ID
+vra-cli delete pipeline --id "pipeline ID"
+
+# Delete by Name
+vra-cli delete pipeline --name "My Pipeline"
+
+# Delete by Name and Project
+vra-cli delete pipeline --name "My Pipeline" --project "My Project"
+
+# Delete all pipelines in Project
+vra-cli delete pipeline --project "My Project"
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := ensureTargetConnection(); err != nil {
 			log.Fatalln(err)

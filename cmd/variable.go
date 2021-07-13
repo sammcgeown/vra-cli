@@ -19,14 +19,14 @@ var getVariableCmd = &cobra.Command{
 	Short: "Get Variables",
 	Long: `Get Code Stream Variables by name, project or by id - e.g:
 
-Get by ID
-	vra-cli get variable --id 6b7936d3-a19d-4298-897a-65e9dc6620c8
+# Get Variable by ID
+vra-cli get variable --id 6b7936d3-a19d-4298-897a-65e9dc6620c8
 	
-Get by Name
-	vra-cli get variable --name my-variable
+# Get Variable by Name
+vra-cli get variable --name my-variable
 	
-Get by Project
-	vra-cli get variable --project production`,
+# Get Variable by Project
+vra-cli get variable --project production`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := ensureTargetConnection(); err != nil {
 			log.Fatalln(err)
@@ -131,7 +131,20 @@ var updateVariableCmd = &cobra.Command{
 var deleteVariableCmd = &cobra.Command{
 	Use:   "variable",
 	Short: "Delete a Variable",
-	Long:  `Delete a Variable.`,
+	Long: `Delete a Variable
+
+# Delete Variable by ID
+vra-cli delete variable --id "variable ID"
+
+# Delete Variable by Name
+vra-cli delete variable --name "My Variable"
+
+# Delete Variable by Name and Project
+vra-cli delete variable --name "My Variable" --project "My Project"
+
+# Delete all Variables in Project
+vra-cli delete variable --project "My Project"
+	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := ensureTargetConnection(); err != nil {
 			log.Fatalln(err)

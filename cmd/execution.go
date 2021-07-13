@@ -23,18 +23,20 @@ var inputPath string
 var getExecutionCmd = &cobra.Command{
 	Use:   "execution",
 	Short: "Get Pipeline Executions",
-	Long: `Get Code Stream Pipeline Executions by ID, Pipeline name, Project and Status
-	Get only failed executions:
-	  vra-cli get execution --status FAILED
-	Get an execution by ID:
-	  vra-cli get execution --id bb3f6aff-311a-45fe-8081-5845a529068d
-	`,
+	Long: `Get Code Stream Pipeline Executions by ID, Name, Project and Status
+
+# Get only failed executions:
+vra-cli get execution --status FAILED
+# Get an execution by ID:
+vra-cli get execution --id bb3f6aff-311a-45fe-8081-5845a529068d
+# Get Failed executions in Project "Field Demo" with the name "Learn Code Stream"
+vra-cli get execution --status FAILED --project "Field Demo" --name "Learn Code Stream"`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := ensureTargetConnection(); err != nil {
 			log.Fatalln(err)
 		}
 
-		response, err := getExecutions(id, status, name, nested)
+		response, err := getExecutions(id, project, status, name, nested)
 		if err != nil {
 			log.Errorln("Unable to get executions: ", err)
 		}
@@ -68,13 +70,21 @@ var delExecutionCmd = &cobra.Command{
 		if err := ensureTargetConnection(); err != nil {
 			log.Fatalln(err)
 		}
-
-		response, err := deleteExecution(id)
-		if err != nil {
-			log.Errorln("Unable to delete execution: ", err)
+		if id != "" {
+			response, err := deleteExecution(id)
+			if err != nil {
+				log.Errorln("Unable to delete execution: ", err)
+			} else {
+				log.Infoln("Execution with id " + response.ID + " deleted")
+			}
+		} else if project != "" {
+			response, err := deleteExecutions(project, status, name, nested)
+			if err != nil {
+				log.Errorln("Unable to delete executions: ", err)
+			} else {
+				log.Infoln(len(response), "Executions deleted")
+			}
 		}
-		log.Infoln("Execution with id " + response.ID + " deleted")
-
 	},
 }
 
@@ -105,11 +115,15 @@ func init() {
 	getExecutionCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the pipeline to list executions for")
 	getExecutionCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the executions to list")
 	getExecutionCmd.Flags().StringVarP(&status, "status", "s", "", "Filter executions by status (Completed|Waiting|Pausing|Paused|Resuming|Running)")
+	getExecutionCmd.Flags().StringVarP(&project, "project", "p", "", "Filter executions by Project")
 	getExecutionCmd.Flags().BoolVarP(&nested, "nested", "", false, "Include nested executions")
 	// Delete
 	deleteCmd.AddCommand(delExecutionCmd)
-	delExecutionCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the pipeline to delete")
-	delExecutionCmd.MarkFlagRequired("id")
+	delExecutionCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the pipeline to delete executions for")
+	delExecutionCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the execution to delete")
+	delExecutionCmd.Flags().StringVarP(&status, "status", "s", "", "Delete executions by status (Completed|Waiting|Pausing|Paused|Resuming|Running)")
+	delExecutionCmd.Flags().StringVarP(&project, "project", "p", "", "Delete executions by Project")
+	delExecutionCmd.Flags().BoolVarP(&nested, "nested", "", false, "Delete nested executions")
 	// Create
 	createCmd.AddCommand(createExecutionCmd)
 	createExecutionCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the pipeline to execute")
