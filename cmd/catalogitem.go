@@ -112,6 +112,7 @@ vra-cli create catalogitem --id 69787c80-b5d8-3d03-8ec0-a0fe67edc9e2 --project "
 			log.Fatalln(rErr)
 		} else {
 			log.Infoln("Catalog Item request created successfully", requestResponse.DeploymentId)
+			log.Infoln("Use vra-cli get deployment --id", requestResponse.DeploymentId, "to view the deployment status")
 		}
 
 	},
