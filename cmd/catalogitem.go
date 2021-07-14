@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -12,6 +13,11 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+)
+
+var (
+	deploymentName   string
+	deploymentReason string
 )
 
 // getCatalogItemCmd represents the CatalogItem command
@@ -24,7 +30,7 @@ var getCatalogItemCmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 
-		response, err := getCatalogItems(name, project)
+		response, err := getCatalogItems(id, name, project)
 		if err != nil {
 			log.Infoln("Unable to get CatalogItems: ", err)
 		}
@@ -51,40 +57,56 @@ var getCatalogItemCmd = &cobra.Command{
 	},
 }
 
-// // createCatalogItemCmd represents the CatalogItem create command
-// var createCatalogItemCmd = &cobra.Command{
-// 	Use:   "CatalogItem",
-// 	Short: "Create an CatalogItem",
-// 	Long: `Create an CatalogItem by importing a YAML specification.
+// createCatalogItemCmd represents the CatalogItem create command
+var createCatalogItemCmd = &cobra.Command{
+	Use:   "catalogitem",
+	Short: "Create a Catalog Item request",
+	Long: `Create a CatalogItem request
 
-// 	Create from YAML
-// 	  vra-cli create CatalogItem --importPath "/Users/sammcgeown/Desktop/CatalogItem.yaml"
-// 	`,
-// 	Args: func(cmd *cobra.Command, args []string) error {
-// 		return nil
-// 	},
-// 	Run: func(cmd *cobra.Command, args []string) {
-// 		if err := ensureTargetConnection(); err != nil {
-// 			log.Fatalln(err)
-// 		}
+# Create a request using Catalog Item ID (prompts for inputs)
+vra-cli create catalogitem --id 69787c80-b5d8-3d03-8ec0-a0fe67edc9e2 --project "Field Demo" --deploymentName "My Deployment"
+	`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := ensureTargetConnection(); err != nil {
+			log.Fatalln(err)
+		}
+		requestContent := CatalogItemRequest{}
+		requestContent.DeploymentName = deploymentName
+		requestContent.Reason = fmt.Sprint("[vra-cli]", deploymentReason)
 
-// 		if importPath != "" {
-// 			yamlFilePaths := getYamlFilePaths(importPath)
-// 			if len(yamlFilePaths) == 0 {
-// 				log.Warnln("No YAML files were found in", importPath)
-// 			}
-// 			for _, yamlFilePath := range yamlFilePaths {
-// 				yamlFileName := filepath.Base(yamlFilePath)
-// 				err := importYaml(yamlFilePath, "create", project, "CatalogItem")
-// 				if err != nil {
-// 					log.Warnln("Failed to import", yamlFilePath, "as CatalogItem", err)
-// 				} else {
-// 					fmt.Println("Imported", yamlFileName, "successfully - CatalogItem created.")
-// 				}
-// 			}
-// 		}
-// 	},
-// }
+		targetProject, pErr := getProject("", project)
+		if pErr != nil {
+			log.Fatalln(pErr)
+		} else {
+			requestContent.ProjectId = targetProject[0].ID
+			log.Debugln("Found Project ID:", requestContent.ProjectId)
+		}
+
+		catalogItems, cErr := getCatalogItems(id, name, project)
+		if cErr != nil {
+			log.Fatalln(cErr)
+		} else {
+			if len(catalogItems) == 1 {
+				log.Debugln("Found Catalog Item ID:", catalogItems[0].Id)
+				requestContent.Inputs = getCatalogItemInputs(catalogItems[0].Schema.Properties)
+			} else {
+				log.Errorln(len(catalogItems), "Catalog Items found")
+			}
+			PrettyPrint(requestContent)
+		}
+
+		requestResponse, rErr := createCatalogItemRequest(id, requestContent)
+		if rErr != nil {
+			log.Fatalln(rErr)
+		} else {
+			log.Infoln("Catalog Item request created successfully", requestResponse.DeploymentId)
+		}
+
+	},
+}
 
 // // updateCatalogItemCmd represents the CatalogItem update command
 // var updateCatalogItemCmd = &cobra.Command{
@@ -187,10 +209,14 @@ func init() {
 	getCatalogItemCmd.Flags().StringVarP(&typename, "type", "t", "", "Filter CatalogItem by Type")
 	getCatalogItemCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
 	// // Create
-	// createCmd.AddCommand(createCatalogItemCmd)
-	// createCatalogItemCmd.Flags().StringVarP(&importPath, "importPath", "c", "", "YAML configuration file to import")
-	// createCatalogItemCmd.Flags().StringVarP(&project, "project", "p", "", "Manually specify the Project in which to create the CatalogItem (overrides YAML)")
-	// createCatalogItemCmd.MarkFlagRequired("importPath")
+	createCmd.AddCommand(createCatalogItemCmd)
+	createCatalogItemCmd.Flags().StringVar(&deploymentName, "deploymentName", "", "Get CatalogItem by Name")
+	createCatalogItemCmd.Flags().StringVar(&deploymentReason, "deploymentReason", "", "Get CatalogItem by ID")
+	createCatalogItemCmd.Flags().StringVarP(&id, "id", "i", "", "Get CatalogItem by ID")
+	createCatalogItemCmd.Flags().StringVarP(&name, "name", "n", "", "Get CatalogItem by Name")
+	createCatalogItemCmd.Flags().StringVarP(&project, "project", "p", "", "Manually specify the Project in which to create the CatalogItem (overrides YAML)")
+	createCatalogItemCmd.MarkFlagRequired("deploymentName")
+	createCatalogItemCmd.MarkFlagRequired("project")
 	// // Update
 	// updateCmd.AddCommand(updateCatalogItemCmd)
 	// updateCatalogItemCmd.Flags().StringVarP(&importPath, "importPath", "c", "", "YAML configuration file to import")

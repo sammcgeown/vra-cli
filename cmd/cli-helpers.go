@@ -157,7 +157,7 @@ func AddFileToZip(zipWriter *zip.Writer, filename string, basedir string) error 
 
 func getInputsFromSchema(schema *CloudAssemblyCloudTemplateInputSchema) DeploymentInput {
 	var inputs DeploymentInput
-	for name, _ := range schema.Properties {
+	for name := range schema.Properties {
 		log.Infoln(name)
 		// c := CloudAssemblyCloudTemplateInputProperty{}
 		// mapstructure.Decode(value, &c)
@@ -167,7 +167,7 @@ func getInputsFromSchema(schema *CloudAssemblyCloudTemplateInputSchema) Deployme
 	return inputs
 }
 
-// Credit - https://gist.github.com/r0l1/3dcbb0c8f6cfe9c66ab8008f55f8f28b
+// askForConfirmation - Credit - https://gist.github.com/r0l1/3dcbb0c8f6cfe9c66ab8008f55f8f28b
 func askForConfirmation(s string) bool {
 	reader := bufio.NewReader(os.Stdin)
 
@@ -187,4 +187,16 @@ func askForConfirmation(s string) bool {
 			return false
 		}
 	}
+}
+
+// promptUserForInputs
+func getCatalogItemInputs(SchemaProperties map[string]CatalogItemSchemaProperties) map[string]string {
+	inputs := make(map[string]string)
+	for name, schema := range SchemaProperties {
+		fmt.Printf(name + "[" + schema.Type + "]: ")
+		var response string
+		fmt.Scanln(&response)
+		inputs[name] = response
+	}
+	return inputs
 }
