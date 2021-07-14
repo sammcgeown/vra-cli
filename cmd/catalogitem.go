@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -74,28 +75,36 @@ vra-cli create catalogitem --id 69787c80-b5d8-3d03-8ec0-a0fe67edc9e2 --project "
 			log.Fatalln(err)
 		}
 		requestContent := CatalogItemRequest{}
-		requestContent.DeploymentName = deploymentName
-		requestContent.Reason = fmt.Sprint("[vra-cli]", deploymentReason)
 
-		targetProject, pErr := getProject("", project)
-		if pErr != nil {
-			log.Fatalln(pErr)
-		} else {
-			requestContent.ProjectId = targetProject[0].ID
-			log.Debugln("Found Project ID:", requestContent.ProjectId)
-		}
-
-		catalogItems, cErr := getCatalogItems(id, name, project)
-		if cErr != nil {
-			log.Fatalln(cErr)
-		} else {
-			if len(catalogItems) == 1 {
-				log.Debugln("Found Catalog Item ID:", catalogItems[0].Id)
-				requestContent.Inputs = getCatalogItemInputs(catalogItems[0].Schema.Properties)
-			} else {
-				log.Errorln(len(catalogItems), "Catalog Items found")
+		if isInputFromPipe() {
+			if err := json.NewDecoder(os.Stdin).Decode(&requestContent); err != nil {
+				log.Warnln(err)
 			}
-			PrettyPrint(requestContent)
+		} else {
+
+			requestContent.DeploymentName = deploymentName
+			requestContent.Reason = fmt.Sprint("[vra-cli]", deploymentReason)
+
+			targetProject, pErr := getProject("", project)
+			if pErr != nil {
+				log.Fatalln(pErr)
+			} else {
+				requestContent.ProjectId = targetProject[0].ID
+				log.Debugln("Found Project ID:", requestContent.ProjectId)
+			}
+
+			catalogItems, cErr := getCatalogItems(id, name, project)
+			if cErr != nil {
+				log.Fatalln(cErr)
+			} else {
+				if len(catalogItems) == 1 {
+					log.Debugln("Found Catalog Item ID:", catalogItems[0].Id)
+					requestContent.Inputs = getCatalogItemInputs(catalogItems[0].Schema.Properties)
+				} else {
+					log.Errorln(len(catalogItems), "Catalog Items found")
+				}
+				log.Debugln(requestContent)
+			}
 		}
 
 		requestResponse, rErr := createCatalogItemRequest(id, requestContent)
