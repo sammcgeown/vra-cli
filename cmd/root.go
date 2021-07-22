@@ -101,7 +101,7 @@ func initConfig() {
 	viper.AddConfigPath(home)
 
 	// Bind ENV variables
-	viper.SetEnvPrefix("cs")
+	viper.SetEnvPrefix("vra")
 	viper.AutomaticEnv()
 
 	// If we're using ENV variables
