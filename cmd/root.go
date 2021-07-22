@@ -135,7 +135,8 @@ func initConfig() {
 		}
 		currentTargetName = viper.GetString("currentTargetName")
 		if currentTargetName != "" {
-			log.Debugln("Using config:", viper.ConfigFileUsed(), "Target:", currentTargetName)
+			log.Debugln("Using config:", viper.ConfigFileUsed())
+			log.Infoln("Context:", currentTargetName)
 			configuration := viper.Sub("target." + currentTargetName)
 			if configuration == nil { // Sub returns nil if the key cannot be found
 				log.Fatalln("Target configuration not found")
