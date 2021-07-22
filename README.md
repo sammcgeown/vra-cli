@@ -20,7 +20,7 @@ MacOs and Linux users can install using homebrew
 2) `brew install vra-cli`
 
 ### Install the pre-compiled binary
-1) Download the gzipped tar package from the [releases](releases/) page.
+1) Download the gzipped tar package from the [releases](https://github.com/sammcgeown/vra-cli/releases/) page.
 2) Extract the vra-cli binary, license and readme files
 3) Move the vra-cli binary into the PATH for your OS
 
@@ -59,7 +59,7 @@ vra-cli get execution
 ```
 
 ### Certificates
-By default vra-cli will use the OS's certificate trust to determine whether the vRealize Automation Code Stream API certificate is trusted. To ignore certificate warnings, use the `--ignoreCertificateWarnings` flag:
+By default vra-cli will use the OS's certificate trust to determine whether the vRealize Automation API certificate is trusted. To ignore certificate warnings, use the `--ignoreCertificateWarnings` flag:
 
 ```bash
 ❯ vra-cli get execution
@@ -113,8 +113,6 @@ vra-cli config use-target --name my-vra-server --config test-config.yaml
 #View the current active target
 vra-cli config current-target --config test-config.yaml
 ```
-
-[![asciicast](https://asciinema.org/a/JLRJOYU2w0uSSlsBxYVB5GkqP.svg)](https://asciinema.org/a/JLRJOYU2w0uSSlsBxYVB5GkqP)
 
 ## Shell Completions
 Basic shell completion is now available using the `vra-cli completion` command - to load completions:
