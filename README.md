@@ -20,7 +20,7 @@ MacOs and Linux users can install using homebrew
 2) `brew install vra-cli`
 
 ### Install the pre-compiled binary
-1) Download the gzipped tar package from the [releases](https://github.com/vmware/code-stream-cli/releases/) page.
+1) Download the gzipped tar package from the [releases](releases/) page.
 2) Extract the vra-cli binary, license and readme files
 3) Move the vra-cli binary into the PATH for your OS
 
