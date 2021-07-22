@@ -11,9 +11,12 @@ import (
 	"os"
 	"path/filepath"
 
+	httptransport "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-resty/resty/v2"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/vmware/vra-sdk-go/pkg/client"
 	"gopkg.in/yaml.v2"
 )
 
@@ -118,6 +121,14 @@ func testAccessToken() bool {
 	}
 	log.Debugln("Access Token OK (Username:", queryResponse.Result().(*UserPreferences).UserName, ")")
 	return true
+}
+
+func getApiClient() *client.MulticloudIaaS {
+	transport := httptransport.New(targetConfig.server, "", nil)
+	// transport.SetDebug(debug)
+	transport.DefaultAuthentication = httptransport.APIKeyAuth("Authorization", "header", "Bearer "+targetConfig.accesstoken)
+	apiclient := client.New(transport, strfmt.Default)
+	return apiclient
 }
 
 func exportYaml(name, project, path, object string) error {

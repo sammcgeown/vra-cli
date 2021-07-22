@@ -20,7 +20,16 @@ var (
 var getCloudAccountCmd = &cobra.Command{
 	Use:   "cloudaccount",
 	Short: "Get Cloud Accounts",
-	Long:  `Get Cloud Accounts by ID, name or status`,
+	Long: `Get Cloud Accounts by ID, name or type
+
+Get Cloud Account by ID:
+  vra-cli get cloudaccount --id <cloudaccount-id>
+
+Get Cloud Account by Name:
+  vra-cli get cloudaccount --name <cloudaccount-name>
+
+Get Cloud Accounts by Type:
+  vra-cli get cloudaccount --type <cloudaccount-type>`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := ensureTargetConnection(); err != nil {
 			log.Fatalln(err)
@@ -85,15 +94,36 @@ var getCloudAccountCmd = &cobra.Command{
 // }
 
 // deleteCloudAccountCmd represents the delete Blueprint command
-// var deleteCloudAccountCmd = &cobra.Command{
-// 	Use:   "cloudtemplate",
-// 	Short: "Delete a Cloud Template",
-// 	Long: `Delete a Blueprint with a specific ID
-// 	`,
-// 	Run: func(cmd *cobra.Command, args []string) {
+var deleteCloudAccountCmd = &cobra.Command{
+	Use:   "cloudaccount",
+	Short: "Delete a Cloud Account",
+	Long: `Delete a Cloud Account with a specific ID or Name
+	`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := ensureTargetConnection(); err != nil {
+			log.Fatalln(err)
+		}
+		if account, err := getCloudAccounts(id, name, ""); err != nil {
+			log.Fatalln(err) // There was an error getting the cloud account
+		} else {
+			if len(account) == 0 {
+				// No error was throw, but there was no cloud account
+				log.Fatalln("No Cloud Account matching the request was found")
+			} else if len(account) > 1 {
+				// There was more than one cloud account
+				log.Fatalln("More than one Cloud Account matching the request was found")
+			} else {
+				// There was only one cloud account
+				if err := deleteCloudAccount(*account[0].ID); err != nil {
+					log.Fatalln(err) // There was an error deleting the cloud account
+				} else {
+					log.Infoln("Cloud Account deleted successfully")
+				}
+			}
+		}
 
-// 	},
-// }
+	},
+}
 
 func init() {
 	// Get
@@ -118,9 +148,7 @@ func init() {
 	// updateCloudAccountCmd.Flags().StringVarP(&state, "state", "s", "", "Set the state of the Blueprint (ENABLED|DISABLED|RELEASED")
 
 	// Delete
-	// deleteCmd.AddCommand(deleteCloudAccountCmd)
-	// deleteCloudAccountCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Cloud Template to delete")
-	// deleteCloudAccountCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Cloud Template to delete")
-	// deleteCloudAccountCmd.Flags().StringVarP(&project, "project", "p", "", "Project of the Cloud Template to delete")
-
+	deleteCmd.AddCommand(deleteCloudAccountCmd)
+	deleteCloudAccountCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Cloud Account to delete")
+	deleteCloudAccountCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Cloud Account to delete")
 }
