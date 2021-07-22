@@ -6,6 +6,8 @@ package cmd
 
 import (
 	"crypto/tls"
+	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/go-resty/resty/v2"
@@ -46,5 +48,9 @@ func getProject(id, name string) ([]*CodeStreamProject, error) {
 		mapstructure.Decode(value, &c)
 		projects = append(projects, &c)
 	}
-	return projects, err
+	if len(projects) == 0 {
+		return nil, errors.New(fmt.Sprint("Unable to find Project \"", name, id, "\""))
+	} else {
+		return projects, err
+	}
 }

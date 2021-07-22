@@ -91,15 +91,51 @@ var getCloudTemplateCmd = &cobra.Command{
 // }
 
 // createCloudTemplateCmd represents the Blueprint create command
+//
+// Cloud Template JSON structure:
+// {
+//     "projectId": "90bb3da1-8e1f-40c0-b431-0838e8ebc28d",
+//     "name": "vra-cli Test",
+//     "description": "Blueprint to test Packer Image builds",
+//     "status": "DRAFT",
+//     "content": "formatVersion: 1\ninputs: {}\nresources:\n  Cloud_Machine_CentOS7:\n    type: Cloud.Machine\n    properties:\n      image: '[Packer Test] CentOS7'\n      flavor: small\n      constraints:\n        - tag: 'env:vsphere'\n  Cloud_Machine_CentOS8:\n    type: Cloud.Machine\n    properties:\n      image: '[Packer Test] CentOS8'\n      flavor: small\n      constraints:\n        - tag: 'env:vsphere'\n  Cloud_Machine_Ubuntu1804:\n    type: Cloud.Machine\n    properties:\n      image: '[Packer Test] Ubuntu1804'\n      flavor: small\n      constraints:\n        - tag: 'env:vsphere'"
+// }
+//
+// Cloud Template YAML structure:
+//
+// formatVersion: 1
+// inputs: {}
+// resources:
+//   Cloud_Machine_CentOS7:
+//     type: Cloud.Machine
+//     properties:
+//       image: '[Packer Test] CentOS7'
+//       flavor: small
+//       constraints:
+//         - tag: 'env:vsphere'
+//   Cloud_Machine_CentOS8:
+//     type: Cloud.Machine
+//     properties:
+//       image: '[Packer Test] CentOS8'
+//       flavor: small
+//       constraints:
+//         - tag: 'env:vsphere'
+//   Cloud_Machine_Ubuntu1804:
+//     type: Cloud.Machine
+//     properties:
+//       image: '[Packer Test] Ubuntu1804'
+//       flavor: small
+//       constraints:
+//         - tag: 'env:vsphere'
 var createCloudTemplateCmd = &cobra.Command{
 	Use:   "cloudtemplate",
 	Short: "Create a Cloud Template",
 	Long: `Create a Cloud Template.
 
 	Create from piped JSON:
-	  cat test/blueprint.json | vra-cli create cloud template
+	  cat test/cloudtemplate.json | vra-cli create cloud template
 	Create from piped JSON, overriding project:
-	  cat test/blueprint.json | vra-cli create cloud template --project Test
+	  cat test/cloudtemplate.json | vra-cli create cloud template --project Test
 	Create from flags:
 	  vra-cli create cloudtemplate --name Test --project Development --description "My new template" --content "{formatVersion: 1, inputs: {}, resources: {}}" --scope project
 	`,
@@ -122,12 +158,14 @@ var createCloudTemplateCmd = &cobra.Command{
 			log.Debugln("Project: " + project)
 			projectObj, pErr := getProject("", project)
 			if pErr != nil {
-				log.Errorln("Unable to get Project ID for "+project, pErr)
-			} else {
+				log.Fatalln(pErr)
+			} else if len(projectObj) == 1 {
 				projectId = projectObj[0].ID
+				log.Debugln("Project ID: " + projectId)
+				cloudTemplateReq.ProjectID = projectId
+			} else {
+				log.Fatalln("Unable to find Project \"" + project + "\"")
 			}
-			log.Debugln("Project ID: " + projectId)
-			cloudTemplateReq.ProjectID = projectId
 		}
 		// If name flag is set, update the request
 		if name != "" {
