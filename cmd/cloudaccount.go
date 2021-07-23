@@ -26,6 +26,10 @@ var (
 	cloudproxy      string
 	insecure        bool
 	createcloudzone bool
+	// NSX
+	vccloudaccount string
+	nsxtglobal     bool
+	nsxtmanager    bool
 )
 
 // getCloudAccountCmd represents the Blueprint command
@@ -131,6 +135,12 @@ Create a new AWS Cloud Account:
 				log.Fatalln(err)
 			}
 			PrettyPrint(newAccount)
+		} else if cloudaccounttype == "nsxt" {
+			newAccount, err := createCloudAccountNsxT(name, description, fqdn, username, password, vccloudaccount, tags, nsxtglobal, nsxtmanager, insecure)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			PrettyPrint(newAccount)
 		}
 	},
 }
@@ -196,6 +206,10 @@ func init() {
 	createCloudAccountCmd.Flags().StringVar(&cloudproxy, "cloudproxy", "", "List of AWS Regions (comma separated) of the Cloud Account")
 	createCloudAccountCmd.Flags().BoolVar(&insecure, "insecure", false, "Ignore Self-Signed Certificates")
 	createCloudAccountCmd.Flags().BoolVar(&createcloudzone, "createcloudzone", false, "Automatically create a Cloud Zone for this Account")
+	// Create NSX-T Cloud Account
+	createCloudAccountCmd.Flags().StringVar(&vccloudaccount, "vccloudaccount", "", "Name of the vCenter Cloud Account to associate with NSX")
+	createCloudAccountCmd.Flags().BoolVar(&nsxtglobal, "nsxtglobal", false, "NSX-T is Global")
+	createCloudAccountCmd.Flags().BoolVar(&nsxtmanager, "nsxtmanager", false, "NSX-T Manager mode (true: manager, false: policy)")
 
 	// // Update
 	// updateCmd.AddCommand(updateCloudAccountCmd)

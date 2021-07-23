@@ -125,7 +125,7 @@ func testAccessToken() bool {
 
 func getApiClient() *client.MulticloudIaaS {
 	transport := httptransport.New(targetConfig.server, "", nil)
-	// transport.SetDebug(debug)
+	transport.SetDebug(debug)
 	transport.DefaultAuthentication = httptransport.APIKeyAuth("Authorization", "header", "Bearer "+targetConfig.accesstoken)
 	apiclient := client.New(transport, strfmt.Default)
 	return apiclient

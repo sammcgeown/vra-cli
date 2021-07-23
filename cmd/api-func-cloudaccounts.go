@@ -114,6 +114,39 @@ func getvSphereRegions(fqdn, username, password, cloudproxy string, insecure boo
 
 }
 
+func createCloudAccountNsxT(name, description, fqdn, username, password, vccloudaccount, tags string, global, manager, insecure bool) (*models.CloudAccountNsxT, error) {
+	apiclient := getApiClient()
+
+	if vCenter, err := getCloudAccounts("", vccloudaccount, "vsphere"); err != nil {
+		log.Warnln("Unable to find a vSphere Cloud Account named "+vccloudaccount+" to associate with NSXT Cloud Account", err)
+		vccloudaccount = ""
+	} else {
+		vccloudaccount = *vCenter[0].ID
+	}
+
+	NsxTSpec := models.CloudAccountNsxTSpecification{
+		AcceptSelfSignedCertificate: insecure,
+		Name:                        &name,
+		Description:                 description,
+		HostName:                    &fqdn,
+		Username:                    &username,
+		Password:                    &password,
+		ManagerMode:                 manager,
+		IsGlobalManager:             global,
+		Tags:                        stringToTags(tags),
+	}
+	if vccloudaccount != "" {
+		NsxTSpec.AssociatedCloudAccountIds = []string{vccloudaccount}
+	}
+
+	createResp, err := apiclient.CloudAccount.CreateNsxTCloudAccount(cloud_account.NewCreateNsxTCloudAccountParams().WithBody(&NsxTSpec))
+	if err != nil {
+		return nil, err
+	} else {
+		return createResp.Payload, nil
+	}
+}
+
 func deleteCloudAccount(id string) error {
 
 	apiclient := getApiClient()
