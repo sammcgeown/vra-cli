@@ -18,6 +18,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmware/vra-sdk-go/pkg/models"
 )
 
 // isInputFromPipe - pipeline detection
@@ -199,4 +200,17 @@ func getCatalogItemInputs(SchemaProperties map[string]CatalogItemSchemaPropertie
 		inputs[name] = response
 	}
 	return inputs
+}
+
+func stringToTags(tags string) []*models.Tag {
+	var tagsArray []*models.Tag
+	for _, tag := range strings.Split(tags, ",") {
+		tagKey := strings.Split(tag, ":")[0]
+		tagValue := strings.Split(tag, ":")[1]
+		tagsArray = append(tagsArray, &models.Tag{
+			Key:   &tagKey,
+			Value: &tagValue,
+		})
+	}
+	return tagsArray
 }
