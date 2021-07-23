@@ -14,10 +14,18 @@ import (
 
 var (
 	cloudaccounttype   string
+	tags               string
 	awsaccesskeyid     string
 	awssecretaccesskey string
 	awsregions         string
-	tags               string
+	// vSphere
+	fqdn            string
+	username        string
+	password        string
+	nsxaccount      string
+	cloudproxy      string
+	insecure        bool
+	createcloudzone bool
 )
 
 // getCloudAccountCmd represents the Blueprint command
@@ -117,6 +125,12 @@ Create a new AWS Cloud Account:
 				log.Fatalln(err)
 			}
 			PrettyPrint(newAccount)
+		} else if cloudaccounttype == "vsphere" {
+			newAccount, err := createCloudAccountvSphere(name, description, fqdn, username, password, nsxaccount, cloudproxy, tags, insecure, createcloudzone)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			PrettyPrint(newAccount)
 		}
 	},
 }
@@ -128,7 +142,7 @@ var deleteCloudAccountCmd = &cobra.Command{
 	Long: `Delete a Cloud Account with a specific ID or Name
 
 Delete a Cloud Account by Name:
-  vra-cli delete cloudaccount --name spc-47-aws
+  vra-cli delete cloudaccount --name <Cloud Account Name>
 
 Delete a Cloud Account by ID:
   vra-cli delete cloudaccount --id <Cloud Account ID>`,
@@ -169,10 +183,19 @@ func init() {
 	createCmd.AddCommand(createCloudAccountCmd)
 	createCloudAccountCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Cloud Account")
 	createCloudAccountCmd.Flags().StringVarP(&cloudaccounttype, "type", "t", "", "Type of the Cloud Account")
+	createCloudAccountCmd.Flags().StringVar(&tags, "tags", "", "List of Tags (comma separated e.g. \"name1:value2,name2:value2\") to apply to the Cloud Account")
+	// Create AWS Cloud Account
 	createCloudAccountCmd.Flags().StringVar(&awsaccesskeyid, "awsaccesskeyid", "", "AWS Access Key ID of the Cloud Account")
 	createCloudAccountCmd.Flags().StringVar(&awssecretaccesskey, "awssecretaccesskey", "", "AWS Secret Access Key of the Cloud Account")
 	createCloudAccountCmd.Flags().StringVar(&awsregions, "awsregions", "", "List of AWS Regions (comma separated) of the Cloud Account")
-	createCloudAccountCmd.Flags().StringVar(&tags, "tags", "", "List of Tags (comma separated e.g. \"name1:value2,name2:value2\") to apply to the Cloud Account")
+	// Create vSphere Cloud Account
+	createCloudAccountCmd.Flags().StringVar(&fqdn, "fqdn", "", "AWS Access Key ID of the Cloud Account")
+	createCloudAccountCmd.Flags().StringVar(&username, "username", "", "AWS Secret Access Key of the Cloud Account")
+	createCloudAccountCmd.Flags().StringVar(&password, "password", "", "List of AWS Regions (comma separated) of the Cloud Account")
+	createCloudAccountCmd.Flags().StringVar(&nsxaccount, "nsxaccount", "", "List of AWS Regions (comma separated) of the Cloud Account")
+	createCloudAccountCmd.Flags().StringVar(&cloudproxy, "cloudproxy", "", "List of AWS Regions (comma separated) of the Cloud Account")
+	createCloudAccountCmd.Flags().BoolVar(&insecure, "insecure", false, "Ignore Self-Signed Certificates")
+	createCloudAccountCmd.Flags().BoolVar(&createcloudzone, "createcloudzone", false, "Automatically create a Cloud Zone for this Account")
 
 	// // Update
 	// updateCmd.AddCommand(updateCloudAccountCmd)
