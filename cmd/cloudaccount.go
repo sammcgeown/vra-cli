@@ -13,7 +13,11 @@ import (
 )
 
 var (
-	cloudaccounttype string
+	cloudaccounttype   string
+	awsaccesskeyid     string
+	awssecretaccesskey string
+	awsregions         string
+	tags               string
 )
 
 // getCloudAccountCmd represents the Blueprint command
@@ -84,21 +88,50 @@ Get Cloud Accounts by Type:
 // }
 
 // createCloudAccountCmd represents the Blueprint create command
-// var createCloudAccountCmd = &cobra.Command{
-// 	Use:   "cloudtemplate",
-// 	Short: "Create a Cloud Template",
-// 	Long: `Create a Cloud Template.`,
-// 	Run: func(cmd *cobra.Command, args []string) {
+var createCloudAccountCmd = &cobra.Command{
+	Use:   "cloudaccount",
+	Short: "Create a Cloud Account",
+	Long: `Create a Cloud Account.
 
-// 	},
-// }
+Create a new AWS Cloud Account:
+  vra-cli create cloudaccount --name spc-47-aws --type aws --awsaccesskeyid <AWS Access Key ID> \
+    --awssecretaccesskey <AWS Secret Access Key> --tags "cloud:aws,env:staging" \
+	--awsregions "us-west-1,us-west-2"`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := ensureTargetConnection(); err != nil {
+			log.Fatalln(err)
+		}
+
+		// if isInputFromPipe() { // If it's a pipe, then read from stdin
+		// 	// Decode JSON to struct
+		// 	if err := json.NewDecoder(os.Stdin).Decode(&CloudAccount); err != nil {
+		// 		log.Warnln(err)
+		// 	}
+		// }
+		if cloudaccounttype == "aws" {
+			newAccount, err := createCloudAccountAws(name, awsaccesskeyid, awssecretaccesskey, awsregions, tags)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			PrettyPrint(newAccount)
+		}
+	},
+}
 
 // deleteCloudAccountCmd represents the delete Blueprint command
 var deleteCloudAccountCmd = &cobra.Command{
 	Use:   "cloudaccount",
 	Short: "Delete a Cloud Account",
 	Long: `Delete a Cloud Account with a specific ID or Name
-	`,
+
+Delete a Cloud Account by Name:
+  vra-cli delete cloudaccount --name spc-47-aws
+
+Delete a Cloud Account by ID:
+  vra-cli delete cloudaccount --id <Cloud Account ID>`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := ensureTargetConnection(); err != nil {
 			log.Fatalln(err)
@@ -133,13 +166,13 @@ func init() {
 	getCloudAccountCmd.Flags().StringVarP(&cloudaccounttype, "type", "t", "", "List by Type of the Cloud Account")
 
 	// Create
-	// createCmd.AddCommand(createCloudAccountCmd)
-	// // createCloudAccountCmd.Flags().StringVarP(&importPath, "importPath", "", "", "YAML configuration file to import")
-	// createCloudAccountCmd.Flags().StringVarP(&project, "project", "p", "", "Project in which to create the Cloud Template (overrides piped JSON)")
-	// createCloudAccountCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Cloud Template (overrides piped JSON)")
-	// createCloudAccountCmd.Flags().StringVarP(&description, "description", "d", "", "Description of the Cloud Template (overrides piped JSON)")
-	// createCloudAccountCmd.Flags().StringVarP(&content, "content", "c", "", "Content of the Cloud Template - YAML as a string (overrides piped JSON)")
-	// createCloudAccountCmd.Flags().StringVarP(&scope, "scope", "", "", "Scope of the Cloud Template, false is project, true is any project in the organization (overrides piped JSON)")
+	createCmd.AddCommand(createCloudAccountCmd)
+	createCloudAccountCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Cloud Account")
+	createCloudAccountCmd.Flags().StringVarP(&cloudaccounttype, "type", "t", "", "Type of the Cloud Account")
+	createCloudAccountCmd.Flags().StringVar(&awsaccesskeyid, "awsaccesskeyid", "", "AWS Access Key ID of the Cloud Account")
+	createCloudAccountCmd.Flags().StringVar(&awssecretaccesskey, "awssecretaccesskey", "", "AWS Secret Access Key of the Cloud Account")
+	createCloudAccountCmd.Flags().StringVar(&awsregions, "awsregions", "", "List of AWS Regions (comma separated) of the Cloud Account")
+	createCloudAccountCmd.Flags().StringVar(&tags, "tags", "", "List of Tags (comma separated e.g. \"name1:value2,name2:value2\") to apply to the Cloud Account")
 
 	// // Update
 	// updateCmd.AddCommand(updateCloudAccountCmd)

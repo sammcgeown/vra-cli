@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 package cmd
 
 import (
+	"errors"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -46,6 +47,33 @@ func getCloudAccounts(id string, name string, cloudaccounttype string) ([]*model
 
 	return ret.Payload.Content, err
 
+}
+
+func createCloudAccountAws(name, accesskey, secretkey, regions, tags string) (*models.CloudAccountAws, error) {
+	AwsSpec := models.CloudAccountAwsSpecification{}
+	AwsSpec.Name = &name
+	AwsSpec.AccessKeyID = &accesskey
+	AwsSpec.SecretAccessKey = &secretkey
+	AwsSpec.RegionIds = strings.Split(regions, ",")
+	for _, tag := range strings.Split(tags, ",") {
+		tagKey := strings.Split(tag, ":")[0]
+		tagValue := strings.Split(tag, ":")[1]
+		AwsSpec.Tags = append(AwsSpec.Tags, &models.Tag{
+			Key:   &tagKey,
+			Value: &tagValue,
+		})
+	}
+	apiclient := getApiClient()
+	createResp, err := apiclient.CloudAccount.CreateAwsCloudAccount(cloud_account.NewCreateAwsCloudAccountParams().WithBody(&AwsSpec))
+	if err != nil {
+		if _, ok := err.(*cloud_account.CreateAwsCloudAccountBadRequest); ok {
+			return nil, errors.New("Cloud account " + name + " already exists")
+		} else {
+			return nil, err
+		}
+	} else {
+		return createResp.Payload, nil
+	}
 }
 
 func deleteCloudAccount(id string) error {
