@@ -43,8 +43,11 @@ func getCloudAccounts(id string, name string, cloudaccounttype string) ([]*model
 	apiclient := getApiClient()
 
 	ret, err := apiclient.CloudAccount.GetCloudAccounts(CloudAccountParams)
-
-	return ret.Payload.Content, err
+	if err != nil {
+		return nil, err
+	} else {
+		return ret.Payload.Content, err
+	}
 
 }
 
