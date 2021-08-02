@@ -130,13 +130,14 @@ Create a new AWS Cloud Account:
 			}
 			PrettyPrint(newAccount)
 		} else if cloudaccounttype == "vsphere" {
+
 			newAccount, err := createCloudAccountvSphere(name, description, fqdn, username, password, nsxaccount, cloudproxy, tags, insecure, createcloudzone)
 			if err != nil {
 				log.Fatalln(err)
 			}
 			PrettyPrint(newAccount)
 		} else if cloudaccounttype == "nsxt" {
-			newAccount, err := createCloudAccountNsxT(name, description, fqdn, username, password, vccloudaccount, tags, nsxtglobal, nsxtmanager, insecure)
+			newAccount, err := createCloudAccountNsxT(name, description, fqdn, username, password, vccloudaccount, cloudproxy, tags, nsxtglobal, nsxtmanager, insecure)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -194,17 +195,17 @@ func init() {
 	createCloudAccountCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Cloud Account")
 	createCloudAccountCmd.Flags().StringVarP(&cloudaccounttype, "type", "t", "", "Type of the Cloud Account")
 	createCloudAccountCmd.Flags().StringVar(&tags, "tags", "", "List of Tags (comma separated e.g. \"name1:value2,name2:value2\") to apply to the Cloud Account")
+	createCloudAccountCmd.Flags().StringVar(&cloudproxy, "cloudproxy", "", "vRA Cloud only - ID of the Data Collector (Cloud Proxy) (use: vra-cli get datacollector)")
+	createCloudAccountCmd.Flags().BoolVar(&insecure, "insecure", false, "Ignore Self-Signed Certificates")
 	// Create AWS Cloud Account
 	createCloudAccountCmd.Flags().StringVar(&awsaccesskeyid, "awsaccesskeyid", "", "AWS Access Key ID of the Cloud Account")
 	createCloudAccountCmd.Flags().StringVar(&awssecretaccesskey, "awssecretaccesskey", "", "AWS Secret Access Key of the Cloud Account")
 	createCloudAccountCmd.Flags().StringVar(&awsregions, "awsregions", "", "List of AWS Regions (comma separated) of the Cloud Account")
 	// Create vSphere Cloud Account
-	createCloudAccountCmd.Flags().StringVar(&fqdn, "fqdn", "", "AWS Access Key ID of the Cloud Account")
-	createCloudAccountCmd.Flags().StringVar(&username, "username", "", "AWS Secret Access Key of the Cloud Account")
-	createCloudAccountCmd.Flags().StringVar(&password, "password", "", "List of AWS Regions (comma separated) of the Cloud Account")
-	createCloudAccountCmd.Flags().StringVar(&nsxaccount, "nsxaccount", "", "List of AWS Regions (comma separated) of the Cloud Account")
-	createCloudAccountCmd.Flags().StringVar(&cloudproxy, "cloudproxy", "", "List of AWS Regions (comma separated) of the Cloud Account")
-	createCloudAccountCmd.Flags().BoolVar(&insecure, "insecure", false, "Ignore Self-Signed Certificates")
+	createCloudAccountCmd.Flags().StringVar(&fqdn, "fqdn", "", "vCenter Server FQDN")
+	createCloudAccountCmd.Flags().StringVar(&username, "username", "", "User Name")
+	createCloudAccountCmd.Flags().StringVar(&password, "password", "", "Password")
+	createCloudAccountCmd.Flags().StringVar(&nsxaccount, "nsxaccount", "", "ID of the NSX-T or NSX-v Cloud Account to link (use: vra-cli get cloudaccount --type nsxt/nsxv)")
 	createCloudAccountCmd.Flags().BoolVar(&createcloudzone, "createcloudzone", false, "Automatically create a Cloud Zone for this Account")
 	// Create NSX-T Cloud Account
 	createCloudAccountCmd.Flags().StringVar(&vccloudaccount, "vccloudaccount", "", "Name of the vCenter Cloud Account to associate with NSX")

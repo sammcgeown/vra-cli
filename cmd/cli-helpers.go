@@ -204,6 +204,9 @@ func getCatalogItemInputs(SchemaProperties map[string]CatalogItemSchemaPropertie
 
 func stringToTags(tags string) []*models.Tag {
 	var tagsArray []*models.Tag
+	if tags == "" {
+		return tagsArray
+	}
 	for _, tag := range strings.Split(tags, ",") {
 		tagKey := strings.Split(tag, ":")[0]
 		tagValue := strings.Split(tag, ":")[1]
