@@ -6,10 +6,20 @@ package cmd
 
 import (
 	"os"
+	"strings"
 
 	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+)
+
+var (
+	admins                string
+	members               string
+	viewers               string
+	operationTimeout      int64
+	machineNamingTemplate string
+	sharedResources       bool
 )
 
 // getProjectCommand represents the project command
@@ -82,6 +92,60 @@ Get Project by Name (case sensitive):
 	},
 }
 
+// createProjectCommand creates a project
+var createProjectCommand = &cobra.Command{
+	Use:   "project",
+	Short: "Create a Project",
+	Long:  `Create a Project`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := ensureTargetConnection(); err != nil {
+			log.Fatalln(err)
+		}
+
+		adminUsers := createUserArray(strings.Split(admins, ","))
+		memberUsers := createUserArray(strings.Split(members, ","))
+		viewerUsers := createUserArray(strings.Split(viewers, ","))
+
+		newProject, err := createProject(projectName, description, adminUsers, memberUsers, viewerUsers, nil, nil, operationTimeout, machineNamingTemplate, &sharedResources)
+		if err != nil {
+			log.Fatal("Unable to create Project", err)
+		} else {
+			PrettyPrint(newProject)
+		}
+
+	},
+}
+
+// updateProjectCommand creates a project
+var updateProjectCommand = &cobra.Command{
+	Use:   "project",
+	Short: "Update a Project",
+	Long:  `Update a Project`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := ensureTargetConnection(); err != nil {
+			log.Fatalln(err)
+		}
+
+		adminUsers := createUserArray(strings.Split(admins, ","))
+		memberUsers := createUserArray(strings.Split(members, ","))
+		viewerUsers := createUserArray(strings.Split(viewers, ","))
+
+		newProject, err := updateProject(id, projectName, description, adminUsers, memberUsers, viewerUsers, nil, nil, operationTimeout, machineNamingTemplate, &sharedResources)
+		if err != nil {
+			log.Fatal("Unable to update Project", err)
+		} else {
+			PrettyPrint(newProject)
+		}
+
+	},
+}
+
 // deleteProjectCommand deletes a project
 var deleteProjectCommand = &cobra.Command{
 	Use:   "project",
@@ -109,10 +173,34 @@ func init() {
 	getCmd.AddCommand(getProjectCommand)
 	getProjectCommand.Flags().StringVarP(&projectName, "name", "n", "", "Name of the Project (case sensitive)")
 	getProjectCommand.Flags().StringVarP(&id, "id", "i", "", "ID of the Project")
-	// getProjectCommand.Flags().StringVarP(&exportPath, "exportpath", "", "", "Path to export projects and contents")
+
+	// Create
+	createCmd.AddCommand(createProjectCommand)
+	createProjectCommand.Flags().StringVarP(&projectName, "name", "n", "", "Name of the Project")
+	createProjectCommand.Flags().StringVarP(&description, "description", "d", "", "Description of the Project")
+	createProjectCommand.Flags().StringVar(&admins, "admins", "", "Comma separated list of email addresses to assign administrator role for this project")
+	createProjectCommand.Flags().StringVar(&members, "members", "", "Comma separated list of email addresses to assign member role for this project")
+	createProjectCommand.Flags().StringVar(&viewers, "viewers", "", "Comma separated list of email addresses to assign viewer role for this project")
+	createProjectCommand.Flags().Int64Var(&operationTimeout, "timeout", 0, "Operation Timeout setting for this project")
+	createProjectCommand.Flags().StringVar(&machineNamingTemplate, "machineNamingTemplate", "", "Machine naming template for this project")
+	createProjectCommand.Flags().BoolVar(&sharedResources, "sharedResources", false, "If true, Deployments are shared between all users in the project")
+
+	// Update
+	updateCmd.AddCommand(updateProjectCommand)
+	updateProjectCommand.Flags().StringVarP(&id, "id", "i", "", "ID of the Project")
+	updateProjectCommand.MarkFlagRequired("id")
+	updateProjectCommand.Flags().StringVarP(&projectName, "name", "n", "", "Name of the Project")
+	updateProjectCommand.Flags().StringVarP(&description, "description", "d", "", "Description of the Project")
+	updateProjectCommand.Flags().StringVar(&admins, "admins", "", "Comma separated list of email addresses to assign administrator role for this project")
+	updateProjectCommand.Flags().StringVar(&members, "members", "", "Comma separated list of email addresses to assign member role for this project")
+	updateProjectCommand.Flags().StringVar(&viewers, "viewers", "", "Comma separated list of email addresses to assign viewer role for this project")
+	updateProjectCommand.Flags().Int64Var(&operationTimeout, "timeout", 0, "Operation Timeout setting for this project")
+	updateProjectCommand.Flags().StringVar(&machineNamingTemplate, "machineNamingTemplate", "", "Machine naming template for this project")
+	updateProjectCommand.Flags().BoolVar(&sharedResources, "sharedResources", false, "If true, Deployments are shared between all users in the project")
 
 	// Delete
 	deleteCmd.AddCommand(deleteProjectCommand)
 	deleteProjectCommand.Flags().StringVarP(&id, "id", "i", "", "ID of the Project to delete")
+	deleteProjectCommand.MarkFlagRequired("id")
 
 }

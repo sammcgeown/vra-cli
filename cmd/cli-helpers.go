@@ -217,3 +217,17 @@ func stringToTags(tags string) []*models.Tag {
 	}
 	return tagsArray
 }
+
+func createUserArray(emails []string) []*models.User {
+	if emails[0] == "" {
+		return nil
+	}
+	users := make([]*models.User, 0, len(emails))
+	for i := range emails {
+		user := models.User{
+			Email: &emails[i],
+		}
+		users = append(users, &user)
+	}
+	return users
+}

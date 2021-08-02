@@ -32,6 +32,7 @@ func getProject(id, name string) ([]*models.Project, error) {
 
 	ProjectParams := project.NewGetProjectsParams()
 	ProjectParams.DollarFilter = &filter
+	ProjectParams.APIVersion = &apiVersion
 
 	ret, err := apiClient.Project.GetProjects(ProjectParams)
 	if err != nil {
@@ -48,7 +49,7 @@ func deleteProject(id string) error {
 	apiClient := getApiClient()
 
 	// Workaround an issue where the cloud regions need to be removed before the project can be deleted.
-	_, err := apiClient.Project.UpdateProject(project.NewUpdateProjectParams().WithID(id).WithBody(&models.ProjectSpecification{
+	_, err := apiClient.Project.UpdateProject(project.NewUpdateProjectParams().WithAPIVersion(&apiVersion).WithID(id).WithBody(&models.ProjectSpecification{
 		ZoneAssignmentConfigurations: []*models.ZoneAssignmentSpecification{},
 	}))
 	if err != nil {
@@ -60,4 +61,66 @@ func deleteProject(id string) error {
 		return err
 	}
 	return nil
+}
+
+func createProject(name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.Project, error) {
+	apiClient := getApiClient()
+	createdProject, err := apiClient.Project.CreateProject(project.NewCreateProjectParams().WithAPIVersion(&apiVersion).WithBody(&models.ProjectSpecification{
+		Administrators:               administrators,
+		Constraints:                  constraints,
+		Description:                  description,
+		MachineNamingTemplate:        machineNamingTemplate,
+		Members:                      members,
+		Name:                         &name,
+		OperationTimeout:             int64(operationTimeout),
+		SharedResources:              sharedResources,
+		Viewers:                      viewers,
+		ZoneAssignmentConfigurations: zoneAssignment,
+	}))
+	if err != nil {
+		return nil, err
+	}
+	return createdProject.Payload, nil
+}
+
+func updateProject(id string, name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.Project, error) {
+	apiClient := getApiClient()
+	ProjectSpecification := models.ProjectSpecification{}
+
+	if len(administrators) > 0 {
+		ProjectSpecification.Administrators = administrators
+	}
+	if len(members) > 0 {
+		ProjectSpecification.Members = members
+	}
+	if len(viewers) > 0 {
+		ProjectSpecification.Viewers = viewers
+	}
+	if len(zoneAssignment) > 0 {
+		ProjectSpecification.ZoneAssignmentConfigurations = zoneAssignment
+	}
+	if len(constraints) > 0 {
+		ProjectSpecification.Constraints = constraints
+	}
+	if name != "" {
+		ProjectSpecification.Name = &name
+	}
+	if description != "" {
+		ProjectSpecification.Description = description
+	}
+	if operationTimeout != 0 {
+		ProjectSpecification.OperationTimeout = int64(operationTimeout)
+	}
+	if machineNamingTemplate != "" {
+		ProjectSpecification.MachineNamingTemplate = machineNamingTemplate
+	}
+	if *sharedResources == bool(true) {
+		ProjectSpecification.SharedResources = sharedResources
+	}
+
+	updatedProject, err := apiClient.Project.UpdateProject(project.NewUpdateProjectParams().WithAPIVersion(&apiVersion).WithID(id).WithBody(&ProjectSpecification))
+	if err != nil {
+		return nil, err
+	}
+	return updatedProject.Payload, nil
 }

@@ -25,6 +25,7 @@ var (
 	commit            = "none"
 	date              = "unknown"
 	builtBy           = "unknown"
+	apiVersion        = "2019-10-17"
 	// Global Flags
 	debug      bool
 	ignoreCert bool
