@@ -34,7 +34,7 @@ var (
 	// Command Flags
 	id          string
 	name        string
-	project     string
+	projectName string
 	typename    string
 	value       string
 	description string

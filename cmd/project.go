@@ -41,7 +41,7 @@ var getProjectCommand = &cobra.Command{
 		// endpointTable := tablewriter.NewWriter(os.Stdout)
 		// table.SetHeader([]string{"Id", "Name", "Description"})
 		for _, p := range response {
-			table.Append([]string{p.ID, p.Name, p.Description})
+			table.Append([]string{*p.ID, p.Name, p.Description})
 			if exportPath != "" {
 				tmpDir, err := ioutil.TempDir(os.TempDir(), "vra-cli-*")
 				if err != nil {

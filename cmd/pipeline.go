@@ -42,7 +42,7 @@ vra-cli get execution --status Failed`,
 			log.Fatalln(err)
 		}
 
-		response, err := getPipelines(id, name, project, exportPath)
+		response, err := getPipelines(id, name, projectName, exportPath)
 		if err != nil {
 			log.Errorln("Unable to get Code Stream Pipelines: ", err)
 		}
@@ -215,7 +215,7 @@ vra-cli create pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 		}
 		for _, yamlFilePath := range yamlFilePaths {
 			yamlFileName := filepath.Base(yamlFilePath)
-			err := importYaml(yamlFilePath, "create", project, "pipeline")
+			err := importYaml(yamlFilePath, "create", projectName, "pipeline")
 			if err != nil {
 				log.Warnln("Failed to import", yamlFilePath, "as Pipeline", err)
 			} else {
@@ -253,10 +253,10 @@ vra-cli delete pipeline --project "My Project"
 				log.Errorln("Delete Pipeline failed:", err)
 			}
 			log.Infoln("Pipeline with id " + response.ID + " deleted")
-		} else if project != "" {
-			response, err := deletePipelineInProject(project)
+		} else if projectName != "" {
+			response, err := deletePipelineInProject(projectName)
 			if err != nil {
-				log.Errorln("Delete Pipelines in "+project+" failed:", err)
+				log.Errorln("Delete Pipelines in "+projectName+" failed:", err)
 			} else {
 				log.Infoln(len(response), "Pipelines deleted")
 			}
@@ -271,7 +271,7 @@ func init() {
 	getCmd.AddCommand(getPipelineCmd)
 	getPipelineCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the pipeline to list executions for")
 	getPipelineCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the pipeline to list")
-	getPipelineCmd.Flags().StringVarP(&project, "project", "p", "", "List pipeline in project")
+	getPipelineCmd.Flags().StringVarP(&projectName, "project", "p", "", "List pipeline in project")
 	getPipelineCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
 	getPipelineCmd.Flags().BoolVarP(&printForm, "form", "f", false, "Return pipeline inputs form(s)")
 	getPipelineCmd.Flags().BoolVarP(&printJson, "json", "", false, "Return JSON formatted Pipeline(s)")
@@ -280,7 +280,7 @@ func init() {
 	// Create
 	createCmd.AddCommand(createPipelineCmd)
 	createPipelineCmd.Flags().StringVarP(&importPath, "importPath", "", "", "YAML configuration file to import")
-	createPipelineCmd.Flags().StringVarP(&project, "project", "p", "", "Manually specify the Project in which to create the Pipeline (overrides YAML)")
+	createPipelineCmd.Flags().StringVarP(&projectName, "project", "p", "", "Manually specify the Project in which to create the Pipeline (overrides YAML)")
 	createPipelineCmd.MarkFlagRequired("importPath")
 	// Update
 	updateCmd.AddCommand(updatePipelineCmd)
@@ -290,6 +290,6 @@ func init() {
 	// Delete
 	deleteCmd.AddCommand(deletePipelineCmd)
 	deletePipelineCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Pipeline to delete")
-	deletePipelineCmd.Flags().StringVarP(&project, "project", "p", "", "Delete all Pipelines in the specified Project")
+	deletePipelineCmd.Flags().StringVarP(&projectName, "project", "p", "", "Delete all Pipelines in the specified Project")
 
 }

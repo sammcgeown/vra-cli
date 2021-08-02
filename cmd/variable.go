@@ -32,7 +32,7 @@ vra-cli get variable --project production`,
 			log.Fatalln(err)
 		}
 
-		response, err := getVariable(id, name, project, exportPath)
+		response, err := getVariable(id, name, projectName, exportPath)
 		if err != nil {
 			log.Fatalln("Unable to get Code Stream Variables: ", err)
 		}
@@ -71,8 +71,8 @@ var createVariableCmd = &cobra.Command{
 		if importPath != "" { // If we are importing a file
 			variables := importVariables(importPath)
 			for _, value := range variables {
-				if project != "" { // If the project is specified update the object
-					value.Project = project
+				if projectName != "" { // If the project is specified update the object
+					value.Project = projectName
 				}
 				createResponse, err := createVariable(value.Name, value.Description, value.Type, value.Project, value.Value)
 				if err != nil {
@@ -82,7 +82,7 @@ var createVariableCmd = &cobra.Command{
 				}
 			}
 		} else {
-			createResponse, err := createVariable(name, description, typename, project, value)
+			createResponse, err := createVariable(name, description, typename, projectName, value)
 			if err != nil {
 				log.Errorln("Unable to create Code Stream Variable: ", err)
 			} else {
@@ -157,10 +157,10 @@ vra-cli delete variable --project "My Project"
 			} else {
 				log.Infoln("Variable with id " + response.ID + " deleted")
 			}
-		} else if project != "" {
-			response, err := deleteVariableByProject(project)
+		} else if projectName != "" {
+			response, err := deleteVariableByProject(projectName)
 			if err != nil {
-				log.Errorln("Delete Variables in "+project+" failed:", err)
+				log.Errorln("Delete Variables in "+projectName+" failed:", err)
 			} else {
 				log.Infoln(len(response), "Variables deleted")
 			}
@@ -172,14 +172,14 @@ func init() {
 	// Get Variable
 	getCmd.AddCommand(getVariableCmd)
 	getVariableCmd.Flags().StringVarP(&name, "name", "n", "", "List variable with name")
-	getVariableCmd.Flags().StringVarP(&project, "project", "p", "", "List variables in project")
+	getVariableCmd.Flags().StringVarP(&projectName, "project", "p", "", "List variables in project")
 	getVariableCmd.Flags().StringVarP(&id, "id", "i", "", "List variables by id")
 	getVariableCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
 	// Create Variable
 	createCmd.AddCommand(createVariableCmd)
 	createVariableCmd.Flags().StringVarP(&name, "name", "n", "", "The name of the variable to create")
 	createVariableCmd.Flags().StringVarP(&typename, "type", "t", "", "The type of the variable to create REGULAR|SECRET|RESTRICTED")
-	createVariableCmd.Flags().StringVarP(&project, "project", "p", "", "The project in which to create the variable")
+	createVariableCmd.Flags().StringVarP(&projectName, "project", "p", "", "The project in which to create the variable")
 	createVariableCmd.Flags().StringVarP(&value, "value", "v", "", "The value of the variable to create")
 	createVariableCmd.Flags().StringVarP(&description, "description", "d", "", "The description of the variable to create")
 	createVariableCmd.Flags().StringVarP(&importPath, "importpath", "i", "", "Path to a YAML file with the variables to import")
@@ -197,6 +197,6 @@ func init() {
 	// Delete Variable
 	deleteCmd.AddCommand(deleteVariableCmd)
 	deleteVariableCmd.Flags().StringVarP(&id, "id", "i", "", "Delete variable by id")
-	deleteVariableCmd.Flags().StringVarP(&project, "project", "p", "", "The project in which to delete the variable, or delete all variables in project")
+	deleteVariableCmd.Flags().StringVarP(&projectName, "project", "p", "", "The project in which to delete the variable, or delete all variables in project")
 
 }

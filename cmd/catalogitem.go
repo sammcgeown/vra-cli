@@ -31,7 +31,7 @@ var getCatalogItemCmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 
-		response, err := getCatalogItems(id, name, project)
+		response, err := getCatalogItems(id, name, projectName)
 		if err != nil {
 			log.Infoln("Unable to get CatalogItems: ", err)
 		}
@@ -85,15 +85,15 @@ vra-cli create catalogitem --id 69787c80-b5d8-3d03-8ec0-a0fe67edc9e2 --project "
 			requestContent.DeploymentName = deploymentName
 			requestContent.Reason = fmt.Sprint("[vra-cli]", deploymentReason)
 
-			targetProject, pErr := getProject("", project)
+			targetProject, pErr := getProject("", projectName)
 			if pErr != nil {
 				log.Fatalln(pErr)
 			} else {
-				requestContent.ProjectId = targetProject[0].ID
+				requestContent.ProjectId = *targetProject[0].ID
 				log.Debugln("Found Project ID:", requestContent.ProjectId)
 			}
 
-			catalogItems, cErr := getCatalogItems(id, name, project)
+			catalogItems, cErr := getCatalogItems(id, name, projectName)
 			if cErr != nil {
 				log.Fatalln(cErr)
 			} else {
@@ -215,7 +215,7 @@ func init() {
 	getCmd.AddCommand(getCatalogItemCmd)
 	getCatalogItemCmd.Flags().StringVarP(&name, "name", "n", "", "Get CatalogItem by Name")
 	getCatalogItemCmd.Flags().StringVarP(&id, "id", "i", "", "Get CatalogItem by ID")
-	getCatalogItemCmd.Flags().StringVarP(&project, "project", "p", "", "Filter CatalogItem by Project")
+	getCatalogItemCmd.Flags().StringVarP(&projectName, "project", "p", "", "Filter CatalogItem by Project")
 	getCatalogItemCmd.Flags().StringVarP(&typename, "type", "t", "", "Filter CatalogItem by Type")
 	getCatalogItemCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
 	// // Create
@@ -224,7 +224,7 @@ func init() {
 	createCatalogItemCmd.Flags().StringVar(&deploymentReason, "deploymentReason", "", "Get CatalogItem by ID")
 	createCatalogItemCmd.Flags().StringVarP(&id, "id", "i", "", "Get CatalogItem by ID")
 	createCatalogItemCmd.Flags().StringVarP(&name, "name", "n", "", "Get CatalogItem by Name")
-	createCatalogItemCmd.Flags().StringVarP(&project, "project", "p", "", "Manually specify the Project in which to create the CatalogItem (overrides YAML)")
+	createCatalogItemCmd.Flags().StringVarP(&projectName, "project", "p", "", "Manually specify the Project in which to create the CatalogItem (overrides YAML)")
 	createCatalogItemCmd.MarkFlagRequired("deploymentName")
 	createCatalogItemCmd.MarkFlagRequired("project")
 	// // Update

@@ -5,21 +5,17 @@ SPDX-License-Identifier: BSD-2-Clause
 package cmd
 
 import (
-	"crypto/tls"
 	"errors"
-	"fmt"
 	"strings"
 
-	"github.com/go-resty/resty/v2"
-	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmware/vra-sdk-go/pkg/client/project"
+	"github.com/vmware/vra-sdk-go/pkg/models"
 )
 
-func getProject(id, name string) ([]*CodeStreamProject, error) {
-	var projects []*CodeStreamProject
-	client := resty.New()
-
+func getProject(id, name string) ([]*models.Project, error) {
 	var filters []string
+	var filter string
 	if id != "" {
 		filters = append(filters, "(id eq '"+id+"')")
 	}
@@ -27,30 +23,63 @@ func getProject(id, name string) ([]*CodeStreamProject, error) {
 		filters = append(filters, "(name eq '"+name+"')")
 	}
 	if len(filters) > 0 {
-		qParams["$filter"] = "(" + strings.Join(filters, " and ") + ")"
+		filter = "(" + strings.Join(filters, " and ") + ")"
 	}
 
-	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-		SetQueryParams(qParams).
-		SetHeader("Accept", "application/json").
-		SetResult(&CodeStreamProjectList{}).
-		SetAuthToken(targetConfig.accesstoken).
-		Get("https://" + targetConfig.server + "/project-service/api/projects")
+	log.Debugln("Filter:", filter)
 
-	if queryResponse.IsError() {
-		return nil, queryResponse.Error().(error)
-	}
+	apiClient := getApiClient()
 
-	log.Debugln(queryResponse.Request.URL)
+	ProjectParams := project.NewGetProjectsParams()
+	ProjectParams.DollarFilter = &filter
 
-	for _, value := range queryResponse.Result().(*CodeStreamProjectList).Content {
-		c := CodeStreamProject{}
-		mapstructure.Decode(value, &c)
-		projects = append(projects, &c)
+	ret, err := apiClient.Project.GetProjects(ProjectParams)
+	if err != nil {
+		switch err.(type) {
+		case *project.GetProjectNotFound:
+			return nil, errors.New("Project with ID " + id + " not found")
+		}
+		return nil, err
 	}
-	if len(projects) == 0 {
-		return nil, errors.New(fmt.Sprint("Unable to find Project \"", name, id, "\""))
-	} else {
-		return projects, err
-	}
+	return ret.Payload.Content, nil
 }
+
+// func getProject(id, name string) ([]*CodeStreamProject, error) {
+// 	var projects []*CodeStreamProject
+// 	client := resty.New()
+
+// 	var filters []string
+// 	if id != "" {
+// 		filters = append(filters, "(id eq '"+id+"')")
+// 	}
+// 	if name != "" {
+// 		filters = append(filters, "(name eq '"+name+"')")
+// 	}
+// 	if len(filters) > 0 {
+// 		qParams["$filter"] = "(" + strings.Join(filters, " and ") + ")"
+// 	}
+
+// 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
+// 		SetQueryParams(qParams).
+// 		SetHeader("Accept", "application/json").
+// 		SetResult(&CodeStreamProjectList{}).
+// 		SetAuthToken(targetConfig.accesstoken).
+// 		Get("https://" + targetConfig.server + "/project-service/api/projects")
+
+// 	if queryResponse.IsError() {
+// 		return nil, queryResponse.Error().(error)
+// 	}
+
+// 	log.Debugln(queryResponse.Request.URL)
+
+// 	for _, value := range queryResponse.Result().(*CodeStreamProjectList).Content {
+// 		c := CodeStreamProject{}
+// 		mapstructure.Decode(value, &c)
+// 		projects = append(projects, &c)
+// 	}
+// 	if len(projects) == 0 {
+// 		return nil, errors.New(fmt.Sprint("Unable to find Project \"", name, id, "\""))
+// 	} else {
+// 		return projects, err
+// 	}
+// }

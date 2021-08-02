@@ -25,7 +25,7 @@ var getEndpointCmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 
-		response, err := getEndpoint(id, name, project, typename, exportPath)
+		response, err := getEndpoint(id, name, projectName, typename, exportPath)
 		if err != nil {
 			log.Infoln("Unable to get endpoints: ", err)
 		}
@@ -72,7 +72,7 @@ var createEndpointCmd = &cobra.Command{
 			}
 			for _, yamlFilePath := range yamlFilePaths {
 				yamlFileName := filepath.Base(yamlFilePath)
-				err := importYaml(yamlFilePath, "create", project, "endpoint")
+				err := importYaml(yamlFilePath, "create", projectName, "endpoint")
 				if err != nil {
 					log.Warnln("Failed to import", yamlFilePath, "as Endpoint", err)
 				} else {
@@ -150,7 +150,7 @@ vra-cli delete endpoint --project "My Project"
 			log.Fatalln(err)
 		}
 		if name != "" {
-			response, err := getEndpoint(id, name, project, typename, exportPath)
+			response, err := getEndpoint(id, name, projectName, typename, exportPath)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -164,8 +164,8 @@ vra-cli delete endpoint --project "My Project"
 				log.Errorln("Unable to delete Endpoint: ", err)
 			}
 			log.Infoln("Endpoint with id " + response.ID + " deleted")
-		} else if project != "" {
-			response, err := deleteEndpointByProject(project)
+		} else if projectName != "" {
+			response, err := deleteEndpointByProject(projectName)
 			if err != nil {
 				log.Errorln("Unable to delete Endpoint: ", err)
 			}
@@ -180,13 +180,13 @@ func init() {
 	getCmd.AddCommand(getEndpointCmd)
 	getEndpointCmd.Flags().StringVarP(&name, "name", "n", "", "Get Endpoint by Name")
 	getEndpointCmd.Flags().StringVarP(&id, "id", "i", "", "Get Endpoint by ID")
-	getEndpointCmd.Flags().StringVarP(&project, "project", "p", "", "Filter Endpoint by Project")
+	getEndpointCmd.Flags().StringVarP(&projectName, "project", "p", "", "Filter Endpoint by Project")
 	getEndpointCmd.Flags().StringVarP(&typename, "type", "t", "", "Filter Endpoint by Type")
 	getEndpointCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
 	// Create
 	createCmd.AddCommand(createEndpointCmd)
 	createEndpointCmd.Flags().StringVarP(&importPath, "importPath", "c", "", "YAML configuration file to import")
-	createEndpointCmd.Flags().StringVarP(&project, "project", "p", "", "Manually specify the Project in which to create the Endpoint (overrides YAML)")
+	createEndpointCmd.Flags().StringVarP(&projectName, "project", "p", "", "Manually specify the Project in which to create the Endpoint (overrides YAML)")
 	createEndpointCmd.MarkFlagRequired("importPath")
 	// Update
 	updateCmd.AddCommand(updateEndpointCmd)
@@ -196,6 +196,6 @@ func init() {
 	deleteCmd.AddCommand(deleteEndpointCmd)
 	deleteEndpointCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Endpoint to delete")
 	deleteEndpointCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Endpoint to delete")
-	deleteEndpointCmd.Flags().StringVarP(&project, "project", "p", "", "Delete Endpoints by Project")
+	deleteEndpointCmd.Flags().StringVarP(&projectName, "project", "p", "", "Delete Endpoints by Project")
 
 }

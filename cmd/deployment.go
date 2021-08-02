@@ -53,7 +53,7 @@ func init() {
 	// Get Variable
 	getCmd.AddCommand(getDeploymentCmd)
 	getDeploymentCmd.Flags().StringVarP(&name, "name", "n", "", "List variable with name")
-	getDeploymentCmd.Flags().StringVarP(&project, "project", "p", "", "List variables in project")
+	getDeploymentCmd.Flags().StringVarP(&projectName, "project", "p", "", "List variables in project")
 	getDeploymentCmd.Flags().StringVarP(&id, "id", "i", "", "List variables by id")
 	getDeploymentCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
 

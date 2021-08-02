@@ -36,7 +36,7 @@ vra-cli get execution --status FAILED --project "Field Demo" --name "Learn Code 
 			log.Fatalln(err)
 		}
 
-		response, err := getExecutions(id, project, status, name, nested)
+		response, err := getExecutions(id, projectName, status, name, nested)
 		if err != nil {
 			log.Errorln("Unable to get executions: ", err)
 		}
@@ -77,8 +77,8 @@ var delExecutionCmd = &cobra.Command{
 			} else {
 				log.Infoln("Execution with id " + response.ID + " deleted")
 			}
-		} else if project != "" {
-			response, err := deleteExecutions(project, status, name, nested)
+		} else if projectName != "" {
+			response, err := deleteExecutions(projectName, status, name, nested)
 			if err != nil {
 				log.Errorln("Unable to delete executions: ", err)
 			} else {
@@ -115,14 +115,14 @@ func init() {
 	getExecutionCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the pipeline to list executions for")
 	getExecutionCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the executions to list")
 	getExecutionCmd.Flags().StringVarP(&status, "status", "s", "", "Filter executions by status (Completed|Waiting|Pausing|Paused|Resuming|Running)")
-	getExecutionCmd.Flags().StringVarP(&project, "project", "p", "", "Filter executions by Project")
+	getExecutionCmd.Flags().StringVarP(&projectName, "project", "p", "", "Filter executions by Project")
 	getExecutionCmd.Flags().BoolVarP(&nested, "nested", "", false, "Include nested executions")
 	// Delete
 	deleteCmd.AddCommand(delExecutionCmd)
 	delExecutionCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the pipeline to delete executions for")
 	delExecutionCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the execution to delete")
 	delExecutionCmd.Flags().StringVarP(&status, "status", "s", "", "Delete executions by status (Completed|Waiting|Pausing|Paused|Resuming|Running)")
-	delExecutionCmd.Flags().StringVarP(&project, "project", "p", "", "Delete executions by Project")
+	delExecutionCmd.Flags().StringVarP(&projectName, "project", "p", "", "Delete executions by Project")
 	delExecutionCmd.Flags().BoolVarP(&nested, "nested", "", false, "Delete nested executions")
 	// Create
 	createCmd.AddCommand(createExecutionCmd)
