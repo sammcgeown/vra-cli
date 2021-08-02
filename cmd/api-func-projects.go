@@ -44,42 +44,20 @@ func getProject(id, name string) ([]*models.Project, error) {
 	return ret.Payload.Content, nil
 }
 
-// func getProject(id, name string) ([]*CodeStreamProject, error) {
-// 	var projects []*CodeStreamProject
-// 	client := resty.New()
+func deleteProject(id string) error {
+	apiClient := getApiClient()
 
-// 	var filters []string
-// 	if id != "" {
-// 		filters = append(filters, "(id eq '"+id+"')")
-// 	}
-// 	if name != "" {
-// 		filters = append(filters, "(name eq '"+name+"')")
-// 	}
-// 	if len(filters) > 0 {
-// 		qParams["$filter"] = "(" + strings.Join(filters, " and ") + ")"
-// 	}
+	// Workaround an issue where the cloud regions need to be removed before the project can be deleted.
+	_, err := apiClient.Project.UpdateProject(project.NewUpdateProjectParams().WithID(id).WithBody(&models.ProjectSpecification{
+		ZoneAssignmentConfigurations: []*models.ZoneAssignmentSpecification{},
+	}))
+	if err != nil {
+		return err
+	}
 
-// 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-// 		SetQueryParams(qParams).
-// 		SetHeader("Accept", "application/json").
-// 		SetResult(&CodeStreamProjectList{}).
-// 		SetAuthToken(targetConfig.accesstoken).
-// 		Get("https://" + targetConfig.server + "/project-service/api/projects")
-
-// 	if queryResponse.IsError() {
-// 		return nil, queryResponse.Error().(error)
-// 	}
-
-// 	log.Debugln(queryResponse.Request.URL)
-
-// 	for _, value := range queryResponse.Result().(*CodeStreamProjectList).Content {
-// 		c := CodeStreamProject{}
-// 		mapstructure.Decode(value, &c)
-// 		projects = append(projects, &c)
-// 	}
-// 	if len(projects) == 0 {
-// 		return nil, errors.New(fmt.Sprint("Unable to find Project \"", name, id, "\""))
-// 	} else {
-// 		return projects, err
-// 	}
-// }
+	_, err = apiClient.Project.DeleteProject(project.NewDeleteProjectParams().WithID(id))
+	if err != nil {
+		return err
+	}
+	return nil
+}
