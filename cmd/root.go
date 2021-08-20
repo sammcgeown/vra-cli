@@ -106,7 +106,7 @@ func initConfig() {
 	viper.AutomaticEnv()
 
 	// If we're using ENV variables
-	if viper.Get("server") != nil { // CS_SERVER environment variable is set
+	if viper.Get("server") != nil { // VRA_SERVER environment variable is set
 		log.Debugln("Using ENV variables")
 		targetConfig = config{
 			server:      sanitize.URL(viper.GetString("server")),
