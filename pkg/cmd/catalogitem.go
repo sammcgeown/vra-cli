@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
+	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/olekukonko/tablewriter"
@@ -75,7 +76,7 @@ vra-cli create catalogitem --id 69787c80-b5d8-3d03-8ec0-a0fe67edc9e2 --project "
 		if err := ensureTargetConnection(); err != nil {
 			log.Fatalln(err)
 		}
-		requestContent := CatalogItemRequest{}
+		requestContent := types.CatalogItemRequest{}
 
 		if helpers.IsInputFromPipe() {
 			if err := json.NewDecoder(os.Stdin).Decode(&requestContent); err != nil {

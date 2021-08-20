@@ -14,8 +14,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func getCatalogItems(id string, name string, project string) ([]*CatalogItem, error) {
-	var arrResults []*CatalogItem
+func getCatalogItems(id string, name string, project string) ([]*types.CatalogItem, error) {
+	var arrResults []*types.CatalogItem
 	client := resty.New()
 	qParams["expandProjects"] = "true"
 
@@ -23,7 +23,7 @@ func getCatalogItems(id string, name string, project string) ([]*CatalogItem, er
 		queryResponse, _ := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 			SetQueryParams(qParams).
 			SetHeader("Accept", "application/json").
-			SetResult(&CatalogItem{}).
+			SetResult(&types.CatalogItem{}).
 			SetAuthToken(targetConfig.AccessToken).
 			SetError(&types.Exception{}).
 			Get("https://" + targetConfig.Server + "/catalog/api/items/" + id)
@@ -35,7 +35,7 @@ func getCatalogItems(id string, name string, project string) ([]*CatalogItem, er
 			return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 		}
 
-		arrResults = append(arrResults, queryResponse.Result().(*CatalogItem))
+		arrResults = append(arrResults, queryResponse.Result().(*types.CatalogItem))
 	} else {
 		queryResponse, _ := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 			SetQueryParams(qParams).
@@ -53,7 +53,7 @@ func getCatalogItems(id string, name string, project string) ([]*CatalogItem, er
 		}
 
 		for _, value := range queryResponse.Result().(*types.ContentsList).Content {
-			c := CatalogItem{}
+			c := types.CatalogItem{}
 			mapstructure.Decode(value, &c)
 			arrResults = append(arrResults, &c)
 		}
@@ -62,12 +62,12 @@ func getCatalogItems(id string, name string, project string) ([]*CatalogItem, er
 	return arrResults, nil
 }
 
-func createCatalogItemRequest(id string, request CatalogItemRequest) (*CatalogItemRequestResponse, error) {
+func createCatalogItemRequest(id string, request types.CatalogItemRequest) (*types.CatalogItemRequestResponse, error) {
 	client := resty.New()
 	queryResponse, _ := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
-		SetResult(&CatalogItemRequestResponse{}).
+		SetResult(&types.CatalogItemRequestResponse{}).
 		SetAuthToken(targetConfig.AccessToken).
 		SetError(&types.Exception{}).
 		SetBody(request).
@@ -79,7 +79,7 @@ func createCatalogItemRequest(id string, request CatalogItemRequest) (*CatalogIt
 	if queryResponse.IsError() {
 		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 	} else {
-		response := queryResponse.Result().(*CatalogItemRequestResponse)
+		response := queryResponse.Result().(*types.CatalogItemRequestResponse)
 		return response, nil
 	}
 

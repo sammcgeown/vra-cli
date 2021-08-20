@@ -14,15 +14,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func getDeployments(id string) ([]*Deployment, error) {
-	var arrResults []*Deployment
+func getDeployments(id string) ([]*types.Deployment, error) {
+	var arrResults []*types.Deployment
 	client := resty.New()
 
 	if id != "" {
 		queryResponse, _ := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 			SetQueryParams(qParams).
 			SetHeader("Accept", "application/json").
-			SetResult(&Deployment{}).
+			SetResult(&types.Deployment{}).
 			SetAuthToken(targetConfig.AccessToken).
 			SetError(&types.Exception{}).
 			Get("https://" + targetConfig.Server + "/deployment/api/deployments/" + id)
@@ -34,7 +34,7 @@ func getDeployments(id string) ([]*Deployment, error) {
 			return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 		}
 
-		arrResults = append(arrResults, queryResponse.Result().(*Deployment))
+		arrResults = append(arrResults, queryResponse.Result().(*types.Deployment))
 	} else {
 		queryResponse, _ := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 			SetQueryParams(qParams).
@@ -52,7 +52,7 @@ func getDeployments(id string) ([]*Deployment, error) {
 		}
 
 		for _, value := range queryResponse.Result().(*types.ContentsList).Content {
-			c := Deployment{}
+			c := types.Deployment{}
 			mapstructure.Decode(value, &c)
 			arrResults = append(arrResults, &c)
 		}
