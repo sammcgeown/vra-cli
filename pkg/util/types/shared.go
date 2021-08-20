@@ -4,6 +4,16 @@ SPDX-License-Identifier: BSD-2-Clause
 */
 package types
 
+type Config struct {
+	Name        string
+	Domain      string
+	Password    string
+	Server      string
+	Username    string
+	ApiToken    string
+	AccessToken string
+}
+
 // Exception - Generic exception struct
 type Exception struct {
 	Timestamp   int64       `json:"timestamp"`

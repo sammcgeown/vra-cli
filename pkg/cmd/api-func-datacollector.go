@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 package cmd
 
 import (
+	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	log "github.com/sirupsen/logrus"
 	"github.com/vmware/vra-sdk-go/pkg/client/data_collector"
 	"github.com/vmware/vra-sdk-go/pkg/models"
@@ -13,7 +14,7 @@ import (
 func getDataCollectors(id string) ([]*models.DataCollector, error) {
 	var dataCollectors []*models.DataCollector
 
-	apiclient := getApiClient()
+	apiclient := auth.GetApiClient(targetConfig, debug)
 
 	if id != "" || name != "" {
 		// Get Data Collector by ID or Name

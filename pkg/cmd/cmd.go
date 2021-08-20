@@ -13,6 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	homedir "github.com/mitchellh/go-homedir"
+	types "github.com/sammcgeown/vra-cli/pkg/util/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -21,7 +22,7 @@ var (
 	// Configuration
 	cfgFile           string
 	currentTargetName string
-	targetConfig      Config
+	targetConfig      types.Config
 	version           = "dev"
 	commit            = "none"
 	date              = "unknown"
@@ -48,15 +49,6 @@ var (
 
 var qParams = map[string]string{
 	"apiVersion": "2019-10-17",
-}
-
-type Config struct {
-	Domain      string
-	Password    string
-	Server      string
-	Username    string
-	ApiToken    string
-	AccessToken string
 }
 
 // rootCmd represents the base command when called without any subcommands
@@ -118,7 +110,7 @@ func initConfig() {
 	// If we're using ENV variables
 	if viper.Get("server") != nil { // VRA_SERVER environment variable is set
 		log.Debugln("Using ENV variables")
-		targetConfig = Config{
+		targetConfig = types.Config{
 			Domain:      viper.GetString("domain"),
 			Server:      sanitize.URL(viper.GetString("server")),
 			Username:    viper.GetString("username"),
@@ -152,7 +144,8 @@ func initConfig() {
 			if configuration == nil { // Sub returns nil if the key cannot be found
 				log.Fatalln("Target configuration not found")
 			}
-			targetConfig = Config{
+			targetConfig = types.Config{
+				Name:        currentTargetName,
 				Domain:      configuration.GetString("domain"),
 				Server:      sanitize.URL(configuration.GetString("server")),
 				Username:    configuration.GetString("username"),

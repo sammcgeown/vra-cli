@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -25,7 +26,7 @@ Get Data Collector by ID:
 Get all Data Collectors:
   vra-cli get datacollector`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 		dataCollectors, err := getDataCollectors(id)

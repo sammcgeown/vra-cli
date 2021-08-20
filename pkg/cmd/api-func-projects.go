@@ -8,6 +8,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	log "github.com/sirupsen/logrus"
 	"github.com/vmware/vra-sdk-go/pkg/client/project"
 	"github.com/vmware/vra-sdk-go/pkg/models"
@@ -28,7 +29,7 @@ func getProject(id, name string) ([]*models.Project, error) {
 
 	log.Debugln("Filter:", filter)
 
-	apiClient := getApiClient()
+	apiClient := auth.GetApiClient(targetConfig, debug)
 
 	ProjectParams := project.NewGetProjectsParams()
 	ProjectParams.DollarFilter = &filter
@@ -46,7 +47,7 @@ func getProject(id, name string) ([]*models.Project, error) {
 }
 
 func deleteProject(id string) error {
-	apiClient := getApiClient()
+	apiClient := auth.GetApiClient(targetConfig, debug)
 
 	// Workaround an issue where the cloud regions need to be removed before the project can be deleted.
 	_, err := apiClient.Project.UpdateProject(project.NewUpdateProjectParams().WithAPIVersion(&apiVersion).WithID(id).WithBody(&models.ProjectSpecification{
@@ -64,7 +65,7 @@ func deleteProject(id string) error {
 }
 
 func createProject(name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.Project, error) {
-	apiClient := getApiClient()
+	apiClient := auth.GetApiClient(targetConfig, debug)
 	createdProject, err := apiClient.Project.CreateProject(project.NewCreateProjectParams().WithAPIVersion(&apiVersion).WithBody(&models.ProjectSpecification{
 		Administrators:               administrators,
 		Constraints:                  constraints,
@@ -84,7 +85,7 @@ func createProject(name string, description string, administrators []*models.Use
 }
 
 func updateProject(id string, name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.Project, error) {
-	apiClient := getApiClient()
+	apiClient := auth.GetApiClient(targetConfig, debug)
 	ProjectSpecification := models.ProjectSpecification{}
 
 	if len(administrators) > 0 {

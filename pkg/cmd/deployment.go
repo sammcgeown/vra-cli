@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
@@ -20,7 +21,7 @@ var getDeploymentCmd = &cobra.Command{
 	Short: "Get Deployments",
 	Long:  `Get Deployments`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 

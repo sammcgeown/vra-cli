@@ -7,6 +7,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
@@ -29,7 +30,7 @@ Get by Name
 Get by Project
 	vra-cli get customintegration --project production`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 		response, err := getCustomIntegration(id, name)
@@ -67,7 +68,7 @@ Get by Project
 // 	Short: "A brief description of your command",
 // 	Long:  ``,
 // 	Run: func(cmd *cobra.Command, args []string) {
-// 				if err := ensureTargetConnection(); err != nil {
+// 				if err := auth.GetConnection(targetConfig, debug); err != nil {
 // 	log.Fatalln(err)
 // }
 
@@ -100,7 +101,7 @@ Get by Project
 // 	Short: "A brief description of your command",
 // 	Long:  ``,
 // 	Run: func(cmd *cobra.Command, args []string) {
-// 				if err := ensureTargetConnection(); err != nil {
+// 				if err := auth.GetConnection(targetConfig, debug); err != nil {
 // 	log.Fatalln(err)
 // }
 
@@ -140,7 +141,7 @@ Get by Project
 // This application is a tool to generate the needed files
 // to quickly create a Cobra application.`,
 // 	Run: func(cmd *cobra.Command, args []string) {
-// 				if err := ensureTargetConnection(); err != nil {
+// 				if err := auth.GetConnection(targetConfig, debug); err != nil {
 // 	log.Fatalln(err)
 // }
 

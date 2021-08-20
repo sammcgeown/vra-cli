@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
@@ -29,7 +30,7 @@ var getCatalogItemCmd = &cobra.Command{
 	Short: "Get Catalog Items",
 	Long:  `Get Catalog Items`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 
@@ -73,7 +74,7 @@ vra-cli create catalogitem --id 69787c80-b5d8-3d03-8ec0-a0fe67edc9e2 --project "
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 		requestContent := types.CatalogItemRequest{}
@@ -132,7 +133,7 @@ vra-cli create catalogitem --id 69787c80-b5d8-3d03-8ec0-a0fe67edc9e2 --project "
 // 	vra-cli update CatalogItem --importPath "/Users/sammcgeown/vra-cli/CatalogItems"
 // 	`,
 // 	Run: func(cmd *cobra.Command, args []string) {
-// 		if err := ensureTargetConnection(); err != nil {
+// 		if err := auth.GetConnection(targetConfig, debug); err != nil {
 // 			log.Fatalln(err)
 // 		}
 
@@ -183,7 +184,7 @@ vra-cli create catalogitem --id 69787c80-b5d8-3d03-8ec0-a0fe67edc9e2 --project "
 // 		return nil
 // 	},
 // 	Run: func(cmd *cobra.Command, args []string) {
-// 		if err := ensureTargetConnection(); err != nil {
+// 		if err := auth.GetConnection(targetConfig, debug); err != nil {
 // 			log.Fatalln(err)
 // 		}
 // 		if name != "" {

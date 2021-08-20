@@ -7,6 +7,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
@@ -29,7 +30,7 @@ vra-cli get variable --name my-variable
 # Get Variable by Project
 vra-cli get variable --project production`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 
@@ -65,7 +66,7 @@ var createVariableCmd = &cobra.Command{
 	Short: "Create a Variable",
 	Long:  `Create a Variable`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 
@@ -99,7 +100,7 @@ var updateVariableCmd = &cobra.Command{
 	Short: "Update a Variable",
 	Long:  `Update a Variable`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 
@@ -147,7 +148,7 @@ vra-cli delete variable --name "My Variable" --project "My Project"
 vra-cli delete variable --project "My Project"
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 

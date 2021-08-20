@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	CloudAssembly "github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
@@ -29,7 +30,7 @@ var getCloudTemplateCmd = &cobra.Command{
 	Short: "Get Cloud Templates",
 	Long:  `Get Cloud Templates by ID, name or status`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 		response, err := getCloudTemplate(id, name, projectName, exportPath)
@@ -86,7 +87,7 @@ var getCloudTemplateCmd = &cobra.Command{
 // 		return nil
 // 	},
 // 	Run: func(cmd *cobra.Command, args []string) {
-// 		if err := ensureTargetConnection(); err != nil {
+// 		if err := auth.GetConnection(targetConfig, debug); err != nil {
 // 			log.Fatalln(err)
 // 		}
 
@@ -146,7 +147,7 @@ var createCloudTemplateCmd = &cobra.Command{
 		var cloudTemplateReq CloudAssembly.CloudTemplateRequest
 		var projectId string
 
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 
@@ -204,7 +205,7 @@ var deleteCloudTemplateCmd = &cobra.Command{
 	Long: `Delete a Blueprint with a specific ID
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 

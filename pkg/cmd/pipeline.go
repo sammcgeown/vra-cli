@@ -15,6 +15,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/olekukonko/tablewriter"
+	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
@@ -40,7 +41,7 @@ get execution --name vra-authenticateUser
 # View executions by status
 vra-cli get execution --status Failed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 
@@ -168,7 +169,7 @@ vra-cli update pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 
@@ -208,7 +209,7 @@ vra-cli create pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 		yamlFilePaths := helpers.GetYamlFilePaths(importPath)
@@ -246,7 +247,7 @@ vra-cli delete pipeline --name "My Pipeline" --project "My Project"
 vra-cli delete pipeline --project "My Project"
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 		if id != "" {

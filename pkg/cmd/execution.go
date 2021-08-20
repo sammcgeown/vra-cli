@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
@@ -33,7 +34,7 @@ vra-cli get execution --id bb3f6aff-311a-45fe-8081-5845a529068d
 # Get Failed executions in Project "Field Demo" with the name "Learn Code Stream"
 vra-cli get execution --status FAILED --project "Field Demo" --name "Learn Code Stream"`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 
@@ -68,7 +69,7 @@ var delExecutionCmd = &cobra.Command{
 	
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 		if id != "" {
@@ -97,7 +98,7 @@ var createExecutionCmd = &cobra.Command{
 	
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ensureTargetConnection(); err != nil {
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 
