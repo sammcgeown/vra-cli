@@ -14,6 +14,7 @@ import (
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-resty/resty/v2"
+	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/vmware/vra-sdk-go/pkg/client"
@@ -56,7 +57,7 @@ func ensureTargetConnection() error {
 func authenticateCredentials(server string, username string, password string, domain string) (string, error) {
 	log.Debugln("Authenticating vRA with Credentials")
 	var authPath string
-	var authBody AuthenticationRequest
+	var authBody types.AuthenticationRequest
 	authBody.Username = username
 	authBody.Password = password
 	client := resty.New()
@@ -74,15 +75,15 @@ func authenticateCredentials(server string, username string, password string, do
 
 	loginResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetBody(authBody).
-		SetResult(&AuthenticationResponse{}).
-		SetError(&AuthenticationError{}).
+		SetResult(&types.AuthenticationResponse{}).
+		SetError(&types.Authentication{}).
 		Post("https://" + server + authPath)
 	if loginResponse.IsError() {
 		log.Debugln("Authentication failed")
-		return "", errors.New(loginResponse.Error().(*AuthenticationError).ServerMessage)
+		return "", errors.New(loginResponse.Error().(*types.AuthenticationError).ServerMessage)
 	}
 	log.Debugln("Authentication succeeded")
-	return loginResponse.Result().(*AuthenticationResponse).RefreshToken, err
+	return loginResponse.Result().(*types.AuthenticationResponse).RefreshToken, err
 }
 
 // authenticateApiToken - get vRA Access token (valid for 8h)
@@ -90,16 +91,16 @@ func authenticateApiToken(server string, token string) (string, error) {
 	log.Debug("Attempting to authenticate the API Refresh Token")
 	client := resty.New()
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-		SetBody(ApiAuthentication{token}).
-		SetResult(&ApiAuthenticationResponse{}).
-		SetError(&ApiAuthenticationError{}).
+		SetBody(types.Authentication{RefreshToken: token}).
+		SetResult(&types.AuthenticationResponse{}).
+		SetError(&types.Authentication{}).
 		Post("https://" + server + "/iaas/api/login")
 	if queryResponse.IsError() {
 		log.Debug("Refresh Token failed")
-		return "", errors.New(queryResponse.Error().(*ApiAuthenticationError).Message)
+		return "", errors.New(queryResponse.Error().(*types.AuthenticationError).Message)
 	}
 	log.Debug("Refresh Token succeeded")
-	return queryResponse.Result().(*ApiAuthenticationResponse).Token, err
+	return queryResponse.Result().(*types.AuthenticationResponse).Token, err
 }
 
 func testAccessToken() bool {
@@ -107,8 +108,8 @@ func testAccessToken() bool {
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetHeader("Accept", "application/json").
 		SetAuthToken(targetConfig.AccessToken).
-		SetResult(&UserPreferences{}).
-		SetError(&CodeStreamException{}).
+		SetResult(&types.UserPreferences{}).
+		SetError(&types.Exception{}).
 		Get("https://" + targetConfig.Server + "/pipeline/api/user-preferences")
 	if err != nil {
 		log.Warnln(err)
@@ -119,7 +120,7 @@ func testAccessToken() bool {
 		log.Debugln("Access Token Expired")
 		return false
 	}
-	log.Debugln("Access Token OK (Username:", queryResponse.Result().(*UserPreferences).UserName, ")")
+	log.Debugln("Access Token OK (Username:", queryResponse.Result().(*types.UserPreferences).UserName, ")")
 	return true
 }
 
@@ -147,7 +148,7 @@ func exportYaml(name, project, path, object string) error {
 		SetHeader("Accept", "application/x-yaml;charset=UTF-8").
 		SetAuthToken(targetConfig.AccessToken).
 		SetOutput(filepath.Join(exportPath, name+".yaml")).
-		SetError(&CodeStreamException{}).
+		SetError(&types.Exception{}).
 		Get("https://" + targetConfig.Server + "/pipeline/api/export")
 	log.Debugln(queryResponse.Request.RawRequest.URL)
 
@@ -159,8 +160,8 @@ func exportYaml(name, project, path, object string) error {
 
 // importYaml import a yaml pipeline or endpoint
 func importYaml(yamlPath, action, project, importType string) error {
-	var pipeline CodeStreamPipelineYaml
-	var endpoint CodeStreamEndpointYaml
+	var pipeline types.PipelineYaml
+	var endpoint types.EndpointYaml
 
 	qParams["action"] = action
 	yamlBytes, err := ioutil.ReadFile(yamlPath)
@@ -193,13 +194,13 @@ func importYaml(yamlPath, action, project, importType string) error {
 		SetHeader("Content-Type", "application/x-yaml").
 		SetBody(yamlPayload).
 		SetAuthToken(targetConfig.AccessToken).
-		SetError(&CodeStreamException{}).
+		SetError(&types.Exception{}).
 		Post("https://" + targetConfig.Server + "/pipeline/api/import")
 	log.Debugln(queryResponse.Request.RawRequest.URL)
 	if queryResponse.IsError() {
 		return queryResponse.Error().(error)
 	}
-	var importResponse CodeStreamPipelineImportResponse
+	var importResponse types.PipelineImportResponse
 	if err = yaml.Unmarshal(queryResponse.Body(), &importResponse); err != nil {
 		return err
 	}

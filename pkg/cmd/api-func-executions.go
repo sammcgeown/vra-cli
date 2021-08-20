@@ -15,11 +15,12 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
+	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 )
 
-func getExecutions(id string, project string, status string, name string, nested bool) ([]*CodestreamAPIExecutions, error) {
-	var arrExecutions []*CodestreamAPIExecutions
+func getExecutions(id string, project string, status string, name string, nested bool) ([]*types.Executions, error) {
+	var arrExecutions []*types.Executions
 	if id != "" {
 		x, err := getExecution("/codestream/api/executions/" + id)
 		if err != nil {
@@ -58,53 +59,53 @@ func getExecutions(id string, project string, status string, name string, nested
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
-		SetResult(&documentsList{}).
-		SetError(&CodeStreamException{}).
+		SetResult(&types.DocumentsList{}).
+		SetError(&types.Exception{}).
 		SetAuthToken(targetConfig.AccessToken).
 		Get("https://" + targetConfig.Server + "/pipeline/api/executions")
 	if queryResponse.IsError() {
 		//return nil, queryResponse.Error().(error)
-		return nil, errors.New(queryResponse.Error().(*CodeStreamException).Message)
+		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
 
-	for _, value := range queryResponse.Result().(*documentsList).Documents {
-		c := CodestreamAPIExecutions{}
+	for _, value := range queryResponse.Result().(*types.DocumentsList).Documents {
+		c := types.Executions{}
 		mapstructure.Decode(value, &c)
 		arrExecutions = append(arrExecutions, &c)
 	}
 	return arrExecutions, err
 }
 
-func getExecution(executionLink string) (*CodestreamAPIExecutions, error) {
+func getExecution(executionLink string) (*types.Executions, error) {
 	client := resty.New()
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
-		SetResult(&CodestreamAPIExecutions{}).
+		SetResult(&types.Executions{}).
 		SetAuthToken(targetConfig.AccessToken).
 		Get("https://" + targetConfig.Server + executionLink)
 	if queryResponse.IsError() {
 		return nil, queryResponse.Error().(error)
 	}
-	return queryResponse.Result().(*CodestreamAPIExecutions), err
+	return queryResponse.Result().(*types.Executions), err
 }
 
-func deleteExecution(id string) (*CodestreamAPIExecutions, error) {
+func deleteExecution(id string) (*types.Executions, error) {
 	client := resty.New()
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
-		SetResult(&CodestreamAPIExecutions{}).
+		SetResult(&types.Executions{}).
 		SetAuthToken(targetConfig.AccessToken).
 		Delete("https://" + targetConfig.Server + "/pipeline/api/executions/" + id)
 	if queryResponse.IsError() {
-		return nil, errors.New(queryResponse.Error().(*CodeStreamException).Message)
+		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
-	return queryResponse.Result().(*CodestreamAPIExecutions), err
+	return queryResponse.Result().(*types.Executions), err
 }
 
-func deleteExecutions(project string, status string, name string, nested bool) ([]*CodestreamAPIExecutions, error) {
-	var deletedExecutions []*CodestreamAPIExecutions
+func deleteExecutions(project string, status string, name string, nested bool) ([]*types.Executions, error) {
+	var deletedExecutions []*types.Executions
 	Executions, err := getExecutions("", project, status, name, nested)
 	if err != nil {
 		return nil, err
@@ -124,7 +125,7 @@ func deleteExecutions(project string, status string, name string, nested bool) (
 	}
 }
 
-func createExecution(id string, inputs string, comment string) (*CodeStreamCreateExecutionResponse, error) {
+func createExecution(id string, inputs string, comment string) (*types.CreateExecutionResponse, error) {
 	// Convert JSON string to byte array
 	var inputBytes = []byte(inputs)
 	// Unmarshal inputs using a generic interface
@@ -133,8 +134,8 @@ func createExecution(id string, inputs string, comment string) (*CodeStreamCreat
 	if err != nil {
 		return nil, err
 	}
-	// Create CodeStreamCreateExecutionRequest struct
-	var execution CodeStreamCreateExecutionRequest
+	// Create types.CreateExecutionRequest struct
+	var execution types.CreateExecutionRequest
 	execution.Comments = comment
 	execution.Input = inputsInterface
 	//Marshal struct to JSON []byte
@@ -147,11 +148,11 @@ func createExecution(id string, inputs string, comment string) (*CodeStreamCreat
 		SetQueryParams(qParams).
 		SetHeader("Content-Type", "application/json").
 		SetBody(executionBytes).
-		SetResult(&CodeStreamCreateExecutionResponse{}).
+		SetResult(&types.CreateExecutionResponse{}).
 		SetAuthToken(targetConfig.AccessToken).
 		Post("https://" + targetConfig.Server + "/pipeline/api/pipelines/" + id + "/executions")
 	if queryResponse.IsError() {
-		return nil, errors.New(queryResponse.Error().(*CodeStreamException).Message)
+		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
-	return queryResponse.Result().(*CodeStreamCreateExecutionResponse), nil
+	return queryResponse.Result().(*types.CreateExecutionResponse), nil
 }

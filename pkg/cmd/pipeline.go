@@ -16,6 +16,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/olekukonko/tablewriter"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
+	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
@@ -78,7 +79,7 @@ vra-cli get execution --status Failed`,
 
 				table.Append([]string{c.ID, c.Name, c.Project, c.Description})
 				for _, s := range c.Stages {
-					stage := CodeStreamPipelineStage{}
+					stage := types.PipelineStage{}
 					mapstructure.Decode(s, &stage)
 					// Loop through the Stage Tasks
 					for n, t := range stage.Tasks {
@@ -88,7 +89,7 @@ vra-cli get execution --status Failed`,
 						for _, v := range variableMatches {
 							variables = append(variables, v[1])
 						}
-						task := CodeStreamPipelineTask{}
+						task := types.PipelineTask{}
 						mapstructure.Decode(t, &task)
 						if len(task.Endpoints) > 0 {
 							for _, e := range task.Endpoints {

@@ -13,11 +13,12 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
+	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 )
 
-func getEndpoint(id, name, project, endpointtype string, exportPath string) ([]*CodeStreamEndpoint, error) {
-	var endpoints []*CodeStreamEndpoint
+func getEndpoint(id, name, project, endpointtype string, exportPath string) ([]*types.Endpoint, error) {
+	var endpoints []*types.Endpoint
 	var qParams = make(map[string]string)
 	qParams["expand"] = "true"
 	client := resty.New()
@@ -42,7 +43,7 @@ func getEndpoint(id, name, project, endpointtype string, exportPath string) ([]*
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
-		SetResult(&documentsList{}).
+		SetResult(&types.DocumentsList{}).
 		SetAuthToken(targetConfig.AccessToken).
 		Get("https://" + targetConfig.Server + "/pipeline/api/endpoints")
 
@@ -50,8 +51,8 @@ func getEndpoint(id, name, project, endpointtype string, exportPath string) ([]*
 		return nil, queryResponse.Error().(error)
 	}
 
-	for _, value := range queryResponse.Result().(*documentsList).Documents {
-		c := CodeStreamEndpoint{}
+	for _, value := range queryResponse.Result().(*types.DocumentsList).Documents {
+		c := types.Endpoint{}
 		mapstructure.Decode(value, &c)
 		if exportPath != "" {
 			exportYaml(c.Name, c.Project, exportPath, "endpoints")
@@ -64,22 +65,22 @@ func getEndpoint(id, name, project, endpointtype string, exportPath string) ([]*
 	return endpoints, err
 }
 
-func deleteEndpoint(id string) (*CodeStreamEndpoint, error) {
+func deleteEndpoint(id string) (*types.Endpoint, error) {
 	client := resty.New()
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
-		SetResult(&CodeStreamEndpoint{}).
+		SetResult(&types.Endpoint{}).
 		SetAuthToken(targetConfig.AccessToken).
 		Delete("https://" + targetConfig.Server + "/pipeline/api/endpoints/" + id)
 	if queryResponse.IsError() {
 		return nil, queryResponse.Error().(error)
 	}
-	return queryResponse.Result().(*CodeStreamEndpoint), err
+	return queryResponse.Result().(*types.Endpoint), err
 }
 
-func deleteEndpointByProject(project string) ([]*CodeStreamEndpoint, error) {
-	var deletedEndpoints []*CodeStreamEndpoint
+func deleteEndpointByProject(project string) ([]*types.Endpoint, error) {
+	var deletedEndpoints []*types.Endpoint
 	Endpoints, err := getEndpoint("", "", project, "", "")
 	if err != nil {
 		return nil, err

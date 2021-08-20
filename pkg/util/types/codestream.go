@@ -1,109 +1,11 @@
 /*
-Package cmd Copyright 2021 VMware, Inc.
+Package types Copyright 2021 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause
 */
-package cmd
+package types
 
-// UserPreferences -
-type UserPreferences struct {
-	Link               string      `json:"_link"`
-	UpdateTimeInMicros int         `json:"_updateTimeInMicros"`
-	CreateTimeInMicros int         `json:"_createTimeInMicros"`
-	Preferences        interface{} `json:"preferences"`
-	UserName           string      `json:"userName"`
-}
-
-// AuthenticationRequest - vRA Authentication request structure
-type AuthenticationRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Domain   string `json:"domain"`
-}
-
-// TokenRequest - vRA Authentication request structure
-type TokenRequest struct {
-	RefreshToken string `json:"refresh_token"`
-}
-
-// AuthenticationResponse - Authentication response structure
-type AuthenticationResponse struct {
-	Scope        string `json:"scope"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	IDToken      string `json:"id_token"`
-	TokenType    string `json:"token_type"`
-	ExpiresIn    int    `json:"expires_in"`
-}
-
-// ApiAuthentication - vRA Authentication request structure for API login with a refresh token
-type ApiAuthentication struct {
-	RefreshToken string `json:"refreshToken"`
-}
-
-// ApiAuthenticationResponse - Authentication response structure for API login with a refresh token
-type ApiAuthenticationResponse struct {
-	TokenType string `json:"tokenType"`
-	Token     string `json:"token"`
-}
-
-// ApiAuthenticationError - API Authentication error structure
-type ApiAuthenticationError struct {
-	Message       string `json:"message"`
-	StatusCode    int64  `json:"statusCode"`
-	ErrorCode     int64  `json:"errorCode"`
-	ServerErrorId string `json:"serverErrorId"`
-	DocumentKind  string `json:"documentKind"`
-}
-
-// AuthenticationError - Authentication error structure
-type AuthenticationError struct {
-	Timestamp     int64  `json:"timestamp"`
-	Type          string `json:"type"`
-	Status        string `json:"status"`
-	Error         string `json:"error"`
-	ServerMessage string `json:"serverMessage"`
-}
-
-// documentsList - Code Stream Documents List structure
-type documentsList struct {
-	Count      int                    `json:"count"`
-	TotalCount int                    `json:"totalCount"`
-	Links      []string               `json:"links"`
-	Documents  map[string]interface{} `json:"documents"`
-}
-
-// contentsList - Generic Contents List Structure
-type contentsList struct {
-	Content  []interface{} `json:"content"`
-	Pageable struct {
-		Sort struct {
-			Sorted   bool `json:"sorted"`
-			Unsorted bool `json:"unsorted"`
-			Empty    bool `json:"empty"`
-		} `json:"sort"`
-		PageNumber int  `json:"pageNumber"`
-		PageSize   int  `json:"pageSize"`
-		Offset     int  `json:"offset"`
-		Paged      bool `json:"paged"`
-		Unpaged    bool `json:"unpaged"`
-	} `json:"pageable"`
-	TotalElements int  `json:"totalElements"`
-	TotalPages    int  `json:"totalPages"`
-	Last          bool `json:"last"`
-	Sort          struct {
-		Sorted   bool `json:"sorted"`
-		Unsorted bool `json:"unsorted"`
-		Empty    bool `json:"empty"`
-	} `json:"sort"`
-	First            bool `json:"first"`
-	Number           int  `json:"number"`
-	NumberOfElements int  `json:"numberOfElements"`
-	Size             int  `json:"size"`
-	Empty            bool `json:"empty"`
-}
-
-// CodestreamAPIExecutions - Code Stream Execution document structure
-type CodestreamAPIExecutions struct {
+// Executions - Code Stream Execution document structure
+type Executions struct {
 	Project            string        `json:"project"`
 	ID                 string        `json:"id"`
 	Name               string        `json:"name"`
@@ -141,8 +43,8 @@ type CodestreamAPIExecutions struct {
 	Tags []string `json:"tags"`
 }
 
-// CodeStreamVariableResponse - Code Stream API Variable response
-type CodeStreamVariableResponse struct {
+// VariableResponse - Code Stream API Variable response
+type VariableResponse struct {
 	Project            string `json:"project"`
 	Kind               string `json:"kind"`
 	ID                 string `json:"id"`
@@ -160,8 +62,8 @@ type CodeStreamVariableResponse struct {
 	Value              string `json:"value"`
 }
 
-// CodeStreamVariableRequest - Code Stream API Variable Create Request
-type CodeStreamVariableRequest struct {
+// VariableRequest - Code Stream API Variable Create Request
+type VariableRequest struct {
 	Project     string `json:"project"`
 	Kind        string `json:"kind"`
 	Name        string `json:"name"`
@@ -170,8 +72,8 @@ type CodeStreamVariableRequest struct {
 	Value       string `json:"value"`
 }
 
-// CodeStreamPipeline - Code Stream Pipeline API
-type CodeStreamPipeline struct {
+// Pipeline - Code Stream Pipeline API
+type Pipeline struct {
 	Project            string `json:"project"`
 	Kind               string `json:"kind"`
 	ID                 string `json:"id"`
@@ -221,13 +123,13 @@ type CodeStreamPipeline struct {
 	State      string        `json:"state"`
 }
 
-type CodeStreamPipelineStage struct {
+type PipelineStage struct {
 	Tags      []string               `json:"tags"`
 	TaskOrder []string               `json:"taskOrder"`
 	Tasks     map[string]interface{} `json:"tasks"`
 }
 
-type CodeStreamPipelineTask struct {
+type PipelineTask struct {
 	Configured    bool              `json:"_configured"`
 	Endpoints     map[string]string `json:"endpoints"`
 	IgnoreFailure bool              `json:"ignoreFailure"`
@@ -245,14 +147,14 @@ type CodeStreamPipelineTask struct {
 	Type         string   `json:"type"`
 }
 
-// CodeStreamCreateExecutionRequest - Code Stream Create Execution Request
-type CodeStreamCreateExecutionRequest struct {
+// CreateExecutionRequest - Code Stream Create Execution Request
+type CreateExecutionRequest struct {
 	Comments string      `json:"comments"`
 	Input    interface{} `json:"input"`
 }
 
-// CodeStreamCreateExecutionResponse - Code Stream Create Execution Response
-type CodeStreamCreateExecutionResponse struct {
+// CreateExecutionResponse - Code Stream Create Execution Response
+type CreateExecutionResponse struct {
 	Comments      string      `json:"comments"`
 	Source        string      `json:"source"`
 	Input         interface{} `json:"input"`
@@ -260,19 +162,8 @@ type CodeStreamCreateExecutionResponse struct {
 	Tags          []string    `json:"tags"`
 }
 
-// CodeStreamException - Generic exception struct
-type CodeStreamException struct {
-	Timestamp int64  `json:"timestamp"`
-	Path      string `json:"path"`
-	Status    int    `json:"status"`
-	Error     string `json:"error"`
-	Message   string `json:"message"`
-	RequestID string `json:"requestId"`
-	Type      string `json:"@type"`
-}
-
-// CodeStreamEndpoint - Code Stream Create Endpoint
-type CodeStreamEndpoint struct {
+// Endpoint - Code Stream Create Endpoint
+type Endpoint struct {
 	Project            string      `json:"project"`
 	Kind               string      `json:"kind"`
 	ID                 string      `json:"id"`
@@ -293,8 +184,8 @@ type CodeStreamEndpoint struct {
 	ValidationOutput   string      `json:"validationOutput"`
 }
 
-// CodeStreamCustomIntegration - Code Stream Custom Integration
-type CodeStreamCustomIntegration struct {
+// CustomIntegration - Code Stream Custom Integration
+type CustomIntegration struct {
 	ID                 string `json:"id"`
 	Name               string `json:"name"`
 	Description        string `json:"description"`
@@ -310,15 +201,15 @@ type CodeStreamCustomIntegration struct {
 	Yaml               string `json:"yaml"`
 }
 
-// CodeStreamException - Generic exception struct
-type CodeStreamPipelineImportResponse struct {
+// Exception - Generic exception struct
+type PipelineImportResponse struct {
 	Name          string `yaml:"name"`
 	Status        string `yaml:"status"`
 	StatusMessage string `yaml:"statusMessage"`
 }
 
-// CodeStreamProject - Project-Service struct
-type CodeStreamProject struct {
+// Project - Project-Service struct
+type Project struct {
 	ID             string `json:"id"`
 	Name           string `json:"name"`
 	Description    string `json:"description"`
@@ -338,8 +229,8 @@ type CodeStreamProject struct {
 	SharedResources  bool `json:"sharedResources"`
 }
 
-type CodeStreamProjectList struct {
-	Content  []CodeStreamProject `json:"content"`
+type ProjectList struct {
+	Content  []Project `json:"content"`
 	Pageable struct {
 		Offset int `json:"offset"`
 		Sort   struct {
@@ -378,7 +269,7 @@ type CodeStreamProjectList struct {
 	Empty            bool `json:"empty"`
 }
 
-type CodeStreamPipelineYaml struct {
+type PipelineYaml struct {
 	Project     string      `yaml:"project"`
 	Kind        string      `yaml:"kind"`
 	Name        string      `yaml:"name"`
@@ -393,7 +284,7 @@ type CodeStreamPipelineYaml struct {
 	Stages      interface{} `yaml:"stages"`
 }
 
-type CodeStreamEndpointYaml struct {
+type EndpointYaml struct {
 	Project     string            `yaml:"project"`
 	Kind        string            `yaml:"kind"`
 	Name        string            `yaml:"name"`

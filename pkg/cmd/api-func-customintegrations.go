@@ -10,10 +10,11 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
+	"github.com/sammcgeown/vra-cli/pkg/util/types"
 )
 
-func getCustomIntegration(id, name string) ([]*CodeStreamCustomIntegration, error) {
-	var arrCustomIntegrations []*CodeStreamCustomIntegration
+func getCustomIntegration(id, name string) ([]*types.CustomIntegration, error) {
+	var arrCustomIntegrations []*types.CustomIntegration
 	client := resty.New()
 
 	var filters []string
@@ -30,7 +31,7 @@ func getCustomIntegration(id, name string) ([]*CodeStreamCustomIntegration, erro
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
-		SetResult(&documentsList{}).
+		SetResult(&types.DocumentsList{}).
 		SetAuthToken(targetConfig.AccessToken).
 		Get("https://" + targetConfig.Server + "/pipeline/api/custom-integrations")
 
@@ -38,8 +39,8 @@ func getCustomIntegration(id, name string) ([]*CodeStreamCustomIntegration, erro
 		return nil, queryResponse.Error().(error)
 	}
 
-	for _, value := range queryResponse.Result().(*documentsList).Documents {
-		c := CodeStreamCustomIntegration{}
+	for _, value := range queryResponse.Result().(*types.DocumentsList).Documents {
+		c := types.CustomIntegration{}
 		mapstructure.Decode(value, &c)
 		arrCustomIntegrations = append(arrCustomIntegrations, &c)
 	}
@@ -47,11 +48,11 @@ func getCustomIntegration(id, name string) ([]*CodeStreamCustomIntegration, erro
 }
 
 // // createCustomIntegration - Create a new Code Stream CustomIntegration
-// func createCustomIntegration(name string, description string, variableType string, project string, value string) (*CodeStreamCustomIntegrationResponse, error) {
+// func createCustomIntegration(name string, description string, variableType string, project string, value string) (*types.CustomIntegrationResponse, error) {
 // 	client := resty.New()
 // 	response, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 // 		SetBody(
-// 			CodeStreamCustomIntegrationRequest{
+// 			types.CustomIntegrationRequest{
 // 				Project:     project,
 // 				Kind:        "VARIABLE",
 // 				Name:        name,
@@ -60,18 +61,18 @@ func getCustomIntegration(id, name string) ([]*CodeStreamCustomIntegration, erro
 // 				Value:       value,
 // 			}).
 // 		SetHeader("Accept", "application/json").
-// 		SetResult(&CodeStreamCustomIntegrationResponse{}).
-// 		SetError(&CodeStreamException{}).
+// 		SetResult(&types.CustomIntegrationResponse{}).
+// 		SetError(&types.Exception{}).
 // 		SetAuthToken(targetConfig.AccessToken).
 // 		Post("https://" + targetConfig.Server + "/pipeline/api/variables")
 // 	if response.IsError() {
-// 		return nil, errors.New(response.Error().(*CodeStreamException).Message)
+// 		return nil, errors.New(response.Error().(*types.Exception).Message)
 // 	}
-// 	return response.Result().(*CodeStreamCustomIntegrationResponse), err
+// 	return response.Result().(*types.CustomIntegrationResponse), err
 // }
 
 // // updateCustomIntegration - Create a new Code Stream CustomIntegration
-// func updateCustomIntegration(id string, name string, description string, typename string, value string) (*CodeStreamCustomIntegrationResponse, error) {
+// func updateCustomIntegration(id string, name string, description string, typename string, value string) (*types.CustomIntegrationResponse, error) {
 // 	variable, _ := getCustomIntegrationByID(id)
 // 	if name != "" {
 // 		variable.Name = name
@@ -89,35 +90,35 @@ func getCustomIntegration(id, name string) ([]*CodeStreamCustomIntegration, erro
 // 	response, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 // 		SetBody(variable).
 // 		SetHeader("Accept", "application/json").
-// 		SetResult(&CodeStreamCustomIntegrationResponse{}).
-// 		SetError(&CodeStreamException{}).
+// 		SetResult(&types.CustomIntegrationResponse{}).
+// 		SetError(&types.Exception{}).
 // 		SetAuthToken(targetConfig.AccessToken).
 // 		Put("https://" + targetConfig.Server + "/pipeline/api/variables/" + id)
 // 	if response.IsError() {
-// 		return nil, errors.New(response.Error().(*CodeStreamException).Message)
+// 		return nil, errors.New(response.Error().(*types.Exception).Message)
 // 	}
-// 	return response.Result().(*CodeStreamCustomIntegrationResponse), err
+// 	return response.Result().(*types.CustomIntegrationResponse), err
 // }
 
 // // deleteCustomIntegration - Delete a Code Stream CustomIntegration
-// func deleteCustomIntegration(id string) (*CodeStreamCustomIntegrationResponse, error) {
+// func deleteCustomIntegration(id string) (*types.CustomIntegrationResponse, error) {
 // 	client := resty.New()
 // 	response, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 // 		SetHeader("Accept", "application/json").
-// 		SetResult(&CodeStreamCustomIntegrationResponse{}).
+// 		SetResult(&types.CustomIntegrationResponse{}).
 // 		SetAuthToken(targetConfig.AccessToken).
 // 		Delete("https://" + targetConfig.Server + "/pipeline/api/variables/" + id)
 // 	if response.IsError() {
 // 		log.Errorln("Create CustomIntegration failed", err)
 // 		os.Exit(1)
 // 	}
-// 	return response.Result().(*CodeStreamCustomIntegrationResponse), err
+// 	return response.Result().(*types.CustomIntegrationResponse), err
 // }
 
 // // exportCustomIntegration - Export a variable to YAML
 // func exportCustomIntegration(variable interface{}, exportFile string) {
-// 	// variable will be a CodeStreamCustomIntegrationResponse, so lets remap to CodeStreamCustomIntegrationRequest
-// 	c := CodeStreamCustomIntegrationRequest{}
+// 	// variable will be a types.CustomIntegrationResponse, so lets remap to types.CustomIntegrationRequest
+// 	c := types.CustomIntegrationRequest{}
 // 	mapstructure.Decode(variable, &c)
 // 	yaml, err := yaml.Marshal(c)
 // 	if err != nil {
@@ -136,8 +137,8 @@ func getCustomIntegration(id, name string) ([]*CodeStreamCustomIntegration, erro
 // }
 
 // // importCustomIntegrations - Import variables from the filePath
-// func importCustomIntegrations(filePath string) []CodeStreamCustomIntegrationRequest {
-// 	var returnCustomIntegrations []CodeStreamCustomIntegrationRequest
+// func importCustomIntegrations(filePath string) []types.CustomIntegrationRequest {
+// 	var returnCustomIntegrations []types.CustomIntegrationRequest
 // 	filename, _ := filepath.Abs(filePath)
 // 	yamlFile, err := ioutil.ReadFile(filename)
 // 	if err != nil {
@@ -145,7 +146,7 @@ func getCustomIntegration(id, name string) ([]*CodeStreamCustomIntegration, erro
 // 	}
 // 	reader := bytes.NewReader(yamlFile)
 // 	decoder := yaml.NewDecoder(reader)
-// 	var request CodeStreamCustomIntegrationRequest
+// 	var request types.CustomIntegrationRequest
 // 	for decoder.Decode(&request) == nil {
 // 		returnCustomIntegrations = append(returnCustomIntegrations, request)
 // 	}

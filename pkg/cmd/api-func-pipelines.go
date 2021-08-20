@@ -13,11 +13,12 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
+	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 )
 
-func getPipelines(id string, name string, project string, exportPath string) ([]*CodeStreamPipeline, error) {
-	var arrResults []*CodeStreamPipeline
+func getPipelines(id string, name string, project string, exportPath string) ([]*types.Pipeline, error) {
+	var arrResults []*types.Pipeline
 	client := resty.New()
 
 	var filters []string
@@ -36,20 +37,20 @@ func getPipelines(id string, name string, project string, exportPath string) ([]
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
-		SetResult(&documentsList{}).
+		SetResult(&types.DocumentsList{}).
 		SetAuthToken(targetConfig.AccessToken).
-		SetError(&CodeStreamException{}).
+		SetError(&types.Exception{}).
 		Get("https://" + targetConfig.Server + "/pipeline/api/pipelines")
 
 	log.Debugln(queryResponse.Request.RawRequest.URL)
 	// log.Debugln(queryResponse.String())
 
 	if queryResponse.IsError() {
-		return nil, errors.New(queryResponse.Error().(*CodeStreamException).Message)
+		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 
 	}
-	for _, value := range queryResponse.Result().(*documentsList).Documents {
-		c := CodeStreamPipeline{}
+	for _, value := range queryResponse.Result().(*types.DocumentsList).Documents {
+		c := types.Pipeline{}
 		mapstructure.Decode(value, &c)
 		if exportPath != "" {
 			if err := exportYaml(c.Name, c.Project, exportPath, "pipelines"); err != nil {
@@ -64,39 +65,39 @@ func getPipelines(id string, name string, project string, exportPath string) ([]
 }
 
 // patchPipeline - Patch Code Stream Pipeline by ID
-func patchPipeline(id string, payload string) (*CodeStreamPipeline, error) {
+func patchPipeline(id string, payload string) (*types.Pipeline, error) {
 	client := resty.New()
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
 		SetHeader("Content-Type", "application/json").
 		SetBody(payload).
-		SetResult(&CodeStreamPipeline{}).
+		SetResult(&types.Pipeline{}).
 		SetAuthToken(targetConfig.AccessToken).
 		Patch("https://" + targetConfig.Server + "/pipeline/api/pipelines/" + id)
 	if queryResponse.IsError() {
 		return nil, queryResponse.Error().(error)
 	}
-	return queryResponse.Result().(*CodeStreamPipeline), err
+	return queryResponse.Result().(*types.Pipeline), err
 }
 
-func deletePipeline(id string) (*CodeStreamPipeline, error) {
+func deletePipeline(id string) (*types.Pipeline, error) {
 	client := resty.New()
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
-		SetResult(&CodeStreamPipeline{}).
+		SetResult(&types.Pipeline{}).
 		SetAuthToken(targetConfig.AccessToken).
-		SetError(&CodeStreamException{}).
+		SetError(&types.Exception{}).
 		Delete("https://" + targetConfig.Server + "/pipeline/api/pipelines/" + id)
 	if queryResponse.IsError() {
-		return nil, errors.New(queryResponse.Error().(*CodeStreamException).Message)
+		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
-	return queryResponse.Result().(*CodeStreamPipeline), err
+	return queryResponse.Result().(*types.Pipeline), err
 }
 
-func deletePipelineInProject(project string) ([]*CodeStreamPipeline, error) {
-	var deletedPipes []*CodeStreamPipeline
+func deletePipelineInProject(project string) ([]*types.Pipeline, error) {
+	var deletedPipes []*types.Pipeline
 	pipelines, err := getPipelines("", "", project, "")
 	if err != nil {
 		return nil, err

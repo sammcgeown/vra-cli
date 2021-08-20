@@ -10,12 +10,12 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
-	CloudAssembly "github.com/sammcgeown/vra-cli/pkg/util/types"
+	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 )
 
-func getCloudTemplate(id string, name string, project string, exportPath string) ([]*CloudAssembly.CloudTemplate, error) {
-	var arrResults []*CloudAssembly.CloudTemplate
+func getCloudTemplate(id string, name string, project string, exportPath string) ([]*types.CloudTemplate, error) {
+	var arrResults []*types.CloudTemplate
 	var error error
 	client := resty.New()
 
@@ -23,19 +23,19 @@ func getCloudTemplate(id string, name string, project string, exportPath string)
 		queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 			SetQueryParams(qParams).
 			SetHeader("Accept", "application/json").
-			SetResult(&CloudAssembly.CloudTemplate{}).
+			SetResult(&types.CloudTemplate{}).
 			SetAuthToken(targetConfig.AccessToken).
-			SetError(&CloudAssembly.Exception{}).
+			SetError(&types.Exception{}).
 			Get("https://" + targetConfig.Server + "/blueprint/api/blueprints/" + id)
 
 		log.Debugln(queryResponse.Request.RawRequest.URL)
 		log.Debugln(queryResponse.String())
 
 		if queryResponse.IsError() {
-			return nil, errors.New(queryResponse.Error().(*CloudAssembly.Exception).Message)
+			return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 		}
 
-		result := queryResponse.Result().(*CloudAssembly.CloudTemplate)
+		result := queryResponse.Result().(*types.CloudTemplate)
 
 		arrResults = append(arrResults, result)
 
@@ -60,19 +60,19 @@ func getCloudTemplate(id string, name string, project string, exportPath string)
 		queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 			SetQueryParams(qParams).
 			SetHeader("Accept", "application/json").
-			SetResult(&contentsList{}).
+			SetResult(&types.ContentsList{}).
 			SetAuthToken(targetConfig.AccessToken).
-			SetError(&CloudAssembly.Exception{}).
+			SetError(&types.Exception{}).
 			Get("https://" + targetConfig.Server + "/blueprint/api/blueprints")
 
 		log.Debugln(queryResponse.Request.RawRequest.URL)
 		log.Debugln(queryResponse.String())
 
 		if queryResponse.IsError() {
-			return nil, errors.New(queryResponse.Error().(*CloudAssembly.Exception).Message)
+			return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 		}
-		for _, value := range queryResponse.Result().(*contentsList).Content {
-			c := CloudAssembly.CloudTemplate{}
+		for _, value := range queryResponse.Result().(*types.ContentsList).Content {
+			c := types.CloudTemplate{}
 			mapstructure.Decode(value, &c)
 			if project != "" {
 				if project == c.ProjectName {
@@ -99,24 +99,24 @@ func getCloudTemplate(id string, name string, project string, exportPath string)
 }
 
 // getCloudTemplateSchema
-func getCloudTemplateInputSchema(id string) (*CloudAssembly.CloudTemplateInputSchema, error) {
+func getCloudTemplateInputSchema(id string) (*types.CloudTemplateInputSchema, error) {
 	client := resty.New()
 
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
-		SetResult(&CloudAssembly.CloudTemplateInputSchema{}).
+		SetResult(&types.CloudTemplateInputSchema{}).
 		SetAuthToken(targetConfig.AccessToken).
-		SetError(&CloudAssembly.Exception{}).
+		SetError(&types.Exception{}).
 		Get("https://" + targetConfig.Server + "/blueprint/api/blueprints/" + id + "/inputs-schema")
 
 	log.Debugln(queryResponse.Request.RawRequest.URL)
 
 	if queryResponse.IsError() {
-		return nil, errors.New(queryResponse.Error().(*CloudAssembly.Exception).Message)
+		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
 
-	return queryResponse.Result().(*CloudAssembly.CloudTemplateInputSchema), err
+	return queryResponse.Result().(*types.CloudTemplateInputSchema), err
 
 }
 
@@ -142,21 +142,21 @@ func deleteCloudTemplate(id string) error {
 	queryResponse, _ := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetQueryParams(qParams).
 		SetAuthToken(targetConfig.AccessToken).
-		SetError(&CloudAssembly.Exception{}).
+		SetError(&types.Exception{}).
 		Delete("https://" + targetConfig.Server + "/blueprint/api/blueprints/" + id)
 	if queryResponse.IsError() {
-		return errors.New(queryResponse.Error().(*CloudAssembly.Exception).Message)
+		return errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
 	return nil
 }
 
 // createCloudTemplate - Create a new Cloud Assembly Cloud Template
-func createCloudTemplate(name string, description string, projectId string, content string, scope bool) (*CloudAssembly.CloudTemplate, error) {
+func createCloudTemplate(name string, description string, projectId string, content string, scope bool) (*types.CloudTemplate, error) {
 	client := resty.New()
 	queryResponse, _ := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetQueryParams(qParams).
 		SetBody(
-			CloudAssembly.CloudTemplateRequest{
+			types.CloudTemplateRequest{
 				ProjectID:       projectId,
 				Name:            name,
 				Description:     description,
@@ -164,13 +164,13 @@ func createCloudTemplate(name string, description string, projectId string, cont
 				RequestScopeOrg: scope,
 			}).
 		SetHeader("Accept", "application/json").
-		SetResult(&CloudAssembly.CloudTemplate{}).
-		SetError(&CloudAssembly.Exception{}).
+		SetResult(&types.CloudTemplate{}).
+		SetError(&types.Exception{}).
 		SetAuthToken(targetConfig.AccessToken).
 		Post("https://" + targetConfig.Server + "/blueprint/api/blueprints")
 	if queryResponse.IsError() {
-		return nil, errors.New(queryResponse.Error().(*CloudAssembly.Exception).Message)
+		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
-	newCloudTemplate, cErr := getCloudTemplate(queryResponse.Result().(*CloudAssembly.CloudTemplate).ID, "", "", "")
+	newCloudTemplate, cErr := getCloudTemplate(queryResponse.Result().(*types.CloudTemplate).ID, "", "", "")
 	return newCloudTemplate[0], cErr
 }

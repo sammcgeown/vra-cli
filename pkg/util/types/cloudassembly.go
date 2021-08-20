@@ -1,20 +1,12 @@
 /*
-Package CloudAssembly Copyright 2021 VMware, Inc.
+Package types Copyright 2021 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause
 */
-package CloudAssembly
+package types
 
 import "time"
 
 //  *** Cloud Assembly ***
-
-// Exception - Generic exception struct
-type Exception struct {
-	Message     string      `json:"message"`
-	StatusCode  int         `json:"statusCode"`
-	ErrorCode   int         `json:"errorCode"`
-	ReferenceID interface{} `json:"referenceId"`
-}
 
 // CloudTemplate - Struct
 type CloudTemplate struct {
