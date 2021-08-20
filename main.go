@@ -4,7 +4,7 @@ SPDX-License-Identifier: BSD-2-Clause
 */
 package main
 
-import "github.com/sammcgeown/vra-cli/cmd"
+import "github.com/sammcgeown/vra-cli/pkg/cmd"
 
 func main() {
 	cmd.Execute()
