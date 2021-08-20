@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/olekukonko/tablewriter"
@@ -45,7 +46,7 @@ vra-cli get execution --status FAILED --project "Field Demo" --name "Learn Code 
 			// No results
 			log.Infoln("No results found")
 		} else if resultCount == 1 {
-			PrettyPrint(response[0])
+			helpers.PrettyPrint(response[0])
 		} else {
 			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)

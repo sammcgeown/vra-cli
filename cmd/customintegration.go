@@ -7,6 +7,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/olekukonko/tablewriter"
@@ -44,7 +45,7 @@ Get by Project
 			//if export {
 			//exportCustomIntegration(response[0], exportFile)
 			//}
-			PrettyPrint(response[0])
+			helpers.PrettyPrint(response[0])
 		} else {
 			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)
@@ -88,7 +89,7 @@ Get by Project
 // 			if err != nil {
 // 				log.Errorln("Unable to create Code Stream CustomIntegration: ", err)
 // 			}
-// 			PrettyPrint(createResponse)
+// 			helpers.PrettyPrint(createResponse)
 // 		}
 // 	},
 // }

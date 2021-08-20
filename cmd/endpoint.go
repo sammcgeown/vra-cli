@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/olekukonko/tablewriter"
@@ -34,7 +35,7 @@ var getEndpointCmd = &cobra.Command{
 			// No results
 			log.Infoln("No results found")
 		} else if resultCount == 1 {
-			PrettyPrint(response[0])
+			helpers.PrettyPrint(response[0])
 		} else {
 			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)
@@ -66,7 +67,7 @@ var createEndpointCmd = &cobra.Command{
 		}
 
 		if importPath != "" {
-			yamlFilePaths := getYamlFilePaths(importPath)
+			yamlFilePaths := helpers.GetYamlFilePaths(importPath)
 			if len(yamlFilePaths) == 0 {
 				log.Warnln("No YAML files were found in", importPath)
 			}
@@ -100,7 +101,7 @@ var updateEndpointCmd = &cobra.Command{
 		}
 
 		if importPath != "" {
-			yamlFilePaths := getYamlFilePaths(importPath)
+			yamlFilePaths := helpers.GetYamlFilePaths(importPath)
 			if len(yamlFilePaths) == 0 {
 				log.Warnln("No YAML files were found in", importPath)
 			}

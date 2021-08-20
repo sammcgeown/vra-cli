@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/go-resty/resty/v2"
@@ -158,7 +159,7 @@ func deleteVariableByProject(project string) ([]*CodeStreamVariableResponse, err
 	if err != nil {
 		return nil, err
 	}
-	confirm := askForConfirmation("This will attempt to delete " + fmt.Sprint(len(Variables)) + " variables in " + project + ", are you sure?")
+	confirm := helpers.AskForConfirmation("This will attempt to delete " + fmt.Sprint(len(Variables)) + " variables in " + project + ", are you sure?")
 	if confirm {
 
 		for _, Variable := range Variables {

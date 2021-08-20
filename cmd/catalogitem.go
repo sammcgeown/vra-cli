@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/olekukonko/tablewriter"
@@ -40,7 +41,7 @@ var getCatalogItemCmd = &cobra.Command{
 			// No results
 			log.Infoln("No results found")
 		} else if resultCount == 1 {
-			PrettyPrint(response[0])
+			helpers.PrettyPrint(response[0])
 		} else {
 			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)
@@ -76,7 +77,7 @@ vra-cli create catalogitem --id 69787c80-b5d8-3d03-8ec0-a0fe67edc9e2 --project "
 		}
 		requestContent := CatalogItemRequest{}
 
-		if isInputFromPipe() {
+		if helpers.IsInputFromPipe() {
 			if err := json.NewDecoder(os.Stdin).Decode(&requestContent); err != nil {
 				log.Warnln(err)
 			}
@@ -99,7 +100,7 @@ vra-cli create catalogitem --id 69787c80-b5d8-3d03-8ec0-a0fe67edc9e2 --project "
 			} else {
 				if len(catalogItems) == 1 {
 					log.Debugln("Found Catalog Item ID:", catalogItems[0].Id)
-					requestContent.Inputs = getCatalogItemInputs(catalogItems[0].Schema.Properties)
+					// requestContent.Inputs = getCatalogItemInputs(catalogItems[0].Schema.Properties)
 				} else {
 					log.Errorln(len(catalogItems), "Catalog Items found")
 				}
@@ -135,7 +136,7 @@ vra-cli create catalogitem --id 69787c80-b5d8-3d03-8ec0-a0fe67edc9e2 --project "
 // 		}
 
 // 		if importPath != "" {
-// 			yamlFilePaths := getYamlFilePaths(importPath)
+// 			yamlFilePaths := helpers.GetYamlFilePaths(importPath)
 // 			if len(yamlFilePaths) == 0 {
 // 				log.Warnln("No YAML files were found in", importPath)
 // 			}

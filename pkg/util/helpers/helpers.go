@@ -1,8 +1,8 @@
 /*
-Package cmd Copyright 2021 VMware, Inc.
+Package helpers Copyright 2021 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause
 */
-package cmd
+package helpers
 
 import (
 	"archive/zip"
@@ -22,7 +22,7 @@ import (
 )
 
 // isInputFromPipe - pipeline detection
-func isInputFromPipe() bool {
+func IsInputFromPipe() bool {
 	fileInfo, _ := os.Stdin.Stat()
 	return fileInfo.Mode()&os.ModeCharDevice == 0
 }
@@ -67,7 +67,7 @@ func PrintTable(objects []interface{}, headers []string) {
 	table.Render()
 }
 
-func getYamlFilePaths(importPath string) []string {
+func GetYamlFilePaths(importPath string) []string {
 	var yamlFiles []string
 	// Read importPath
 	stat, err := os.Stat(importPath)
@@ -89,7 +89,7 @@ func getYamlFilePaths(importPath string) []string {
 	return yamlFiles
 }
 
-func removeDuplicateStrings(elements []string) []string {
+func RemoveDuplicateStrings(elements []string) []string {
 	encountered := map[string]bool{}
 	// Create a map of all unique elements.
 	for v := range elements {
@@ -156,20 +156,20 @@ func AddFileToZip(zipWriter *zip.Writer, filename string, basedir string) error 
 	return err
 }
 
-func getInputsFromSchema(schema *CloudAssemblyCloudTemplateInputSchema) DeploymentInput {
-	var inputs DeploymentInput
-	for name := range schema.Properties {
-		log.Infoln(name)
-		// c := CloudAssemblyCloudTemplateInputProperty{}
-		// mapstructure.Decode(value, &c)
-		inputs.Inputs[name] = "test"
-	}
+// func GetInputsFromSchema(schema *cmd.CloudAssemblyCloudTemplateInputSchema) cmd.DeploymentInput {
+// 	var inputs cmd.DeploymentInput
+// 	for name := range schema.Properties {
+// 		log.Infoln(name)
+// 		// c := CloudAssemblyCloudTemplateInputProperty{}
+// 		// mapstructure.Decode(value, &c)
+// 		inputs.Inputs[name] = "test"
+// 	}
 
-	return inputs
-}
+// 	return inputs
+// }
 
-// askForConfirmation - Credit - https://gist.github.com/r0l1/3dcbb0c8f6cfe9c66ab8008f55f8f28b
-func askForConfirmation(s string) bool {
+// helpers.AskForConfirmation - Credit - https://gist.github.com/r0l1/3dcbb0c8f6cfe9c66ab8008f55f8f28b
+func AskForConfirmation(s string) bool {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
@@ -191,18 +191,18 @@ func askForConfirmation(s string) bool {
 }
 
 // promptUserForInputs
-func getCatalogItemInputs(SchemaProperties map[string]CatalogItemSchemaProperties) map[string]string {
-	inputs := make(map[string]string)
-	for name, schema := range SchemaProperties {
-		fmt.Printf(name + "[" + schema.Type + "]: ")
-		var response string
-		fmt.Scanln(&response)
-		inputs[name] = response
-	}
-	return inputs
-}
+// func GetCatalogItemInputs(SchemaProperties map[string]cmd.CatalogItemSchemaProperties) map[string]string {
+// 	inputs := make(map[string]string)
+// 	for name, schema := range SchemaProperties {
+// 		fmt.Printf(name + "[" + schema.Type + "]: ")
+// 		var response string
+// 		fmt.Scanln(&response)
+// 		inputs[name] = response
+// 	}
+// 	return inputs
+// }
 
-func stringToTags(tags string) []*models.Tag {
+func StringToTags(tags string) []*models.Tag {
 	var tagsArray []*models.Tag
 	if tags == "" {
 		return tagsArray
@@ -218,7 +218,7 @@ func stringToTags(tags string) []*models.Tag {
 	return tagsArray
 }
 
-func createUserArray(emails []string) []*models.User {
+func CreateUserArray(emails []string) []*models.User {
 	if emails[0] == "" {
 		return nil
 	}

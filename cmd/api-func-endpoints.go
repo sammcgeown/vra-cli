@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -83,7 +84,7 @@ func deleteEndpointByProject(project string) ([]*CodeStreamEndpoint, error) {
 	if err != nil {
 		return nil, err
 	}
-	confirm := askForConfirmation("This will attempt to delete " + fmt.Sprint(len(Endpoints)) + " Endpoints in " + project + ", are you sure?")
+	confirm := helpers.AskForConfirmation("This will attempt to delete " + fmt.Sprint(len(Endpoints)) + " Endpoints in " + project + ", are you sure?")
 	if confirm {
 
 		for _, endpoint := range Endpoints {

@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -35,7 +36,7 @@ Get all Data Collectors:
 		if len(dataCollectors) == 0 {
 			log.Warnln("No Data Collector (Cloud Proxy) found")
 		} else if len(dataCollectors) == 1 {
-			PrettyPrint(dataCollectors[0])
+			helpers.PrettyPrint(dataCollectors[0])
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Id", "Name", "Hostname", "IP Address, Status"})

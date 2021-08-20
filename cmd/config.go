@@ -7,6 +7,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
@@ -68,7 +69,7 @@ Examples:
 			if target == nil {
 				log.Warningln("Target not found.")
 			} else {
-				PrettyPrint(target)
+				helpers.PrettyPrint(target)
 			}
 		} else {
 			var targets = viper.GetStringMapString("target")

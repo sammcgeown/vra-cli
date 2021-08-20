@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
@@ -36,7 +37,7 @@ var getDeploymentCmd = &cobra.Command{
 			if exportPath != "" {
 				exportVariable(response[0], exportPath)
 			}
-			PrettyPrint(response[0])
+			helpers.PrettyPrint(response[0])
 		} else {
 			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)

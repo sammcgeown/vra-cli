@@ -9,6 +9,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	"github.com/vmware/vra-sdk-go/pkg/client/cloud_account"
 	"github.com/vmware/vra-sdk-go/pkg/models"
 )
@@ -57,7 +58,7 @@ func createCloudAccountAws(name, accesskey, secretkey, regions, tags string) (*m
 	AwsSpec.AccessKeyID = &accesskey
 	AwsSpec.SecretAccessKey = &secretkey
 	AwsSpec.RegionIds = strings.Split(regions, ",")
-	AwsSpec.Tags = stringToTags(tags)
+	AwsSpec.Tags = helpers.StringToTags(tags)
 
 	apiclient := getApiClient()
 	createResp, err := apiclient.CloudAccount.CreateAwsCloudAccount(cloud_account.NewCreateAwsCloudAccountParams().WithBody(&AwsSpec))
@@ -82,7 +83,7 @@ func createCloudAccountvSphere(name, description, fqdn, username, password, nsxc
 		CreateDefaultZones:          createcloudzone,
 		AcceptSelfSignedCertificate: insecure,
 		RegionIds:                   DatacenterIds.ExternalRegionIds,
-		Tags:                        stringToTags(tags),
+		Tags:                        helpers.StringToTags(tags),
 	}
 	if nsxcloudaccount != "" {
 		vSphereSpec.AssociatedCloudAccountIds = []string{nsxcloudaccount}
@@ -138,7 +139,7 @@ func createCloudAccountNsxT(name, description, fqdn, username, password, vccloud
 		Password:                    &password,
 		ManagerMode:                 manager,
 		IsGlobalManager:             global,
-		Tags:                        stringToTags(tags),
+		Tags:                        helpers.StringToTags(tags),
 	}
 	if vccloudaccount != "" {
 		NsxTSpec.AssociatedCloudAccountIds = []string{vccloudaccount}

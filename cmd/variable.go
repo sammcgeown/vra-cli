@@ -7,6 +7,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/olekukonko/tablewriter"
@@ -45,7 +46,7 @@ vra-cli get variable --project production`,
 			if exportPath != "" {
 				exportVariable(response[0], exportPath)
 			}
-			PrettyPrint(response[0])
+			helpers.PrettyPrint(response[0])
 		} else {
 			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)
@@ -86,7 +87,7 @@ var createVariableCmd = &cobra.Command{
 			if err != nil {
 				log.Errorln("Unable to create Code Stream Variable: ", err)
 			} else {
-				PrettyPrint(createResponse)
+				helpers.PrettyPrint(createResponse)
 			}
 		}
 	},

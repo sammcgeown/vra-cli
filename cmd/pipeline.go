@@ -15,6 +15,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/olekukonko/tablewriter"
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
@@ -54,12 +55,12 @@ vra-cli get execution --status Failed`,
 
 		if printJson {
 			for _, c := range response {
-				PrettyPrint(c)
+				helpers.PrettyPrint(c)
 			}
 		} else if printForm {
 			// Get the input form
 			for _, c := range response {
-				PrettyPrint(c.Input)
+				helpers.PrettyPrint(c.Input)
 			}
 		} else {
 			var endpoints []string
@@ -94,7 +95,7 @@ vra-cli get execution --status Failed`,
 								endpoints = append(endpoints, e)
 							}
 						}
-						//PrettyPrint(task)
+						//helpers.PrettyPrint(task)
 						if task.Type == "Pipeline" {
 							pipelines = append(pipelines, task.Input.Pipeline)
 						}
@@ -105,7 +106,7 @@ vra-cli get execution --status Failed`,
 					}
 				}
 				if dependencies {
-					variables = removeDuplicateStrings(variables)
+					variables = helpers.RemoveDuplicateStrings(variables)
 					sort.Strings(variables)
 					if len(variables) > 0 {
 						log.Infoln(c.Name, "depends on Variables:", strings.Join(variables, ", "))
@@ -113,7 +114,7 @@ vra-cli get execution --status Failed`,
 							getVariable("", v, c.Project, exportPath)
 						}
 					}
-					pipelines = removeDuplicateStrings(pipelines)
+					pipelines = helpers.RemoveDuplicateStrings(pipelines)
 					sort.Strings(pipelines)
 					if len(pipelines) > 0 {
 						log.Infoln(c.Name, "depends on Pipelines:", strings.Join(pipelines, ", "))
@@ -121,7 +122,7 @@ vra-cli get execution --status Failed`,
 							getPipelines("", p, c.Project, filepath.Join(exportPath, "pipelines"))
 						}
 					}
-					endpoints = removeDuplicateStrings(endpoints)
+					endpoints = helpers.RemoveDuplicateStrings(endpoints)
 					sort.Strings(endpoints)
 					if len(endpoints) > 0 {
 						log.Infoln(c.Name, "depends on Endpoints:", strings.Join(endpoints, ", "))
@@ -129,7 +130,7 @@ vra-cli get execution --status Failed`,
 							getEndpoint("", e, c.Project, "", filepath.Join(exportPath, "endpoints"))
 						}
 					}
-					customintegrations = removeDuplicateStrings(customintegrations)
+					customintegrations = helpers.RemoveDuplicateStrings(customintegrations)
 					sort.Strings(customintegrations)
 					if len(customintegrations) > 0 {
 						log.Infoln(c.Name, "depends on Custom Integrations:", strings.Join(customintegrations, ", "))
@@ -178,7 +179,7 @@ vra-cli update pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 			log.Infoln("Setting pipeline " + response.Name + " to " + state)
 		}
 
-		yamlFilePaths := getYamlFilePaths(importPath)
+		yamlFilePaths := helpers.GetYamlFilePaths(importPath)
 		if len(yamlFilePaths) == 0 {
 			log.Warnln("No YAML files were found in", importPath)
 		}
@@ -209,7 +210,7 @@ vra-cli create pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 		if err := ensureTargetConnection(); err != nil {
 			log.Fatalln(err)
 		}
-		yamlFilePaths := getYamlFilePaths(importPath)
+		yamlFilePaths := helpers.GetYamlFilePaths(importPath)
 		if len(yamlFilePaths) == 0 {
 			log.Warnln("No YAML files were found in", importPath)
 		}

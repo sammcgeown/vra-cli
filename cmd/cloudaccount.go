@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -58,7 +59,7 @@ Get Cloud Accounts by Type:
 		if len(cloudAccounts) == 0 {
 			log.Warnln("No Cloud Accounts found")
 		} else if len(cloudAccounts) == 1 {
-			PrettyPrint(cloudAccounts[0])
+			helpers.PrettyPrint(cloudAccounts[0])
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Id", "Name", "Description", "Type"})
@@ -117,7 +118,7 @@ Create a new AWS Cloud Account:
 			log.Fatalln(err)
 		}
 
-		// if isInputFromPipe() { // If it's a pipe, then read from stdin
+		// if helpers.IsInputFromPipe() { // If it's a pipe, then read from stdin
 		// 	// Decode JSON to struct
 		// 	if err := json.NewDecoder(os.Stdin).Decode(&CloudAccount); err != nil {
 		// 		log.Warnln(err)
@@ -128,20 +129,20 @@ Create a new AWS Cloud Account:
 			if err != nil {
 				log.Fatalln(err)
 			}
-			PrettyPrint(newAccount)
+			helpers.PrettyPrint(newAccount)
 		} else if cloudaccounttype == "vsphere" {
 
 			newAccount, err := createCloudAccountvSphere(name, description, fqdn, username, password, nsxaccount, cloudproxy, tags, insecure, createcloudzone)
 			if err != nil {
 				log.Fatalln(err)
 			}
-			PrettyPrint(newAccount)
+			helpers.PrettyPrint(newAccount)
 		} else if cloudaccounttype == "nsxt" {
 			newAccount, err := createCloudAccountNsxT(name, description, fqdn, username, password, vccloudaccount, cloudproxy, tags, nsxtglobal, nsxtmanager, insecure)
 			if err != nil {
 				log.Fatalln(err)
 			}
-			PrettyPrint(newAccount)
+			helpers.PrettyPrint(newAccount)
 		}
 	},
 }

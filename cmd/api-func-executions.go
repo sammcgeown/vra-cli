@@ -14,6 +14,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -108,7 +109,7 @@ func deleteExecutions(project string, status string, name string, nested bool) (
 	if err != nil {
 		return nil, err
 	}
-	confirm := askForConfirmation("This will attempt to delete " + fmt.Sprint(len(Executions)) + " Executions in " + project + ", are you sure?")
+	confirm := helpers.AskForConfirmation("This will attempt to delete " + fmt.Sprint(len(Executions)) + " Executions in " + project + ", are you sure?")
 	if confirm {
 		for _, Execution := range Executions {
 			deletedExecution, err := deleteExecution(Execution.ID)

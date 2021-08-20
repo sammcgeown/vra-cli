@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
@@ -43,11 +44,12 @@ var getCloudTemplateCmd = &cobra.Command{
 				if inputSchema, err := getCloudTemplateInputSchema(response[0].ID); err != nil {
 					log.Errorln("Unable to retrieve input schema: ", err)
 				} else {
-					inputs := getInputsFromSchema(inputSchema)
-					PrettyPrint(inputs)
+					//inputs := getInputsFromSchema(inputSchema)
+					//helpers.PrettyPrint(inputs)
+					helpers.PrettyPrint(inputSchema)
 				}
 			} else {
-				PrettyPrint(response[0])
+				helpers.PrettyPrint(response[0])
 			}
 		} else {
 			// Print result table
@@ -148,7 +150,7 @@ var createCloudTemplateCmd = &cobra.Command{
 		}
 
 		// Check if input is piped JSON
-		if isInputFromPipe() {
+		if helpers.IsInputFromPipe() {
 			if err := json.NewDecoder(os.Stdin).Decode(&cloudTemplateReq); err != nil {
 				log.Warnln(err)
 			}
@@ -190,7 +192,7 @@ var createCloudTemplateCmd = &cobra.Command{
 		if err != nil {
 			log.Errorln("Unable to create Cloud Template(s): ", err)
 		}
-		PrettyPrint(cloudTemplate)
+		helpers.PrettyPrint(cloudTemplate)
 	},
 }
 

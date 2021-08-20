@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -47,7 +48,7 @@ Get Project by Name (case sensitive):
 			// No results
 			log.Warnln("No results found")
 		} else if resultCount == 1 {
-			PrettyPrint(response[0])
+			helpers.PrettyPrint(response[0])
 		} else {
 
 			table := tablewriter.NewWriter(os.Stdout)
@@ -105,15 +106,15 @@ var createProjectCommand = &cobra.Command{
 			log.Fatalln(err)
 		}
 
-		adminUsers := createUserArray(strings.Split(admins, ","))
-		memberUsers := createUserArray(strings.Split(members, ","))
-		viewerUsers := createUserArray(strings.Split(viewers, ","))
+		adminUsers := helpers.CreateUserArray(strings.Split(admins, ","))
+		memberUsers := helpers.CreateUserArray(strings.Split(members, ","))
+		viewerUsers := helpers.CreateUserArray(strings.Split(viewers, ","))
 
 		newProject, err := createProject(projectName, description, adminUsers, memberUsers, viewerUsers, nil, nil, operationTimeout, machineNamingTemplate, &sharedResources)
 		if err != nil {
 			log.Fatal("Unable to create Project", err)
 		} else {
-			PrettyPrint(newProject)
+			helpers.PrettyPrint(newProject)
 		}
 
 	},
@@ -132,15 +133,15 @@ var updateProjectCommand = &cobra.Command{
 			log.Fatalln(err)
 		}
 
-		adminUsers := createUserArray(strings.Split(admins, ","))
-		memberUsers := createUserArray(strings.Split(members, ","))
-		viewerUsers := createUserArray(strings.Split(viewers, ","))
+		adminUsers := helpers.CreateUserArray(strings.Split(admins, ","))
+		memberUsers := helpers.CreateUserArray(strings.Split(members, ","))
+		viewerUsers := helpers.CreateUserArray(strings.Split(viewers, ","))
 
 		newProject, err := updateProject(id, projectName, description, adminUsers, memberUsers, viewerUsers, nil, nil, operationTimeout, machineNamingTemplate, &sharedResources)
 		if err != nil {
 			log.Fatal("Unable to update Project", err)
 		} else {
-			PrettyPrint(newProject)
+			helpers.PrettyPrint(newProject)
 		}
 
 	},
