@@ -60,8 +60,8 @@ func getExecutions(id string, project string, status string, name string, nested
 		SetHeader("Accept", "application/json").
 		SetResult(&documentsList{}).
 		SetError(&CodeStreamException{}).
-		SetAuthToken(targetConfig.accesstoken).
-		Get("https://" + targetConfig.server + "/pipeline/api/executions")
+		SetAuthToken(targetConfig.AccessToken).
+		Get("https://" + targetConfig.Server + "/pipeline/api/executions")
 	if queryResponse.IsError() {
 		//return nil, queryResponse.Error().(error)
 		return nil, errors.New(queryResponse.Error().(*CodeStreamException).Message)
@@ -81,8 +81,8 @@ func getExecution(executionLink string) (*CodestreamAPIExecutions, error) {
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
 		SetResult(&CodestreamAPIExecutions{}).
-		SetAuthToken(targetConfig.accesstoken).
-		Get("https://" + targetConfig.server + executionLink)
+		SetAuthToken(targetConfig.AccessToken).
+		Get("https://" + targetConfig.Server + executionLink)
 	if queryResponse.IsError() {
 		return nil, queryResponse.Error().(error)
 	}
@@ -95,8 +95,8 @@ func deleteExecution(id string) (*CodestreamAPIExecutions, error) {
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
 		SetResult(&CodestreamAPIExecutions{}).
-		SetAuthToken(targetConfig.accesstoken).
-		Delete("https://" + targetConfig.server + "/pipeline/api/executions/" + id)
+		SetAuthToken(targetConfig.AccessToken).
+		Delete("https://" + targetConfig.Server + "/pipeline/api/executions/" + id)
 	if queryResponse.IsError() {
 		return nil, errors.New(queryResponse.Error().(*CodeStreamException).Message)
 	}
@@ -148,8 +148,8 @@ func createExecution(id string, inputs string, comment string) (*CodeStreamCreat
 		SetHeader("Content-Type", "application/json").
 		SetBody(executionBytes).
 		SetResult(&CodeStreamCreateExecutionResponse{}).
-		SetAuthToken(targetConfig.accesstoken).
-		Post("https://" + targetConfig.server + "/pipeline/api/pipelines/" + id + "/executions")
+		SetAuthToken(targetConfig.AccessToken).
+		Post("https://" + targetConfig.Server + "/pipeline/api/pipelines/" + id + "/executions")
 	if queryResponse.IsError() {
 		return nil, errors.New(queryResponse.Error().(*CodeStreamException).Message)
 	}

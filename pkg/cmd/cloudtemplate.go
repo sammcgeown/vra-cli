@@ -11,6 +11,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
+	CloudAssembly "github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
@@ -142,7 +143,7 @@ var createCloudTemplateCmd = &cobra.Command{
 	  vra-cli create cloudtemplate --name Test --project Development --description "My new template" --content "{formatVersion: 1, inputs: {}, resources: {}}" --scope project
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var cloudTemplateReq CloudAssemblyCloudTemplateRequest
+		var cloudTemplateReq CloudAssembly.CloudTemplateRequest
 		var projectId string
 
 		if err := ensureTargetConnection(); err != nil {

@@ -43,8 +43,8 @@ func getEndpoint(id, name, project, endpointtype string, exportPath string) ([]*
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
 		SetResult(&documentsList{}).
-		SetAuthToken(targetConfig.accesstoken).
-		Get("https://" + targetConfig.server + "/pipeline/api/endpoints")
+		SetAuthToken(targetConfig.AccessToken).
+		Get("https://" + targetConfig.Server + "/pipeline/api/endpoints")
 
 	if queryResponse.IsError() {
 		return nil, queryResponse.Error().(error)
@@ -70,8 +70,8 @@ func deleteEndpoint(id string) (*CodeStreamEndpoint, error) {
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
 		SetResult(&CodeStreamEndpoint{}).
-		SetAuthToken(targetConfig.accesstoken).
-		Delete("https://" + targetConfig.server + "/pipeline/api/endpoints/" + id)
+		SetAuthToken(targetConfig.AccessToken).
+		Delete("https://" + targetConfig.Server + "/pipeline/api/endpoints/" + id)
 	if queryResponse.IsError() {
 		return nil, queryResponse.Error().(error)
 	}

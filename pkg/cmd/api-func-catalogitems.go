@@ -23,9 +23,9 @@ func getCatalogItems(id string, name string, project string) ([]*CatalogItem, er
 			SetQueryParams(qParams).
 			SetHeader("Accept", "application/json").
 			SetResult(&CatalogItem{}).
-			SetAuthToken(targetConfig.accesstoken).
+			SetAuthToken(targetConfig.AccessToken).
 			SetError(&CodeStreamException{}).
-			Get("https://" + targetConfig.server + "/catalog/api/items/" + id)
+			Get("https://" + targetConfig.Server + "/catalog/api/items/" + id)
 
 		log.Debugln(queryResponse.Request.RawRequest.URL)
 		// log.Debugln(queryResponse.String())
@@ -40,9 +40,9 @@ func getCatalogItems(id string, name string, project string) ([]*CatalogItem, er
 			SetQueryParams(qParams).
 			SetHeader("Accept", "application/json").
 			SetResult(&contentsList{}).
-			SetAuthToken(targetConfig.accesstoken).
+			SetAuthToken(targetConfig.AccessToken).
 			SetError(&CodeStreamException{}).
-			Get("https://" + targetConfig.server + "/catalog/api/items")
+			Get("https://" + targetConfig.Server + "/catalog/api/items")
 
 		log.Debugln(queryResponse.Request.RawRequest.URL)
 		// log.Debugln(queryResponse.String())
@@ -67,10 +67,10 @@ func createCatalogItemRequest(id string, request CatalogItemRequest) (*CatalogIt
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
 		SetResult(&CatalogItemRequestResponse{}).
-		SetAuthToken(targetConfig.accesstoken).
+		SetAuthToken(targetConfig.AccessToken).
 		SetError(&CodeStreamException{}).
 		SetBody(request).
-		Post("https://" + targetConfig.server + "/catalog/api/items/" + id + "/request")
+		Post("https://" + targetConfig.Server + "/catalog/api/items/" + id + "/request")
 
 	log.Debugln(queryResponse.Request.RawRequest.URL)
 	// log.Debugln(queryResponse.String())

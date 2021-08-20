@@ -31,8 +31,8 @@ func getCustomIntegration(id, name string) ([]*CodeStreamCustomIntegration, erro
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
 		SetResult(&documentsList{}).
-		SetAuthToken(targetConfig.accesstoken).
-		Get("https://" + targetConfig.server + "/pipeline/api/custom-integrations")
+		SetAuthToken(targetConfig.AccessToken).
+		Get("https://" + targetConfig.Server + "/pipeline/api/custom-integrations")
 
 	if queryResponse.IsError() {
 		return nil, queryResponse.Error().(error)
@@ -62,8 +62,8 @@ func getCustomIntegration(id, name string) ([]*CodeStreamCustomIntegration, erro
 // 		SetHeader("Accept", "application/json").
 // 		SetResult(&CodeStreamCustomIntegrationResponse{}).
 // 		SetError(&CodeStreamException{}).
-// 		SetAuthToken(targetConfig.accesstoken).
-// 		Post("https://" + targetConfig.server + "/pipeline/api/variables")
+// 		SetAuthToken(targetConfig.AccessToken).
+// 		Post("https://" + targetConfig.Server + "/pipeline/api/variables")
 // 	if response.IsError() {
 // 		return nil, errors.New(response.Error().(*CodeStreamException).Message)
 // 	}
@@ -91,8 +91,8 @@ func getCustomIntegration(id, name string) ([]*CodeStreamCustomIntegration, erro
 // 		SetHeader("Accept", "application/json").
 // 		SetResult(&CodeStreamCustomIntegrationResponse{}).
 // 		SetError(&CodeStreamException{}).
-// 		SetAuthToken(targetConfig.accesstoken).
-// 		Put("https://" + targetConfig.server + "/pipeline/api/variables/" + id)
+// 		SetAuthToken(targetConfig.AccessToken).
+// 		Put("https://" + targetConfig.Server + "/pipeline/api/variables/" + id)
 // 	if response.IsError() {
 // 		return nil, errors.New(response.Error().(*CodeStreamException).Message)
 // 	}
@@ -105,8 +105,8 @@ func getCustomIntegration(id, name string) ([]*CodeStreamCustomIntegration, erro
 // 	response, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 // 		SetHeader("Accept", "application/json").
 // 		SetResult(&CodeStreamCustomIntegrationResponse{}).
-// 		SetAuthToken(targetConfig.accesstoken).
-// 		Delete("https://" + targetConfig.server + "/pipeline/api/variables/" + id)
+// 		SetAuthToken(targetConfig.AccessToken).
+// 		Delete("https://" + targetConfig.Server + "/pipeline/api/variables/" + id)
 // 	if response.IsError() {
 // 		log.Errorln("Create CustomIntegration failed", err)
 // 		os.Exit(1)

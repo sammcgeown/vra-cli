@@ -1,23 +1,23 @@
 /*
-Package cmd Copyright 2021 VMware, Inc.
+Package CloudAssembly Copyright 2021 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause
 */
-package cmd
+package CloudAssembly
 
 import "time"
 
 //  *** Cloud Assembly ***
 
-// CloudAssemblyException - Generic exception struct
-type CloudAssemblyException struct {
+// Exception - Generic exception struct
+type Exception struct {
 	Message     string      `json:"message"`
 	StatusCode  int         `json:"statusCode"`
 	ErrorCode   int         `json:"errorCode"`
 	ReferenceID interface{} `json:"referenceId"`
 }
 
-// CloudAssemblyCloudTemplate - Struct
-type CloudAssemblyCloudTemplate struct {
+// CloudTemplate - Struct
+type CloudTemplate struct {
 	ID                        string        `json:"id"`
 	CreatedAt                 time.Time     `json:"createdAt"`
 	CreatedBy                 string        `json:"createdBy"`
@@ -43,7 +43,7 @@ type CloudAssemblyCloudTemplate struct {
 	ContentSourceSyncAt       time.Time     `json:"contentSourceSyncAt"`
 }
 
-type CloudAssemblyCloudTemplateRequest struct {
+type CloudTemplateRequest struct {
 	Content         string `json:"content"`
 	Description     string `json:"description"`
 	Name            string `json:"name"`
@@ -51,14 +51,14 @@ type CloudAssemblyCloudTemplateRequest struct {
 	RequestScopeOrg bool   `json:"requestScopeOrg"`
 }
 
-type CloudAssemblyCloudTemplateInputSchema struct {
+type CloudTemplateInputSchema struct {
 	Type       string                 `json:"type"`
 	Encrypted  bool                   `json:"encrypted"`
 	Required   []string               `json:"required"`
 	Properties map[string]interface{} `json:"properties"`
 }
 
-type CloudAssemblyCloudTemplateInputProperty struct {
+type CloudTemplateInputProperty struct {
 	Type      string `json:"type"`
 	Encrypted bool   `json:"encrypted"`
 	OneOf     []struct {

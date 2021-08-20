@@ -37,9 +37,9 @@ func getPipelines(id string, name string, project string, exportPath string) ([]
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
 		SetResult(&documentsList{}).
-		SetAuthToken(targetConfig.accesstoken).
+		SetAuthToken(targetConfig.AccessToken).
 		SetError(&CodeStreamException{}).
-		Get("https://" + targetConfig.server + "/pipeline/api/pipelines")
+		Get("https://" + targetConfig.Server + "/pipeline/api/pipelines")
 
 	log.Debugln(queryResponse.Request.RawRequest.URL)
 	// log.Debugln(queryResponse.String())
@@ -72,8 +72,8 @@ func patchPipeline(id string, payload string) (*CodeStreamPipeline, error) {
 		SetHeader("Content-Type", "application/json").
 		SetBody(payload).
 		SetResult(&CodeStreamPipeline{}).
-		SetAuthToken(targetConfig.accesstoken).
-		Patch("https://" + targetConfig.server + "/pipeline/api/pipelines/" + id)
+		SetAuthToken(targetConfig.AccessToken).
+		Patch("https://" + targetConfig.Server + "/pipeline/api/pipelines/" + id)
 	if queryResponse.IsError() {
 		return nil, queryResponse.Error().(error)
 	}
@@ -86,9 +86,9 @@ func deletePipeline(id string) (*CodeStreamPipeline, error) {
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/json").
 		SetResult(&CodeStreamPipeline{}).
-		SetAuthToken(targetConfig.accesstoken).
+		SetAuthToken(targetConfig.AccessToken).
 		SetError(&CodeStreamException{}).
-		Delete("https://" + targetConfig.server + "/pipeline/api/pipelines/" + id)
+		Delete("https://" + targetConfig.Server + "/pipeline/api/pipelines/" + id)
 	if queryResponse.IsError() {
 		return nil, errors.New(queryResponse.Error().(*CodeStreamException).Message)
 	}

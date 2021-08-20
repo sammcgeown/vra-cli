@@ -16,9 +16,9 @@ import (
 
 func getCloudAccounts(id string, name string, cloudaccounttype string) ([]*models.CloudAccount, error) {
 
-	// transport := httptransport.New(targetConfig.server, "", nil)
+	// transport := httptransport.New(targetConfig.Server, "", nil)
 	// // transport.SetDebug(debug)
-	// transport.DefaultAuthentication = httptransport.APIKeyAuth("Authorization", "header", "Bearer "+targetConfig.accesstoken)
+	// transport.DefaultAuthentication = httptransport.APIKeyAuth("Authorization", "header", "Bearer "+targetConfig.AccessToken)
 	// apiclient := client.New(transport, strfmt.Default)
 
 	var filters []string

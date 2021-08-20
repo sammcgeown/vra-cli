@@ -115,7 +115,7 @@ Examples:
 		}
 		log.Infoln("Use `vra-cli config use-target --name " + newTargetName + "` to use this target")
 		if newServer != "" {
-			viper.Set("target."+newTargetName+".server", newServer)
+			viper.Set("target."+newTargetName+".Server", newServer)
 		}
 		if newUsername != "" {
 			viper.Set("target."+newTargetName+".username", newUsername)
@@ -127,7 +127,7 @@ Examples:
 			viper.Set("target."+newTargetName+".domain", newDomain)
 		}
 		if newAPIToken != "" {
-			viper.Set("target."+newTargetName+".apitoken", newAPIToken)
+			viper.Set("target."+newTargetName+".ApiToken", newAPIToken)
 		}
 		viper.SetConfigType("yaml")
 		err := viper.SafeWriteConfig()

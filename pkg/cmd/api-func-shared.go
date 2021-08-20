@@ -25,26 +25,26 @@ func ensureTargetConnection() error {
 		log.Debugln("Access Token is valid")
 	} else {
 		var refreshTokenError, credentialError error
-		targetConfig.accesstoken, refreshTokenError = authenticateApiToken(targetConfig.server, targetConfig.apitoken) // Test the API Token (refresh_token)
+		targetConfig.AccessToken, refreshTokenError = authenticateApiToken(targetConfig.Server, targetConfig.ApiToken) // Test the API Token (refresh_token)
 		if refreshTokenError != nil {                                                                                  // We could not get an access token from the API Token
 			log.Debugln("Refresh Token is invalid")
-			if targetConfig.server == "api.mgmt.cloud.vmware.com" { // If it's vRA Cloud we have no credentials to authenticate
+			if targetConfig.Server == "api.mgmt.cloud.vmware.com" { // If it's vRA Cloud we have no credentials to authenticate
 				return refreshTokenError // Return the token error
 			}
-			targetConfig.apitoken, credentialError = authenticateCredentials(targetConfig.server, targetConfig.username, targetConfig.password, targetConfig.domain)
+			targetConfig.ApiToken, credentialError = authenticateCredentials(targetConfig.Server, targetConfig.Username, targetConfig.Password, targetConfig.Domain)
 			if credentialError != nil {
 				return credentialError // Return the credential error
 			}
 			// Try again, now we have a new access token
-			targetConfig.accesstoken, refreshTokenError = authenticateApiToken(targetConfig.server, targetConfig.apitoken) // Test the API Token (refresh_token)
+			targetConfig.AccessToken, refreshTokenError = authenticateApiToken(targetConfig.Server, targetConfig.ApiToken) // Test the API Token (refresh_token)
 			if refreshTokenError != nil {
 				return refreshTokenError
 			}
 		}
 
 		if viper.ConfigFileUsed() != "" { // If we're using a Config file
-			viper.Set("target."+currentTargetName+".accesstoken", targetConfig.accesstoken)
-			viper.Set("target."+currentTargetName+".apitoken", targetConfig.apitoken)
+			viper.Set("target."+currentTargetName+".AccessToken", targetConfig.AccessToken)
+			viper.Set("target."+currentTargetName+".ApiToken", targetConfig.ApiToken)
 			viper.WriteConfig()
 		}
 
@@ -106,10 +106,10 @@ func testAccessToken() bool {
 	client := resty.New()
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetHeader("Accept", "application/json").
-		SetAuthToken(targetConfig.accesstoken).
+		SetAuthToken(targetConfig.AccessToken).
 		SetResult(&UserPreferences{}).
 		SetError(&CodeStreamException{}).
-		Get("https://" + targetConfig.server + "/pipeline/api/user-preferences")
+		Get("https://" + targetConfig.Server + "/pipeline/api/user-preferences")
 	if err != nil {
 		log.Warnln(err)
 		return false
@@ -124,9 +124,9 @@ func testAccessToken() bool {
 }
 
 func getApiClient() *client.MulticloudIaaS {
-	transport := httptransport.New(targetConfig.server, "", nil)
+	transport := httptransport.New(targetConfig.Server, "", nil)
 	transport.SetDebug(debug)
-	transport.DefaultAuthentication = httptransport.APIKeyAuth("Authorization", "header", "Bearer "+targetConfig.accesstoken)
+	transport.DefaultAuthentication = httptransport.APIKeyAuth("Authorization", "header", "Bearer "+targetConfig.AccessToken)
 	apiclient := client.New(transport, strfmt.Default)
 	return apiclient
 }
@@ -145,10 +145,10 @@ func exportYaml(name, project, path, object string) error {
 	queryResponse, _ := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetQueryParams(qParams).
 		SetHeader("Accept", "application/x-yaml;charset=UTF-8").
-		SetAuthToken(targetConfig.accesstoken).
+		SetAuthToken(targetConfig.AccessToken).
 		SetOutput(filepath.Join(exportPath, name+".yaml")).
 		SetError(&CodeStreamException{}).
-		Get("https://" + targetConfig.server + "/pipeline/api/export")
+		Get("https://" + targetConfig.Server + "/pipeline/api/export")
 	log.Debugln(queryResponse.Request.RawRequest.URL)
 
 	if queryResponse.IsError() {
@@ -192,9 +192,9 @@ func importYaml(yamlPath, action, project, importType string) error {
 		SetQueryParams(qParams).
 		SetHeader("Content-Type", "application/x-yaml").
 		SetBody(yamlPayload).
-		SetAuthToken(targetConfig.accesstoken).
+		SetAuthToken(targetConfig.AccessToken).
 		SetError(&CodeStreamException{}).
-		Post("https://" + targetConfig.server + "/pipeline/api/import")
+		Post("https://" + targetConfig.Server + "/pipeline/api/import")
 	log.Debugln(queryResponse.Request.RawRequest.URL)
 	if queryResponse.IsError() {
 		return queryResponse.Error().(error)
