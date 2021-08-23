@@ -49,7 +49,7 @@ Get Cloud Account by Name:
 Get Cloud Accounts by Type:
   vra-cli get cloudaccount --type <cloudaccount-type>`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(targetConfig, debug); err != nil {
+		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 		cloudAccounts, err := getCloudAccounts(id, name, cloudaccounttype)
@@ -94,7 +94,7 @@ Get Cloud Accounts by Type:
 // 		return nil
 // 	},
 // 	Run: func(cmd *cobra.Command, args []string) {
-// 		if err := auth.GetConnection(targetConfig, debug); err != nil {
+// 		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 // 			log.Fatalln(err)
 // 		}
 
@@ -115,7 +115,7 @@ Create a new AWS Cloud Account:
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(targetConfig, debug); err != nil {
+		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 
@@ -160,7 +160,7 @@ Delete a Cloud Account by Name:
 Delete a Cloud Account by ID:
   vra-cli delete cloudaccount --id <Cloud Account ID>`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(targetConfig, debug); err != nil {
+		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 		if account, err := getCloudAccounts(id, name, ""); err != nil {

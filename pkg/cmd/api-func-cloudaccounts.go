@@ -17,9 +17,9 @@ import (
 
 func getCloudAccounts(id string, name string, cloudaccounttype string) ([]*models.CloudAccount, error) {
 
-	// transport := httptransport.New(targetConfig.Server, "", nil)
+	// transport := httptransport.New(&targetConfig.Server, "", nil)
 	// // transport.SetDebug(debug)
-	// transport.DefaultAuthentication = httptransport.APIKeyAuth("Authorization", "header", "Bearer "+targetConfig.AccessToken)
+	// transport.DefaultAuthentication = httptransport.APIKeyAuth("Authorization", "header", "Bearer "+&targetConfig.AccessToken)
 	// apiclient := client.New(transport, strfmt.Default)
 
 	var filters []string
@@ -42,7 +42,7 @@ func getCloudAccounts(id string, name string, cloudaccounttype string) ([]*model
 	CloudAccountParams := cloud_account.NewGetCloudAccountsParams()
 	CloudAccountParams.DollarFilter = &filter
 
-	apiclient := auth.GetApiClient(targetConfig, debug)
+	apiclient := auth.GetApiClient(&targetConfig, debug)
 
 	ret, err := apiclient.CloudAccount.GetCloudAccounts(CloudAccountParams)
 	if err != nil {
@@ -61,7 +61,7 @@ func createCloudAccountAws(name, accesskey, secretkey, regions, tags string) (*m
 	AwsSpec.RegionIds = strings.Split(regions, ",")
 	AwsSpec.Tags = helpers.StringToTags(tags)
 
-	apiclient := auth.GetApiClient(targetConfig, debug)
+	apiclient := auth.GetApiClient(&targetConfig, debug)
 	createResp, err := apiclient.CloudAccount.CreateAwsCloudAccount(cloud_account.NewCreateAwsCloudAccountParams().WithBody(&AwsSpec))
 	if err != nil {
 		return nil, err
@@ -71,7 +71,7 @@ func createCloudAccountAws(name, accesskey, secretkey, regions, tags string) (*m
 }
 
 func createCloudAccountvSphere(name, description, fqdn, username, password, nsxcloudaccount, cloudproxy, tags string, insecure, createcloudzone bool) (*models.CloudAccountVsphere, error) {
-	apiclient := auth.GetApiClient(targetConfig, debug)
+	apiclient := auth.GetApiClient(&targetConfig, debug)
 
 	DatacenterIds, _ := getvSphereRegions(fqdn, username, password, cloudproxy, insecure)
 
@@ -99,7 +99,7 @@ func createCloudAccountvSphere(name, description, fqdn, username, password, nsxc
 }
 
 func getvSphereRegions(fqdn, username, password, cloudproxy string, insecure bool) (*models.CloudAccountRegions, error) {
-	apiclient := auth.GetApiClient(targetConfig, debug)
+	apiclient := auth.GetApiClient(&targetConfig, debug)
 
 	vSphereSpec := models.CloudAccountVsphereSpecification{
 		AcceptSelfSignedCertificate: insecure,
@@ -120,7 +120,7 @@ func getvSphereRegions(fqdn, username, password, cloudproxy string, insecure boo
 }
 
 func createCloudAccountNsxT(name, description, fqdn, username, password, vccloudaccount, cloudproxy, tags string, global, manager, insecure bool) (*models.CloudAccountNsxT, error) {
-	apiclient := auth.GetApiClient(targetConfig, debug)
+	apiclient := auth.GetApiClient(&targetConfig, debug)
 
 	if vccloudaccount != "" {
 		if vCenter, err := getCloudAccounts("", vccloudaccount, "vsphere"); err != nil {
@@ -159,7 +159,7 @@ func createCloudAccountNsxT(name, description, fqdn, username, password, vccloud
 
 func deleteCloudAccount(id string) error {
 
-	apiclient := auth.GetApiClient(targetConfig, debug)
+	apiclient := auth.GetApiClient(&targetConfig, debug)
 
 	_, err := apiclient.CloudAccount.DeleteAwsCloudAccount(cloud_account.NewDeleteAwsCloudAccountParams().WithID(id))
 	if err != nil {

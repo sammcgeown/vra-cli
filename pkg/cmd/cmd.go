@@ -14,6 +14,7 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/mrz1836/go-sanitize"
 	"github.com/sammcgeown/vra-cli/pkg/util/auth"
+	"github.com/sammcgeown/vra-cli/pkg/util/config"
 	types "github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -21,6 +22,7 @@ import (
 )
 
 var (
+	rootCmd *cobra.Command
 	// Configuration
 	cfgFile           string
 	currentTargetName string
@@ -55,21 +57,30 @@ var qParams = map[string]string{
 }
 
 // rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "vra-cli",
-	Short: "CLI Interface for VMware vRealize Automation Code Stream",
-	Long:  `Command line interface for VMware vRealize Automation Code Stream`,
+// var rootCmd = &cobra.Command{
+// 	Use:   "vra-cli",
+// 	Short: "CLI Interface for VMware vRealize Automation Code Stream",
+// 	Long:  `Command line interface for VMware vRealize Automation Code Stream`,
+// }
+
+func NewRootCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "vra-cli",
+		Short: "CLI Interface for VMware vRealize Automation Code Stream",
+		Long:  `Command line interface for VMware vRealize Automation Code Stream`,
+	}
 }
 
 // Execute is the main process
 func Execute() {
+	rootCmd = NewRootCmd()
 	if err := rootCmd.Execute(); err != nil {
 		log.Warnln(err)
 	}
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(InitConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.vra-cli.yaml)")
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Enable debug logging")
 	rootCmd.PersistentFlags().BoolVar(&ignoreCert, "ignoreCertificateWarnings", false, "Disable HTTPS Certificate Validation")
@@ -87,7 +98,7 @@ func init() {
 }
 
 // initConfig reads in config file and ENV variables if set.
-func initConfig() {
+func InitConfig() {
 	// Debug logging
 	log.SetFormatter(&log.TextFormatter{TimestampFormat: "2006-01-02 15:04:05", FullTimestamp: true})
 	if debug {
@@ -113,14 +124,7 @@ func initConfig() {
 	// If we're using ENV variables
 	if viper.Get("server") != nil { // VRA_SERVER environment variable is set
 		log.Debugln("Using ENV variables")
-		targetConfig = types.Config{
-			Domain:      viper.GetString("domain"),
-			Server:      sanitize.URL(viper.GetString("server")),
-			Username:    viper.GetString("username"),
-			Password:    viper.GetString("password"),
-			ApiToken:    viper.GetString("apitoken"),
-			AccessToken: viper.GetString("accesstoken"),
-		}
+		targetConfig = *config.GetConfigFromEnv()
 	} else {
 		if cfgFile != "" { // If the user has specified a config file
 			if file, err := os.Stat(cfgFile); err == nil { // Check if it exists
@@ -159,7 +163,7 @@ func initConfig() {
 		}
 
 		// Validate the configuration and credentials
-		if err := auth.GetConnection(targetConfig, debug); err != nil {
+		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 

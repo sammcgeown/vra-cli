@@ -17,7 +17,7 @@ import (
 	"github.com/vmware/vra-sdk-go/pkg/client"
 )
 
-func GetConnection(config types.Config, insecure bool) error {
+func GetConnection(config *types.Config, insecure bool) error {
 	if TestAccessToken(config, insecure) { // If the Access Token is OK
 		log.Debugln("Access Token is valid")
 	} else {
@@ -28,7 +28,7 @@ func GetConnection(config types.Config, insecure bool) error {
 			if config.Server == "api.mgmt.cloud.vmware.com" { // If it's vRA Cloud we have no credentials to authenticate
 				return refreshTokenError // Return the token error
 			}
-			config.ApiToken, credentialError = AuthenticateCredentials(config, insecure)
+			config.ApiToken, credentialError = AuthenticateCredentials(*config, insecure)
 			if credentialError != nil {
 				return credentialError // Return the credential error
 			}
@@ -53,9 +53,11 @@ func GetConnection(config types.Config, insecure bool) error {
 func AuthenticateCredentials(config types.Config, ignoreCert bool) (string, error) {
 	log.Debugln("Authenticating vRA with Credentials")
 	var authPath string
-	var authBody types.AuthenticationRequest
-	authBody.Username = config.Username
-	authBody.Password = config.Password
+	authBody := &types.AuthenticationRequest{
+		Username: config.Username,
+		Password: config.Password,
+	}
+
 	client := resty.New()
 
 	if config.Domain == "" {
@@ -83,7 +85,7 @@ func AuthenticateCredentials(config types.Config, ignoreCert bool) (string, erro
 }
 
 // authenticateApiToken - get vRA Access token (valid for 8h)
-func AuthenticateApiToken(config types.Config, ignoreCert bool) (string, error) {
+func AuthenticateApiToken(config *types.Config, ignoreCert bool) (string, error) {
 	log.Debug("Attempting to authenticate the API Refresh Token")
 	client := resty.New()
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
@@ -99,11 +101,9 @@ func AuthenticateApiToken(config types.Config, ignoreCert bool) (string, error) 
 	return queryResponse.Result().(*types.AuthenticationResponse).Token, err
 }
 
-func TestAccessToken(config types.Config, ignoreCert bool) bool {
-	client := resty.New()
-	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-		SetHeader("Accept", "application/json").
-		SetAuthToken(config.AccessToken).
+func TestAccessToken(config *types.Config, ignoreCert bool) bool {
+	client := GetRestClient(config, false)
+	queryResponse, err := client.R().
 		SetResult(&types.UserPreferences{}).
 		SetError(&types.Exception{}).
 		Get("https://" + config.Server + "/pipeline/api/user-preferences")
@@ -120,10 +120,21 @@ func TestAccessToken(config types.Config, ignoreCert bool) bool {
 	return true
 }
 
-func GetApiClient(config types.Config, debug bool) *client.MulticloudIaaS {
+func GetApiClient(config *types.Config, debug bool) *client.MulticloudIaaS {
 	transport := httptransport.New(config.Server, "", nil)
 	transport.SetDebug(debug)
 	transport.DefaultAuthentication = httptransport.APIKeyAuth("Authorization", "header", "Bearer "+config.AccessToken)
 	apiclient := client.New(transport, strfmt.Default)
 	return apiclient
+}
+
+func GetRestClient(config *types.Config, insecure bool) *resty.Client {
+	// Configure the Resty Client
+	client := resty.New().
+		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: insecure}).
+		SetAuthToken(config.AccessToken).
+		SetHostURL("https://"+config.Server).
+		SetHeader("Accept", "application/json").
+		SetError(&types.Exception{})
+	return client
 }

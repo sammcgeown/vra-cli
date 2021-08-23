@@ -14,7 +14,7 @@ import (
 func getDataCollectors(id string) ([]*models.DataCollector, error) {
 	var dataCollectors []*models.DataCollector
 
-	apiclient := auth.GetApiClient(targetConfig, debug)
+	apiclient := auth.GetApiClient(&targetConfig, debug)
 
 	if id != "" || name != "" {
 		// Get Data Collector by ID or Name

@@ -22,7 +22,7 @@ var getDeploymentCmd = &cobra.Command{
 	Short: "Get Deployments",
 	Long:  `Get Deployments`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(targetConfig, debug); err != nil {
+		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 

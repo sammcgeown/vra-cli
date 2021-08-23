@@ -1,5 +1,5 @@
 /*
-Package cmd Copyright 2021 VMware, Inc.
+Package variable Copyright 2021 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause
 */
 package variable
@@ -71,21 +71,6 @@ func GetVariable(client *resty.Client, id, name, project, exportPath string) ([]
 	return arrVariables, err
 }
 
-// GetVariableByID - get Code Stream Variable by ID
-// func GetVariableByID(id string) (*types.VariableResponse, error) {
-// 	client := resty.New()
-// 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-// 		SetQueryParams(qParams).
-// 		SetHeader("Accept", "application/json").
-// 		SetResult(&types.VariableResponse{}).
-// 		SetAuthToken(targetConfig.AccessToken).
-// 		Get("https://" + targetConfig.Server + "/pipeline/api/variables/" + id)
-// 	if queryResponse.IsError() {
-// 		log.Errorln("GET Variable failed", err)
-// 	}
-// 	return queryResponse.Result().(*types.VariableResponse), err
-// }
-
 // createVariable - Create a new Code Stream Variable
 func CreateVariable(client *resty.Client, name string, description string, variableType string, project string, value string) (*types.VariableResponse, error) {
 	queryResponse, err := client.R().
@@ -142,7 +127,7 @@ func DeleteVariable(client *resty.Client, id string) (*types.VariableResponse, e
 		SetResult(&types.VariableResponse{}).
 		Delete("/pipeline/api/variables/" + id)
 	if queryResponse.IsError() {
-		return nil, queryResponse.Error().(error)
+		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
 	return queryResponse.Result().(*types.VariableResponse), err
 }

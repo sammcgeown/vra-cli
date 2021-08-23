@@ -36,7 +36,7 @@ Get Projects by ID:
 Get Project by Name (case sensitive):
   vra-cli get project --name <project name>`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(targetConfig, debug); err != nil {
+		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 
@@ -103,7 +103,7 @@ var createProjectCommand = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(targetConfig, debug); err != nil {
+		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 
@@ -130,7 +130,7 @@ var updateProjectCommand = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(targetConfig, debug); err != nil {
+		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 
@@ -157,7 +157,7 @@ var deleteProjectCommand = &cobra.Command{
 Delete by ID:
   vra-cli delete project --id <project ID>`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(targetConfig, debug); err != nil {
+		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
 		if id != "" {
