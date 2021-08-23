@@ -8,31 +8,25 @@ import (
 	"crypto/tls"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/go-resty/resty/v2"
-	homedir "github.com/mitchellh/go-homedir"
-	"github.com/mrz1836/go-sanitize"
 	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/config"
 	types "github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
-	rootCmd *cobra.Command
 	// Configuration
-	cfgFile           string
-	currentTargetName string
-	targetConfig      types.Config
-	version           = "dev"
-	commit            = "none"
-	date              = "unknown"
-	builtBy           = "unknown"
-	apiVersion        = "2019-10-17"
-	client            *resty.Client
+	cfgFile      string
+	targetConfig types.Config
+	version      = "dev"
+	commit       = "none"
+	date         = "unknown"
+	builtBy      = "unknown"
+	apiVersion   = "2019-10-17"
+	client       *resty.Client
 	// Global Flags
 	debug      bool
 	ignoreCert bool
@@ -57,23 +51,14 @@ var qParams = map[string]string{
 }
 
 // rootCmd represents the base command when called without any subcommands
-// var rootCmd = &cobra.Command{
-// 	Use:   "vra-cli",
-// 	Short: "CLI Interface for VMware vRealize Automation Code Stream",
-// 	Long:  `Command line interface for VMware vRealize Automation Code Stream`,
-// }
-
-func NewRootCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "vra-cli",
-		Short: "CLI Interface for VMware vRealize Automation Code Stream",
-		Long:  `Command line interface for VMware vRealize Automation Code Stream`,
-	}
+var rootCmd = &cobra.Command{
+	Use:   "vra-cli",
+	Short: "CLI Interface for VMware vRealize Automation Code Stream",
+	Long:  `Command line interface for VMware vRealize Automation Code Stream`,
 }
 
 // Execute is the main process
 func Execute() {
-	rootCmd = NewRootCmd()
 	if err := rootCmd.Execute(); err != nil {
 		log.Warnln(err)
 	}
@@ -108,59 +93,25 @@ func InitConfig() {
 		log.SetLevel(log.InfoLevel)
 	}
 	// Home directory
-	home, err := homedir.Dir()
-	if err != nil {
-		log.Fatalln(err)
-	}
+	// home, err := homedir.Dir()
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
 
-	viper.SetConfigName(".vra-cli")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(home)
+	// viper.SetConfigName(".vra-cli")
+	// viper.SetConfigType("yaml")
+	// viper.AddConfigPath(home)
 
-	// Bind ENV variables
-	viper.SetEnvPrefix("vra")
-	viper.AutomaticEnv()
+	// // Bind ENV variables
+	// viper.SetEnvPrefix("vra")
+	// viper.AutomaticEnv()
 
 	// If we're using ENV variables
-	if viper.Get("server") != nil { // VRA_SERVER environment variable is set
-		log.Debugln("Using ENV variables")
+	if os.Getenv("VRA_SERVER") != "" { // VRA_SERVER environment variable is set
 		targetConfig = *config.GetConfigFromEnv()
 	} else {
-		if cfgFile != "" { // If the user has specified a config file
-			if file, err := os.Stat(cfgFile); err == nil { // Check if it exists
-				viper.SetConfigFile(file.Name())
-			} else {
-				log.Fatalln("File specified with --config does not exist")
-			}
-		}
-		// Attempt to read the configuration file
-		if err := viper.ReadInConfig(); err != nil {
-			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-				viper.SetConfigType("yaml")
-				viper.WriteConfigAs(filepath.Join(home, ".vra-cli"))
-				viper.ReadInConfig()
-			} else {
-				log.Fatalln(err)
-			}
-		}
-		currentTargetName = viper.GetString("currentTargetName")
-		if currentTargetName != "" {
-			log.Debugln("Using config:", viper.ConfigFileUsed())
-			log.Infoln("Context:", currentTargetName)
-			configuration := viper.Sub("target." + currentTargetName)
-			if configuration == nil { // Sub returns nil if the key cannot be found
-				log.Fatalln("Target configuration not found")
-			}
-			targetConfig = types.Config{
-				Name:        currentTargetName,
-				Domain:      configuration.GetString("domain"),
-				Server:      sanitize.URL(configuration.GetString("server")),
-				Username:    configuration.GetString("username"),
-				Password:    configuration.GetString("password"),
-				ApiToken:    configuration.GetString("apitoken"),
-				AccessToken: configuration.GetString("accesstoken"),
-			}
-		}
+		// If we're using a config file
+		targetConfig = *config.GetConfigFromFile(cfgFile)
 
 		// Validate the configuration and credentials
 		if err := auth.GetConnection(&targetConfig, debug); err != nil {
