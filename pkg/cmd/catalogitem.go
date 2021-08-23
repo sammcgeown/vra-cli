@@ -5,14 +5,11 @@ SPDX-License-Identifier: BSD-2-Clause
 package cmd
 
 import (
-	"encoding/json"
-	"fmt"
 	"os"
 	"strings"
 
-	"github.com/sammcgeown/vra-cli/pkg/util/auth"
+	"github.com/sammcgeown/vra-cli/pkg/cmd/catalogitem"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
-	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/olekukonko/tablewriter"
@@ -30,11 +27,8 @@ var getCatalogItemCmd = &cobra.Command{
 	Short: "Get Catalog Items",
 	Long:  `Get Catalog Items`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
 
-		response, err := getCatalogItems(id, name, projectName)
+		response, err := catalogitem.GetCatalogItems(client, id, name, projectName)
 		if err != nil {
 			log.Infoln("Unable to get CatalogItems: ", err)
 		}
@@ -74,49 +68,49 @@ vra-cli create catalogitem --id 69787c80-b5d8-3d03-8ec0-a0fe67edc9e2 --project "
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
-		requestContent := types.CatalogItemRequest{}
+		// if err := auth.GetConnection(targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
+		// requestContent := types.CatalogItemRequest{}
 
-		if helpers.IsInputFromPipe() {
-			if err := json.NewDecoder(os.Stdin).Decode(&requestContent); err != nil {
-				log.Warnln(err)
-			}
-		} else {
+		// if helpers.IsInputFromPipe() {
+		// 	if err := json.NewDecoder(os.Stdin).Decode(&requestContent); err != nil {
+		// 		log.Warnln(err)
+		// 	}
+		// } else {
 
-			requestContent.DeploymentName = deploymentName
-			requestContent.Reason = fmt.Sprint("[vra-cli]", deploymentReason)
+		// 	requestContent.DeploymentName = deploymentName
+		// 	requestContent.Reason = fmt.Sprint("[vra-cli]", deploymentReason)
 
-			targetProject, pErr := getProject("", projectName)
-			if pErr != nil {
-				log.Fatalln(pErr)
-			} else {
-				requestContent.ProjectId = *targetProject[0].ID
-				log.Debugln("Found Project ID:", requestContent.ProjectId)
-			}
+		// 	targetProject, pErr := getProject("", projectName)
+		// 	if pErr != nil {
+		// 		log.Fatalln(pErr)
+		// 	} else {
+		// 		requestContent.ProjectId = *targetProject[0].ID
+		// 		log.Debugln("Found Project ID:", requestContent.ProjectId)
+		// 	}
 
-			catalogItems, cErr := getCatalogItems(id, name, projectName)
-			if cErr != nil {
-				log.Fatalln(cErr)
-			} else {
-				if len(catalogItems) == 1 {
-					log.Debugln("Found Catalog Item ID:", catalogItems[0].Id)
-					// requestContent.Inputs = getCatalogItemInputs(catalogItems[0].Schema.Properties)
-				} else {
-					log.Errorln(len(catalogItems), "Catalog Items found")
-				}
-				log.Debugln(requestContent)
-			}
-		}
+		// 	catalogItems, cErr := getCatalogItems(id, name, projectName)
+		// 	if cErr != nil {
+		// 		log.Fatalln(cErr)
+		// 	} else {
+		// 		if len(catalogItems) == 1 {
+		// 			log.Debugln("Found Catalog Item ID:", catalogItems[0].Id)
+		// 			// requestContent.Inputs = getCatalogItemInputs(catalogItems[0].Schema.Properties)
+		// 		} else {
+		// 			log.Errorln(len(catalogItems), "Catalog Items found")
+		// 		}
+		// 		log.Debugln(requestContent)
+		// 	}
+		// }
 
-		requestResponse, rErr := createCatalogItemRequest(id, requestContent)
-		if rErr != nil {
-			log.Fatalln(rErr)
-		} else {
-			log.Infoln("Catalog Item request created successfully", requestResponse.DeploymentId)
-			log.Infoln("Use vra-cli get deployment --id", requestResponse.DeploymentId, "to view the deployment status")
-		}
+		// requestResponse, rErr := createCatalogItemRequest(id, requestContent)
+		// if rErr != nil {
+		// 	log.Fatalln(rErr)
+		// } else {
+		// 	log.Infoln("Catalog Item request created successfully", requestResponse.DeploymentId)
+		// 	log.Infoln("Use vra-cli get deployment --id", requestResponse.DeploymentId, "to view the deployment status")
+		// }
 
 	},
 }

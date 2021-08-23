@@ -5,15 +5,17 @@ SPDX-License-Identifier: BSD-2-Clause
 package cmd
 
 import (
+	"crypto/tls"
 	"fmt"
 	"os"
 	"path/filepath"
 
-	"github.com/mrz1836/go-sanitize"
-	log "github.com/sirupsen/logrus"
-
+	"github.com/go-resty/resty/v2"
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mrz1836/go-sanitize"
+	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	types "github.com/sammcgeown/vra-cli/pkg/util/types"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -28,6 +30,7 @@ var (
 	date              = "unknown"
 	builtBy           = "unknown"
 	apiVersion        = "2019-10-17"
+	client            *resty.Client
 	// Global Flags
 	debug      bool
 	ignoreCert bool
@@ -154,6 +157,18 @@ func initConfig() {
 				AccessToken: configuration.GetString("accesstoken"),
 			}
 		}
+
+		// Validate the configuration and credentials
+		if err := auth.GetConnection(targetConfig, debug); err != nil {
+			log.Fatalln(err)
+		}
+
+		// Configure the REST client defaults
+		client = resty.New().
+			SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).
+			SetAuthToken(targetConfig.AccessToken).
+			SetHostURL("https://"+targetConfig.Server).
+			SetHeader("Accept", "application/json")
 	}
 }
 
