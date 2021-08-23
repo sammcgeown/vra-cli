@@ -168,7 +168,8 @@ func initConfig() {
 			SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).
 			SetAuthToken(targetConfig.AccessToken).
 			SetHostURL("https://"+targetConfig.Server).
-			SetHeader("Accept", "application/json")
+			SetHeader("Accept", "application/json").
+			SetError(&types.Exception{})
 	}
 }
 

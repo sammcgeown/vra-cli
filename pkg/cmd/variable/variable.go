@@ -2,16 +2,16 @@
 Package cmd Copyright 2021 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause
 */
-package cmd
+package variable
 
 import (
 	"bytes"
-	"crypto/tls"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
@@ -22,38 +22,40 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func getVariable(id, name, project, exportPath string) ([]*types.VariableResponse, error) {
+func GetVariable(client *resty.Client, id, name, project, exportPath string) ([]*types.VariableResponse, error) {
 	var arrVariables []*types.VariableResponse
-	//var qParams = make(map[string]string)
-	client := resty.New()
 
 	// Get by ID
 	if id != "" {
-		v, e := getVariableByID(id)
-		arrVariables = append(arrVariables, v)
-		return arrVariables, e
-	}
-	if name != "" && project != "" {
-		qParams["$filter"] = "((name eq '" + name + "') and (project eq '" + project + "'))"
-	} else {
-		// Get by name
-		if name != "" {
-			qParams["$filter"] = "(name eq '" + name + "')"
+		queryResponse, err := client.R().
+			SetResult(&types.VariableResponse{}).
+			Get("/pipeline/api/variables/" + id)
+
+		if queryResponse.IsError() {
+			log.Errorln("GET Variable failed", err)
 		}
-		// Get by project
-		if project != "" {
-			qParams["$filter"] = "(project eq '" + project + "')"
-		}
+		arrVariables = append(arrVariables, queryResponse.Result().(*types.VariableResponse))
+		return arrVariables, err
 	}
-	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-		SetQueryParams(qParams).
-		SetHeader("Accept", "application/json").
+
+	var filters []string
+	if name != "" {
+		filters = append(filters, "(name eq '"+name+"')")
+	}
+	if project != "" {
+		filters = append(filters, "(project eq '"+project+"')")
+	}
+	if len(filters) > 0 {
+		client.QueryParam.Add("$filter", "("+strings.Join(filters, ") and (")+")")
+		log.Debugln(client.QueryParam)
+	}
+
+	queryResponse, err := client.R().
 		SetResult(&types.DocumentsList{}).
-		SetAuthToken(targetConfig.AccessToken).
-		Get("https://" + targetConfig.Server + "/pipeline/api/variables")
+		Get("/pipeline/api/variables")
 
 	if queryResponse.IsError() {
-		return nil, queryResponse.Error().(error)
+		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
 
 	log.Debugln(queryResponse.Request.URL)
@@ -63,32 +65,30 @@ func getVariable(id, name, project, exportPath string) ([]*types.VariableRespons
 		mapstructure.Decode(value, &c)
 		arrVariables = append(arrVariables, &c)
 		if exportPath != "" {
-			exportVariable(c, exportPath)
+			ExportVariable(c, exportPath)
 		}
 	}
 	return arrVariables, err
 }
 
-// getVariableByID - get Code Stream Variable by ID
-func getVariableByID(id string) (*types.VariableResponse, error) {
-	client := resty.New()
-	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-		SetQueryParams(qParams).
-		SetHeader("Accept", "application/json").
-		SetResult(&types.VariableResponse{}).
-		SetAuthToken(targetConfig.AccessToken).
-		Get("https://" + targetConfig.Server + "/pipeline/api/variables/" + id)
-	if queryResponse.IsError() {
-		log.Errorln("GET Variable failed", err)
-	}
-	return queryResponse.Result().(*types.VariableResponse), err
-}
+// GetVariableByID - get Code Stream Variable by ID
+// func GetVariableByID(id string) (*types.VariableResponse, error) {
+// 	client := resty.New()
+// 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
+// 		SetQueryParams(qParams).
+// 		SetHeader("Accept", "application/json").
+// 		SetResult(&types.VariableResponse{}).
+// 		SetAuthToken(targetConfig.AccessToken).
+// 		Get("https://" + targetConfig.Server + "/pipeline/api/variables/" + id)
+// 	if queryResponse.IsError() {
+// 		log.Errorln("GET Variable failed", err)
+// 	}
+// 	return queryResponse.Result().(*types.VariableResponse), err
+// }
 
 // createVariable - Create a new Code Stream Variable
-func createVariable(name string, description string, variableType string, project string, value string) (*types.VariableResponse, error) {
-	client := resty.New()
-	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-		SetQueryParams(qParams).
+func CreateVariable(client *resty.Client, name string, description string, variableType string, project string, value string) (*types.VariableResponse, error) {
+	queryResponse, err := client.R().
 		SetBody(
 			types.VariableRequest{
 				Project:     project,
@@ -98,11 +98,9 @@ func createVariable(name string, description string, variableType string, projec
 				Type:        variableType,
 				Value:       value,
 			}).
-		SetHeader("Accept", "application/json").
 		SetResult(&types.VariableResponse{}).
 		SetError(&types.Exception{}).
-		SetAuthToken(targetConfig.AccessToken).
-		Post("https://" + targetConfig.Server + "/pipeline/api/variables")
+		Post("/pipeline/api/variables")
 	if queryResponse.IsError() {
 		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
@@ -110,8 +108,9 @@ func createVariable(name string, description string, variableType string, projec
 }
 
 // updateVariable - Create a new Code Stream Variable
-func updateVariable(id string, name string, description string, typename string, value string) (*types.VariableResponse, error) {
-	variable, _ := getVariableByID(id)
+func UpdateVariable(client *resty.Client, id string, name string, description string, typename string, value string) (*types.VariableResponse, error) {
+	variables, _ := GetVariable(client, id, "", "", "")
+	variable := variables[0]
 	if name != "" {
 		variable.Name = name
 	}
@@ -124,15 +123,13 @@ func updateVariable(id string, name string, description string, typename string,
 	if value != "" {
 		variable.Value = value
 	}
-	client := resty.New()
-	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-		SetQueryParams(qParams).
+
+	queryResponse, err := client.R().
 		SetBody(variable).
-		SetHeader("Accept", "application/json").
 		SetResult(&types.VariableResponse{}).
 		SetError(&types.Exception{}).
-		SetAuthToken(targetConfig.AccessToken).
-		Put("https://" + targetConfig.Server + "/pipeline/api/variables/" + id)
+		Put("/pipeline/api/variables/" + id)
+
 	if queryResponse.IsError() {
 		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
@@ -140,31 +137,26 @@ func updateVariable(id string, name string, description string, typename string,
 }
 
 // deleteVariable - Delete a Code Stream Variable
-func deleteVariable(id string) (*types.VariableResponse, error) {
-	client := resty.New()
-	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-		SetQueryParams(qParams).
-		SetHeader("Accept", "application/json").
+func DeleteVariable(client *resty.Client, id string) (*types.VariableResponse, error) {
+	queryResponse, err := client.R().
 		SetResult(&types.VariableResponse{}).
-		SetAuthToken(targetConfig.AccessToken).
-		Delete("https://" + targetConfig.Server + "/pipeline/api/variables/" + id)
+		Delete("/pipeline/api/variables/" + id)
 	if queryResponse.IsError() {
 		return nil, queryResponse.Error().(error)
 	}
 	return queryResponse.Result().(*types.VariableResponse), err
 }
 
-func deleteVariableByProject(project string) ([]*types.VariableResponse, error) {
+func DeleteVariableByProject(client *resty.Client, project string) ([]*types.VariableResponse, error) {
 	var deletedVariables []*types.VariableResponse
-	Variables, err := getVariable("", "", project, "")
+	Variables, err := GetVariable(client, "", "", project, "")
 	if err != nil {
 		return nil, err
 	}
 	confirm := helpers.AskForConfirmation("This will attempt to delete " + fmt.Sprint(len(Variables)) + " variables in " + project + ", are you sure?")
 	if confirm {
-
 		for _, Variable := range Variables {
-			deletedVariable, err := deleteVariable(Variable.ID)
+			deletedVariable, err := DeleteVariable(client, Variable.ID)
 			if err != nil {
 				log.Warnln("Unable to delete "+Variable.Name, err)
 			}
@@ -177,7 +169,7 @@ func deleteVariableByProject(project string) ([]*types.VariableResponse, error) 
 }
 
 // exportVariable - Export a variable to YAML
-func exportVariable(variable interface{}, exportPath string) {
+func ExportVariable(variable interface{}, exportPath string) {
 	var exportFile string
 	// variable will be a types.VariableResponse, so lets remap to types.VariableRequest
 	c := types.VariableRequest{}
@@ -203,7 +195,7 @@ func exportVariable(variable interface{}, exportPath string) {
 }
 
 // importVariables - Import variables from the filePath
-func importVariables(filePath string) []types.VariableRequest {
+func ImportVariables(filePath string) []types.VariableRequest {
 	var returnVariables []types.VariableRequest
 	filename, _ := filepath.Abs(filePath)
 	yamlFile, err := ioutil.ReadFile(filename)

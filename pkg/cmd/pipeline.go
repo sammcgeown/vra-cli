@@ -15,6 +15,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/olekukonko/tablewriter"
+	"github.com/sammcgeown/vra-cli/pkg/cmd/variable"
 	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
@@ -113,7 +114,7 @@ vra-cli get execution --status Failed`,
 					if len(variables) > 0 {
 						log.Infoln(c.Name, "depends on Variables:", strings.Join(variables, ", "))
 						for _, v := range variables {
-							getVariable("", v, c.Project, exportPath)
+							variable.GetVariable(client, "", v, c.Project, exportPath)
 						}
 					}
 					pipelines = helpers.RemoveDuplicateStrings(pipelines)

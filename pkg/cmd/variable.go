@@ -7,16 +7,17 @@ package cmd
 import (
 	"os"
 
-	"github.com/sammcgeown/vra-cli/pkg/util/auth"
+	"github.com/sammcgeown/vra-cli/pkg/cmd/variable"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
 
-// getVariableCmd represents the variable command
-var getVariableCmd = &cobra.Command{
+// GetVariableCmd represents the variable command
+var GetVariableCmd = &cobra.Command{
 	Use:   "variable",
 	Short: "Get Variables",
 	Long: `Get Code Stream Variables by name, project or by id - e.g:
@@ -30,11 +31,8 @@ vra-cli get variable --name my-variable
 # Get Variable by Project
 vra-cli get variable --project production`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
 
-		response, err := getVariable(id, name, projectName, exportPath)
+		response, err := variable.GetVariable(client, id, name, projectName, exportPath)
 		if err != nil {
 			log.Fatalln("Unable to get Code Stream Variables: ", err)
 		}
@@ -45,7 +43,7 @@ vra-cli get variable --project production`,
 		} else if resultCount == 1 {
 			// Print the single result
 			if exportPath != "" {
-				exportVariable(response[0], exportPath)
+				variable.ExportVariable(response[0], exportPath)
 			}
 			helpers.PrettyPrint(response[0])
 		} else {
@@ -60,23 +58,20 @@ vra-cli get variable --project production`,
 	},
 }
 
-// getVariableCmd represents the variable command
+// GetVariableCmd represents the variable command
 var createVariableCmd = &cobra.Command{
 	Use:   "variable",
 	Short: "Create a Variable",
 	Long:  `Create a Variable`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
 
 		if importPath != "" { // If we are importing a file
-			variables := importVariables(importPath)
+			variables := variable.ImportVariables(importPath)
 			for _, value := range variables {
 				if projectName != "" { // If the project is specified update the object
 					value.Project = projectName
 				}
-				createResponse, err := createVariable(value.Name, value.Description, value.Type, value.Project, value.Value)
+				createResponse, err := variable.CreateVariable(client, value.Name, value.Description, value.Type, value.Project, value.Value)
 				if err != nil {
 					log.Warnln("Unable to create Code Stream Variable: ", err)
 				} else {
@@ -84,7 +79,7 @@ var createVariableCmd = &cobra.Command{
 				}
 			}
 		} else {
-			createResponse, err := createVariable(name, description, typename, projectName, value)
+			createResponse, err := variable.CreateVariable(client, name, description, typename, projectName, value)
 			if err != nil {
 				log.Errorln("Unable to create Code Stream Variable: ", err)
 			} else {
@@ -100,18 +95,15 @@ var updateVariableCmd = &cobra.Command{
 	Short: "Update a Variable",
 	Long:  `Update a Variable`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
 
 		if importPath != "" { // If we are importing a file
-			variables := importVariables(importPath)
+			variables := variable.ImportVariables(importPath)
 			for _, value := range variables {
-				exisitingVariable, err := getVariable("", value.Name, value.Project, "")
+				exisitingVariable, err := variable.GetVariable(client, "", value.Name, value.Project, "")
 				if err != nil {
 					log.Errorln("Update failed - unable to find existing Code Stream Variable", value.Name, "in", value.Project)
 				} else {
-					_, err := updateVariable(exisitingVariable[0].ID, value.Name, value.Description, value.Type, value.Value)
+					_, err := variable.UpdateVariable(client, exisitingVariable[0].ID, value.Name, value.Description, value.Type, value.Value)
 					if err != nil {
 						log.Errorln("Unable to update Code Stream Variable: ", err)
 					} else {
@@ -120,7 +112,7 @@ var updateVariableCmd = &cobra.Command{
 				}
 			}
 		} else { // Else we are updating using flags
-			updateResponse, err := updateVariable(id, name, description, typename, value)
+			updateResponse, err := variable.UpdateVariable(client, id, name, description, typename, value)
 			if err != nil {
 				log.Errorln("Unable to update Code Stream Variable: ", err)
 			}
@@ -148,19 +140,16 @@ vra-cli delete variable --name "My Variable" --project "My Project"
 vra-cli delete variable --project "My Project"
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
 
 		if id != "" {
-			response, err := deleteVariable(id)
+			response, err := variable.DeleteVariable(client, id)
 			if err != nil {
 				log.Errorln("Unable to delete variable: ", err)
 			} else {
 				log.Infoln("Variable with id " + response.ID + " deleted")
 			}
 		} else if projectName != "" {
-			response, err := deleteVariableByProject(projectName)
+			response, err := variable.DeleteVariableByProject(client, projectName)
 			if err != nil {
 				log.Errorln("Delete Variables in "+projectName+" failed:", err)
 			} else {
@@ -172,11 +161,11 @@ vra-cli delete variable --project "My Project"
 
 func init() {
 	// Get Variable
-	getCmd.AddCommand(getVariableCmd)
-	getVariableCmd.Flags().StringVarP(&name, "name", "n", "", "List variable with name")
-	getVariableCmd.Flags().StringVarP(&projectName, "project", "p", "", "List variables in project")
-	getVariableCmd.Flags().StringVarP(&id, "id", "i", "", "List variables by id")
-	getVariableCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
+	getCmd.AddCommand(GetVariableCmd)
+	GetVariableCmd.Flags().StringVarP(&name, "name", "n", "", "List variable with name")
+	GetVariableCmd.Flags().StringVarP(&projectName, "project", "p", "", "List variables in project")
+	GetVariableCmd.Flags().StringVarP(&id, "id", "i", "", "List variables by id")
+	GetVariableCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
 	// Create Variable
 	createCmd.AddCommand(createVariableCmd)
 	createVariableCmd.Flags().StringVarP(&name, "name", "n", "", "The name of the variable to create")
