@@ -28,7 +28,7 @@ var getCatalogItemCmd = &cobra.Command{
 	Long:  `Get Catalog Items`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		response, err := catalogitem.GetCatalogItems(client, id, name, projectName)
+		response, err := catalogitem.GetCatalogItems(restClient, id, name, projectName)
 		if err != nil {
 			log.Infoln("Unable to get CatalogItems: ", err)
 		}

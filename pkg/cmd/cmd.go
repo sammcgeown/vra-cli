@@ -15,6 +15,7 @@ import (
 	types "github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/vmware/vra-sdk-go/pkg/client"
 )
 
 var (
@@ -26,7 +27,8 @@ var (
 	date         = "unknown"
 	builtBy      = "unknown"
 	apiVersion   = "2019-10-17"
-	client       *resty.Client
+	restClient   *resty.Client
+	apiClient    *client.MulticloudIaaS
 	// Global Flags
 	debug      bool
 	ignoreCert bool
@@ -92,19 +94,6 @@ func InitConfig() {
 	} else {
 		log.SetLevel(log.InfoLevel)
 	}
-	// Home directory
-	// home, err := homedir.Dir()
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
-
-	// viper.SetConfigName(".vra-cli")
-	// viper.SetConfigType("yaml")
-	// viper.AddConfigPath(home)
-
-	// // Bind ENV variables
-	// viper.SetEnvPrefix("vra")
-	// viper.AutomaticEnv()
 
 	// If we're using ENV variables
 	if os.Getenv("VRA_SERVER") != "" { // VRA_SERVER environment variable is set
@@ -119,12 +108,15 @@ func InitConfig() {
 		}
 
 		// Configure the REST client defaults
-		client = resty.New().
+		restClient = resty.New().
 			SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).
 			SetAuthToken(targetConfig.AccessToken).
 			SetHostURL("https://"+targetConfig.Server).
 			SetHeader("Accept", "application/json").
 			SetError(&types.Exception{})
+
+		apiClient = auth.GetApiClient(&targetConfig, debug)
+
 	}
 }
 

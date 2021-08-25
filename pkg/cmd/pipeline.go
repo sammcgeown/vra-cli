@@ -114,7 +114,7 @@ vra-cli get execution --status Failed`,
 					if len(variables) > 0 {
 						log.Infoln(c.Name, "depends on Variables:", strings.Join(variables, ", "))
 						for _, v := range variables {
-							variable.GetVariable(client, "", v, c.Project, exportPath)
+							variable.GetVariable(restClient, "", v, c.Project, exportPath)
 						}
 					}
 					pipelines = helpers.RemoveDuplicateStrings(pipelines)

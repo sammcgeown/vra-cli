@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/sammcgeown/vra-cli/pkg/cmd/project"
 	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	CloudAssembly "github.com/sammcgeown/vra-cli/pkg/util/types"
@@ -160,7 +161,7 @@ var createCloudTemplateCmd = &cobra.Command{
 		// If project flag is set, get the project ID and update the request
 		if projectName != "" {
 			log.Debugln("Project: " + projectName)
-			projectObj, pErr := getProject("", projectName)
+			projectObj, pErr := project.GetProject(apiClient, apiVersion, "", projectName)
 			if pErr != nil {
 				log.Fatalln(pErr)
 			} else if len(projectObj) == 1 {

@@ -32,7 +32,7 @@ vra-cli get variable --name my-variable
 vra-cli get variable --project production`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		response, err := variable.GetVariable(client, id, name, projectName, exportPath)
+		response, err := variable.GetVariable(restClient, id, name, projectName, exportPath)
 		if err != nil {
 			log.Fatalln("Unable to get Code Stream Variables: ", err)
 		}
@@ -71,7 +71,7 @@ var createVariableCmd = &cobra.Command{
 				if projectName != "" { // If the project is specified update the object
 					value.Project = projectName
 				}
-				createResponse, err := variable.CreateVariable(client, value.Name, value.Description, value.Type, value.Project, value.Value)
+				createResponse, err := variable.CreateVariable(restClient, value.Name, value.Description, value.Type, value.Project, value.Value)
 				if err != nil {
 					log.Warnln("Unable to create Code Stream Variable: ", err)
 				} else {
@@ -79,7 +79,7 @@ var createVariableCmd = &cobra.Command{
 				}
 			}
 		} else {
-			createResponse, err := variable.CreateVariable(client, name, description, typename, projectName, value)
+			createResponse, err := variable.CreateVariable(restClient, name, description, typename, projectName, value)
 			if err != nil {
 				log.Errorln("Unable to create Code Stream Variable: ", err)
 			} else {
@@ -99,11 +99,11 @@ var updateVariableCmd = &cobra.Command{
 		if importPath != "" { // If we are importing a file
 			variables := variable.ImportVariables(importPath)
 			for _, value := range variables {
-				exisitingVariable, err := variable.GetVariable(client, "", value.Name, value.Project, "")
+				exisitingVariable, err := variable.GetVariable(restClient, "", value.Name, value.Project, "")
 				if err != nil {
 					log.Errorln("Update failed - unable to find existing Code Stream Variable", value.Name, "in", value.Project)
 				} else {
-					_, err := variable.UpdateVariable(client, exisitingVariable[0].ID, value.Name, value.Description, value.Type, value.Value)
+					_, err := variable.UpdateVariable(restClient, exisitingVariable[0].ID, value.Name, value.Description, value.Type, value.Value)
 					if err != nil {
 						log.Errorln("Unable to update Code Stream Variable: ", err)
 					} else {
@@ -112,7 +112,7 @@ var updateVariableCmd = &cobra.Command{
 				}
 			}
 		} else { // Else we are updating using flags
-			updateResponse, err := variable.UpdateVariable(client, id, name, description, typename, value)
+			updateResponse, err := variable.UpdateVariable(restClient, id, name, description, typename, value)
 			if err != nil {
 				log.Errorln("Unable to update Code Stream Variable: ", err)
 			}
@@ -142,14 +142,14 @@ vra-cli delete variable --project "My Project"
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if id != "" {
-			response, err := variable.DeleteVariable(client, id)
+			response, err := variable.DeleteVariable(restClient, id)
 			if err != nil {
 				log.Errorln("Unable to delete variable: ", err)
 			} else {
 				log.Infoln("Variable with id " + response.ID + " deleted")
 			}
 		} else if projectName != "" {
-			response, err := variable.DeleteVariableByProject(client, projectName)
+			response, err := variable.DeleteVariableByProject(restClient, projectName)
 			if err != nil {
 				log.Errorln("Delete Variables in "+projectName+" failed:", err)
 			} else {

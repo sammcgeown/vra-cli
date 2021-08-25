@@ -35,8 +35,6 @@ func TestCreateVariable(t *testing.T) {
 
 	variable, err := CreateVariable(client, "test", "test", "REGULAR", "vra-cli-testing", "test")
 
-	defer DeleteVariable(client, variable.ID)
-
 	assert.NilError(t, err)
 	assert.Equal(t, variable.Name, "test")
 	assert.Equal(t, variable.Type, "REGULAR")
@@ -45,24 +43,3 @@ func TestCreateVariable(t *testing.T) {
 	assert.Equal(t, variable.Project, "vra-cli-testing")
 
 }
-
-// func TestGetVariable(t *testing.T) {
-
-// 	getVariableById, err := GetVariable(client, variable.ID, "", "", "")
-
-// 	assert.NilError(t, err)
-
-// 	if len(getVariableById) != 1 {
-// 		t.Errorf("Expected 1 variable, got %d", len(getVariableById))
-// 	}
-// 	assert.Equal(t, getVariableById[0].Name, "test")
-// }
-
-// func TestDeleteVariable(t *testing.T) {
-// 	client := auth.GetRestClient(targetConfig, insecure)
-
-// 	_, err := DeleteVariable(client, variable.ID)
-
-// 	assert.NilError(t, err)
-
-// }

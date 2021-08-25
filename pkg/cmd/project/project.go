@@ -1,20 +1,20 @@
 /*
-Package cmd Copyright 2021 VMware, Inc.
+Package project Copyright 2021 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause
 */
-package cmd
+package project
 
 import (
 	"errors"
 	"strings"
 
-	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmware/vra-sdk-go/pkg/client"
 	"github.com/vmware/vra-sdk-go/pkg/client/project"
 	"github.com/vmware/vra-sdk-go/pkg/models"
 )
 
-func getProject(id, name string) ([]*models.Project, error) {
+func GetProject(apiClient *client.MulticloudIaaS, apiVersion string, name string, id string) ([]*models.Project, error) {
 	var filters []string
 	var filter string
 	if id != "" {
@@ -28,8 +28,6 @@ func getProject(id, name string) ([]*models.Project, error) {
 	}
 
 	log.Debugln("Filter:", filter)
-
-	apiClient := auth.GetApiClient(&targetConfig, debug)
 
 	ProjectParams := project.NewGetProjectsParams()
 	ProjectParams.DollarFilter = &filter
@@ -46,8 +44,7 @@ func getProject(id, name string) ([]*models.Project, error) {
 	return ret.Payload.Content, nil
 }
 
-func deleteProject(id string) error {
-	apiClient := auth.GetApiClient(&targetConfig, debug)
+func DeleteProject(apiClient *client.MulticloudIaaS, apiVersion string, id string) error {
 
 	// Workaround an issue where the cloud regions need to be removed before the project can be deleted.
 	_, err := apiClient.Project.UpdateProject(project.NewUpdateProjectParams().WithAPIVersion(&apiVersion).WithID(id).WithBody(&models.ProjectSpecification{
@@ -64,8 +61,7 @@ func deleteProject(id string) error {
 	return nil
 }
 
-func createProject(name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.Project, error) {
-	apiClient := auth.GetApiClient(&targetConfig, debug)
+func CreateProject(apiClient *client.MulticloudIaaS, apiVersion string, name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.Project, error) {
 	createdProject, err := apiClient.Project.CreateProject(project.NewCreateProjectParams().WithAPIVersion(&apiVersion).WithBody(&models.ProjectSpecification{
 		Administrators:               administrators,
 		Constraints:                  constraints,
@@ -84,8 +80,7 @@ func createProject(name string, description string, administrators []*models.Use
 	return createdProject.Payload, nil
 }
 
-func updateProject(id string, name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.Project, error) {
-	apiClient := auth.GetApiClient(&targetConfig, debug)
+func UpdateProject(apiClient *client.MulticloudIaaS, apiVersion string, id string, name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.Project, error) {
 	ProjectSpecification := models.ProjectSpecification{}
 
 	if len(administrators) > 0 {
