@@ -22,6 +22,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// GetVariable - Get a Code Stream Variable
 func GetVariable(client *resty.Client, id, name, project, exportPath string) ([]*types.VariableResponse, error) {
 	var arrVariables []*types.VariableResponse
 
@@ -52,13 +53,15 @@ func GetVariable(client *resty.Client, id, name, project, exportPath string) ([]
 
 	queryResponse, err := client.R().
 		SetResult(&types.DocumentsList{}).
+		SetError(&types.Exception{}).
 		Get("/pipeline/api/variables")
 
-	if queryResponse.IsError() {
+	if err != nil {
 		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
 
 	log.Debugln(queryResponse.Request.URL)
+	log.Debugln(queryResponse.RawResponse)
 
 	for _, value := range queryResponse.Result().(*types.DocumentsList).Documents {
 		c := types.VariableResponse{}
@@ -71,7 +74,7 @@ func GetVariable(client *resty.Client, id, name, project, exportPath string) ([]
 	return arrVariables, err
 }
 
-// createVariable - Create a new Code Stream Variable
+// CreateVariable - Create a new Code Stream Variable
 func CreateVariable(client *resty.Client, name string, description string, variableType string, project string, value string) (*types.VariableResponse, error) {
 	queryResponse, err := client.R().
 		SetBody(
@@ -92,7 +95,7 @@ func CreateVariable(client *resty.Client, name string, description string, varia
 	return queryResponse.Result().(*types.VariableResponse), err
 }
 
-// updateVariable - Create a new Code Stream Variable
+// UpdateVariable - Update an existing Code Stream Variable
 func UpdateVariable(client *resty.Client, id string, name string, description string, typename string, value string) (*types.VariableResponse, error) {
 	variables, _ := GetVariable(client, id, "", "", "")
 	variable := variables[0]
@@ -121,17 +124,18 @@ func UpdateVariable(client *resty.Client, id string, name string, description st
 	return queryResponse.Result().(*types.VariableResponse), err
 }
 
-// deleteVariable - Delete a Code Stream Variable
-func DeleteVariable(client *resty.Client, id string) (*types.VariableResponse, error) {
+// DeleteVariable - Delete a Code Stream Variable
+func DeleteVariable(client *resty.Client, id string) (bool, error) {
 	queryResponse, err := client.R().
 		SetResult(&types.VariableResponse{}).
 		Delete("/pipeline/api/variables/" + id)
 	if queryResponse.IsError() {
-		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
+		return false, errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
-	return queryResponse.Result().(*types.VariableResponse), err
+	return true, err
 }
 
+// DeleteVariableByProject - Delete all Variables in a Project
 func DeleteVariableByProject(client *resty.Client, project string) ([]*types.VariableResponse, error) {
 	var deletedVariables []*types.VariableResponse
 	Variables, err := GetVariable(client, "", "", project, "")
@@ -141,19 +145,18 @@ func DeleteVariableByProject(client *resty.Client, project string) ([]*types.Var
 	confirm := helpers.AskForConfirmation("This will attempt to delete " + fmt.Sprint(len(Variables)) + " variables in " + project + ", are you sure?")
 	if confirm {
 		for _, Variable := range Variables {
-			deletedVariable, err := DeleteVariable(client, Variable.ID)
+			_, err := DeleteVariable(client, Variable.ID)
 			if err != nil {
 				log.Warnln("Unable to delete "+Variable.Name, err)
 			}
-			deletedVariables = append(deletedVariables, deletedVariable)
+			deletedVariables = append(deletedVariables, Variable)
 		}
 		return deletedVariables, nil
-	} else {
-		return nil, errors.New("user declined")
 	}
+	return nil, errors.New("user declined")
 }
 
-// exportVariable - Export a variable to YAML
+// ExportVariable - Export a variable to YAML
 func ExportVariable(variable interface{}, exportPath string) {
 	var exportFile string
 	// variable will be a types.VariableResponse, so lets remap to types.VariableRequest
@@ -179,7 +182,7 @@ func ExportVariable(variable interface{}, exportPath string) {
 	file.WriteString("---\n" + string(yaml))
 }
 
-// importVariables - Import variables from the filePath
+// ImportVariables - Import variables from the filePath
 func ImportVariables(filePath string) []types.VariableRequest {
 	var returnVariables []types.VariableRequest
 	filename, _ := filepath.Abs(filePath)

@@ -151,13 +151,13 @@ func deleteCloudTemplate(id string) error {
 }
 
 // createCloudTemplate - Create a new Cloud Assembly Cloud Template
-func createCloudTemplate(name string, description string, projectId string, content string, scope bool) (*types.CloudTemplate, error) {
+func createCloudTemplate(name string, description string, projectID string, content string, scope bool) (*types.CloudTemplate, error) {
 	client := resty.New()
 	queryResponse, _ := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetQueryParams(qParams).
 		SetBody(
 			types.CloudTemplateRequest{
-				ProjectID:       projectId,
+				ProjectID:       projectID,
 				Name:            name,
 				Description:     description,
 				Content:         content,

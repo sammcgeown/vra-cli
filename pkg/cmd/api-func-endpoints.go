@@ -96,7 +96,6 @@ func deleteEndpointByProject(project string) ([]*types.Endpoint, error) {
 			deletedEndpoints = append(deletedEndpoints, deletedEndpoint)
 		}
 		return deletedEndpoints, nil
-	} else {
-		return nil, errors.New("user declined")
 	}
+	return nil, errors.New("user declined")
 }

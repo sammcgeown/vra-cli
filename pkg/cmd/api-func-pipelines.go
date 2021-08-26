@@ -112,7 +112,7 @@ func deletePipelineInProject(project string) ([]*types.Pipeline, error) {
 			deletedPipes = append(deletedPipes, deletedPipe)
 		}
 		return deletedPipes, nil
-	} else {
-		return nil, errors.New("user declined")
 	}
+
+	return nil, errors.New("user declined")
 }

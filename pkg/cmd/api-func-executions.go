@@ -120,9 +120,9 @@ func deleteExecutions(project string, status string, name string, nested bool) (
 			deletedExecutions = append(deletedExecutions, deletedExecution)
 		}
 		return deletedExecutions, nil
-	} else {
-		return nil, errors.New("user declined")
 	}
+	return nil, errors.New("user declined")
+
 }
 
 func createExecution(id string, inputs string, comment string) (*types.CreateExecutionResponse, error) {

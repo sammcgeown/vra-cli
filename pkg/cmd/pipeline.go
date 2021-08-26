@@ -56,7 +56,7 @@ vra-cli get execution --status Failed`,
 			log.Warnln("No results found")
 		}
 
-		if printJson {
+		if printJSON {
 			for _, c := range response {
 				helpers.PrettyPrint(c)
 			}
@@ -278,7 +278,7 @@ func init() {
 	getPipelineCmd.Flags().StringVarP(&projectName, "project", "p", "", "List pipeline in project")
 	getPipelineCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
 	getPipelineCmd.Flags().BoolVarP(&printForm, "form", "f", false, "Return pipeline inputs form(s)")
-	getPipelineCmd.Flags().BoolVarP(&printJson, "json", "", false, "Return JSON formatted Pipeline(s)")
+	getPipelineCmd.Flags().BoolVarP(&printJSON, "json", "", false, "Return JSON formatted Pipeline(s)")
 	getPipelineCmd.Flags().BoolVarP(&dependencies, "exportDependencies", "", false, "Export Pipeline dependencies (Endpoint, Pipelines, Variables, Custom Integrations)")
 
 	// Create

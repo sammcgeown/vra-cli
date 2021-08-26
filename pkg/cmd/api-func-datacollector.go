@@ -14,7 +14,7 @@ import (
 func getDataCollectors(id string) ([]*models.DataCollector, error) {
 	var dataCollectors []*models.DataCollector
 
-	apiclient := auth.GetApiClient(&targetConfig, debug)
+	apiclient := auth.GetAPIClient(&targetConfig, debug)
 
 	if id != "" || name != "" {
 		// Get Data Collector by ID or Name
@@ -22,17 +22,16 @@ func getDataCollectors(id string) ([]*models.DataCollector, error) {
 		ret, err := apiclient.DataCollector.GetDataCollector(data_collector.NewGetDataCollectorParams().WithID(id))
 		if err != nil {
 			return nil, err
-		} else {
-			dataCollectors = append(dataCollectors, ret.Payload)
-			return dataCollectors, err
 		}
-	} else {
-		log.Debug("Getting Data Collectors")
-		ret, err := apiclient.DataCollector.GetDataCollectors(data_collector.NewGetDataCollectorsParams())
-		if err != nil {
-			return nil, err
-		} else {
-			return ret.Payload.Content, err
-		}
+		dataCollectors = append(dataCollectors, ret.Payload)
+		return dataCollectors, err
+
 	}
+	log.Debug("Getting Data Collectors")
+	ret, err := apiclient.DataCollector.GetDataCollectors(data_collector.NewGetDataCollectorsParams())
+	if err != nil {
+		return nil, err
+	}
+	return ret.Payload.Content, err
+
 }

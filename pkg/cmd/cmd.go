@@ -43,7 +43,7 @@ var (
 	value       string
 	description string
 	status      string
-	printJson   bool
+	printJSON   bool
 	exportPath  string
 	importPath  string
 )
@@ -84,7 +84,7 @@ func init() {
 	rootCmd.AddCommand(completionCmd)
 }
 
-// initConfig reads in config file and ENV variables if set.
+// InitConfig reads in config file and ENV variables if set.
 func InitConfig() {
 	// Debug logging
 	log.SetFormatter(&log.TextFormatter{TimestampFormat: "2006-01-02 15:04:05", FullTimestamp: true})
@@ -102,22 +102,22 @@ func InitConfig() {
 		// If we're using a config file
 		targetConfig = *config.GetConfigFromFile(cfgFile)
 
-		// Validate the configuration and credentials
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
-
-		// Configure the REST client defaults
-		restClient = resty.New().
-			SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).
-			SetAuthToken(targetConfig.AccessToken).
-			SetHostURL("https://"+targetConfig.Server).
-			SetHeader("Accept", "application/json").
-			SetError(&types.Exception{})
-
-		apiClient = auth.GetApiClient(&targetConfig, debug)
-
 	}
+	// Validate the configuration and credentials
+	if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		log.Fatalln(err)
+	}
+
+	// Configure the REST client defaults
+	restClient = resty.New().
+		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).
+		SetAuthToken(targetConfig.AccessToken).
+		SetHostURL("https://"+targetConfig.Server).
+		SetHeader("Accept", "application/json").
+		SetError(&types.Exception{})
+
+	apiClient = auth.GetAPIClient(&targetConfig, debug)
+
 }
 
 // getCmd represents the get command

@@ -42,14 +42,13 @@ func getCloudAccounts(id string, name string, cloudaccounttype string) ([]*model
 	CloudAccountParams := cloud_account.NewGetCloudAccountsParams()
 	CloudAccountParams.DollarFilter = &filter
 
-	apiclient := auth.GetApiClient(&targetConfig, debug)
+	apiclient := auth.GetAPIClient(&targetConfig, debug)
 
 	ret, err := apiclient.CloudAccount.GetCloudAccounts(CloudAccountParams)
 	if err != nil {
 		return nil, err
-	} else {
-		return ret.Payload.Content, err
 	}
+	return ret.Payload.Content, err
 
 }
 
@@ -61,17 +60,17 @@ func createCloudAccountAws(name, accesskey, secretkey, regions, tags string) (*m
 	AwsSpec.RegionIds = strings.Split(regions, ",")
 	AwsSpec.Tags = helpers.StringToTags(tags)
 
-	apiclient := auth.GetApiClient(&targetConfig, debug)
+	apiclient := auth.GetAPIClient(&targetConfig, debug)
 	createResp, err := apiclient.CloudAccount.CreateAwsCloudAccount(cloud_account.NewCreateAwsCloudAccountParams().WithBody(&AwsSpec))
 	if err != nil {
 		return nil, err
-	} else {
-		return createResp.Payload, nil
 	}
+	return createResp.Payload, nil
+
 }
 
 func createCloudAccountvSphere(name, description, fqdn, username, password, nsxcloudaccount, cloudproxy, tags string, insecure, createcloudzone bool) (*models.CloudAccountVsphere, error) {
-	apiclient := auth.GetApiClient(&targetConfig, debug)
+	apiclient := auth.GetAPIClient(&targetConfig, debug)
 
 	DatacenterIds, _ := getvSphereRegions(fqdn, username, password, cloudproxy, insecure)
 
@@ -93,13 +92,13 @@ func createCloudAccountvSphere(name, description, fqdn, username, password, nsxc
 	createResp, err := apiclient.CloudAccount.CreateVSphereCloudAccount(cloud_account.NewCreateVSphereCloudAccountParams().WithBody(&vSphereSpec))
 	if err != nil {
 		return nil, err
-	} else {
-		return createResp.Payload, nil
 	}
+	return createResp.Payload, nil
+
 }
 
 func getvSphereRegions(fqdn, username, password, cloudproxy string, insecure bool) (*models.CloudAccountRegions, error) {
-	apiclient := auth.GetApiClient(&targetConfig, debug)
+	apiclient := auth.GetAPIClient(&targetConfig, debug)
 
 	vSphereSpec := models.CloudAccountVsphereSpecification{
 		AcceptSelfSignedCertificate: insecure,
@@ -111,16 +110,16 @@ func getvSphereRegions(fqdn, username, password, cloudproxy string, insecure boo
 		vSphereSpec.Dcid = cloudproxy
 	}
 	// Get Regions
-	if getResp, err := apiclient.CloudAccount.EnumerateVSphereRegions(cloud_account.NewEnumerateVSphereRegionsParams().WithBody(&vSphereSpec)); err != nil {
+	getResp, err := apiclient.CloudAccount.EnumerateVSphereRegions(cloud_account.NewEnumerateVSphereRegionsParams().WithBody(&vSphereSpec))
+	if err != nil {
 		return nil, err
-	} else {
-		return getResp.Payload, nil
 	}
+	return getResp.Payload, nil
 
 }
 
 func createCloudAccountNsxT(name, description, fqdn, username, password, vccloudaccount, cloudproxy, tags string, global, manager, insecure bool) (*models.CloudAccountNsxT, error) {
-	apiclient := auth.GetApiClient(&targetConfig, debug)
+	apiclient := auth.GetAPIClient(&targetConfig, debug)
 
 	if vccloudaccount != "" {
 		if vCenter, err := getCloudAccounts("", vccloudaccount, "vsphere"); err != nil {
@@ -152,19 +151,19 @@ func createCloudAccountNsxT(name, description, fqdn, username, password, vccloud
 	createResp, err := apiclient.CloudAccount.CreateNsxTCloudAccount(cloud_account.NewCreateNsxTCloudAccountParams().WithBody(&NsxTSpec))
 	if err != nil {
 		return nil, err
-	} else {
-		return createResp.Payload, nil
 	}
+	return createResp.Payload, nil
+
 }
 
 func deleteCloudAccount(id string) error {
 
-	apiclient := auth.GetApiClient(&targetConfig, debug)
+	apiclient := auth.GetAPIClient(&targetConfig, debug)
 
 	_, err := apiclient.CloudAccount.DeleteAwsCloudAccount(cloud_account.NewDeleteAwsCloudAccountParams().WithID(id))
 	if err != nil {
 		return err
-	} else {
-		return nil
 	}
+	return nil
+
 }

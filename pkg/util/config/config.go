@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// GetConfigFromEnv returns a config object from environment variables
 func GetConfigFromEnv() *types.Config {
 	log.Debugln("Using config: ENV")
 	viper.SetEnvPrefix("vra")
@@ -26,9 +27,11 @@ func GetConfigFromEnv() *types.Config {
 		ApiToken:    viper.GetString("apitoken"),
 		AccessToken: viper.GetString("accesstoken"),
 	}
+	log.Debugln("Config:", config)
 	return &config
 }
 
+// GetConfigFromFile returns a config object from a file
 func GetConfigFromFile(configFile string) *types.Config {
 	if configFile != "" { // If the user has specified a config file
 		if _, err := os.Stat(configFile); err == nil { // Check if it exists

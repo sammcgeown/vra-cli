@@ -99,7 +99,7 @@ var getCloudTemplateCmd = &cobra.Command{
 //
 // Cloud Template JSON structure:
 // {
-//     "projectId": "90bb3da1-8e1f-40c0-b431-0838e8ebc28d",
+//     "projectID": "90bb3da1-8e1f-40c0-b431-0838e8ebc28d",
 //     "name": "vra-cli Test",
 //     "description": "Blueprint to test Packer Image builds",
 //     "status": "DRAFT",
@@ -146,7 +146,7 @@ var createCloudTemplateCmd = &cobra.Command{
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var cloudTemplateReq CloudAssembly.CloudTemplateRequest
-		var projectId string
+		var projectID string
 
 		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
@@ -165,9 +165,9 @@ var createCloudTemplateCmd = &cobra.Command{
 			if pErr != nil {
 				log.Fatalln(pErr)
 			} else if len(projectObj) == 1 {
-				projectId = *projectObj[0].ID
-				log.Debugln("Project ID: " + projectId)
-				cloudTemplateReq.ProjectID = projectId
+				projectID = *projectObj[0].ID
+				log.Debugln("Project ID: " + projectID)
+				cloudTemplateReq.ProjectID = projectID
 			} else {
 				log.Fatalln("Unable to find Project \"" + projectName + "\"")
 			}

@@ -1,5 +1,5 @@
 /*
-Package cmd Copyright 2021 VMware, Inc.
+Package auth Copyright 2021 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause
 */
 package auth
@@ -17,12 +17,13 @@ import (
 	"github.com/vmware/vra-sdk-go/pkg/client"
 )
 
+// GetConnection - returns a connection to vRA
 func GetConnection(config *types.Config, insecure bool) error {
 	if TestAccessToken(config, insecure) { // If the Access Token is OK
 		log.Debugln("Access Token is valid")
 	} else {
 		var refreshTokenError, credentialError error
-		config.AccessToken, refreshTokenError = AuthenticateApiToken(config, insecure) // Test the API Token (refresh_token)
+		config.AccessToken, refreshTokenError = AuthenticateAPIToken(config, insecure) // Test the API Token (refresh_token)
 		if refreshTokenError != nil {                                                  // We could not get an access token from the API Token
 			log.Debugln("Refresh Token is invalid")
 			if config.Server == "api.mgmt.cloud.vmware.com" { // If it's vRA Cloud we have no credentials to authenticate
@@ -33,7 +34,7 @@ func GetConnection(config *types.Config, insecure bool) error {
 				return credentialError // Return the credential error
 			}
 			// Try again, now we have a new access token
-			config.AccessToken, refreshTokenError = AuthenticateApiToken(config, insecure) // Test the API Token (refresh_token)
+			config.AccessToken, refreshTokenError = AuthenticateAPIToken(config, insecure) // Test the API Token (refresh_token)
 			if refreshTokenError != nil {
 				return refreshTokenError
 			}
@@ -49,7 +50,7 @@ func GetConnection(config *types.Config, insecure bool) error {
 	return nil
 }
 
-// authenticateCredentials - returns the API Refresh Token for vRA On-premises (8.0.1+)
+// AuthenticateCredentials - returns the API Refresh Token for vRA On-premises (8.0.1+)
 func AuthenticateCredentials(config types.Config, ignoreCert bool) (string, error) {
 	log.Debugln("Authenticating vRA with Credentials")
 	var authPath string
@@ -84,8 +85,8 @@ func AuthenticateCredentials(config types.Config, ignoreCert bool) (string, erro
 	return loginResponse.Result().(*types.AuthenticationResponse).RefreshToken, err
 }
 
-// authenticateApiToken - get vRA Access token (valid for 8h)
-func AuthenticateApiToken(config *types.Config, ignoreCert bool) (string, error) {
+// AuthenticateAPIToken - get vRA Access token (valid for 8h)
+func AuthenticateAPIToken(config *types.Config, ignoreCert bool) (string, error) {
 	log.Debug("Attempting to authenticate the API Refresh Token")
 	client := resty.New()
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
@@ -101,6 +102,7 @@ func AuthenticateApiToken(config *types.Config, ignoreCert bool) (string, error)
 	return queryResponse.Result().(*types.AuthenticationResponse).Token, err
 }
 
+// TestAccessToken - returns true if the Access Token is valid
 func TestAccessToken(config *types.Config, ignoreCert bool) bool {
 	client := GetRestClient(config, false)
 	queryResponse, err := client.R().
@@ -120,7 +122,8 @@ func TestAccessToken(config *types.Config, ignoreCert bool) bool {
 	return true
 }
 
-func GetApiClient(config *types.Config, debug bool) *client.MulticloudIaaS {
+// GetAPIClient - returns a vRA API client
+func GetAPIClient(config *types.Config, debug bool) *client.MulticloudIaaS {
 	transport := httptransport.New(config.Server, "", nil)
 	transport.SetDebug(debug)
 	transport.DefaultAuthentication = httptransport.APIKeyAuth("Authorization", "header", "Bearer "+config.AccessToken)
@@ -128,6 +131,7 @@ func GetApiClient(config *types.Config, debug bool) *client.MulticloudIaaS {
 	return apiclient
 }
 
+// GetRestClient - returns a vRA REST client
 func GetRestClient(config *types.Config, insecure bool) *resty.Client {
 	// Configure the Resty Client
 	client := resty.New().

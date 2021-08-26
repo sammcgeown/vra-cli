@@ -142,11 +142,11 @@ vra-cli delete variable --project "My Project"
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if id != "" {
-			response, err := variable.DeleteVariable(restClient, id)
+			_, err := variable.DeleteVariable(restClient, id)
 			if err != nil {
 				log.Errorln("Unable to delete variable: ", err)
 			} else {
-				log.Infoln("Variable with id " + response.ID + " deleted")
+				log.Infoln("Variable " + id + " deleted")
 			}
 		} else if projectName != "" {
 			response, err := variable.DeleteVariableByProject(restClient, projectName)
