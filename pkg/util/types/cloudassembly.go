@@ -13,6 +13,7 @@ type CloudTemplate struct {
 	ID                        string        `json:"id"`
 	CreatedAt                 time.Time     `json:"createdAt"`
 	CreatedBy                 string        `json:"createdBy"`
+	Description               string        `json:"description"`
 	UpdatedAt                 time.Time     `json:"updatedAt"`
 	UpdatedBy                 string        `json:"updatedBy"`
 	OrgID                     string        `json:"orgId"`

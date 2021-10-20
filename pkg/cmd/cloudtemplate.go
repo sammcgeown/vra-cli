@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 package cmd
 
 import (
+	"encoding/json"
 	"os"
 	"strconv"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/sammcgeown/vra-cli/pkg/cmd/cloudassembly"
 	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
+	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
@@ -32,7 +34,7 @@ var getCloudTemplateCmd = &cobra.Command{
 		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
-		response, err := cloudassembly.GetCloudTemplate(apiClient, id, name, projectName, exportPath)
+		response, err := cloudassembly.GetCloudTemplate(apiClient, id, name, projectName)
 		if err != nil {
 			log.Warnln("Unable to get Cloud Template(s): ", err)
 		}
@@ -143,57 +145,57 @@ var createCloudTemplateCmd = &cobra.Command{
 	  vra-cli create cloudtemplate --name Test --project Development --description "My new template" --content "{formatVersion: 1, inputs: {}, resources: {}}" --scope project
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// var cloudTemplateReq CloudAssembly.CloudTemplateRequest
-		// var projectID string
+		var cloudTemplateReq types.CloudTemplate
+		var projectID string
 
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
+		if err := auth.GetConnection(&targetConfig, debug); err != nil {
+			log.Fatalln(err)
+		}
 
-		// // Check if input is piped JSON
-		// if helpers.IsInputFromPipe() {
-		// 	if err := json.NewDecoder(os.Stdin).Decode(&cloudTemplateReq); err != nil {
-		// 		log.Warnln(err)
-		// 	}
-		// }
-		// // If project flag is set, get the project ID and update the request
-		// if projectName != "" {
-		// 	log.Debugln("Project: " + projectName)
-		// 	projectObj, pErr := project.GetProject(apiClient, apiVersion, "", projectName)
-		// 	if pErr != nil {
-		// 		log.Fatalln(pErr)
-		// 	} else if len(projectObj) == 1 {
-		// 		projectID = *projectObj[0].ID
-		// 		log.Debugln("Project ID: " + projectID)
-		// 		cloudTemplateReq.ProjectID = projectID
-		// 	} else {
-		// 		log.Fatalln("Unable to find Project \"" + projectName + "\"")
-		// 	}
-		// }
-		// // If name flag is set, update the request
-		// if name != "" {
-		// 	cloudTemplateReq.Name = name
-		// }
-		// // If description flag is set, update the request
-		// if description != "" {
-		// 	cloudTemplateReq.Description = description
-		// }
-		// // If content flag is set, update the request
-		// if content != "" {
-		// 	cloudTemplateReq.Content = content
-		// }
-		// // If scope flag is set, update the request
-		// if scope == "org" {
-		// 	cloudTemplateReq.RequestScopeOrg = true
-		// } else if scope == "project" {
-		// 	cloudTemplateReq.RequestScopeOrg = false
-		// }
-		// // Create the cloud template
-		// cloudTemplate, err := createCloudTemplate(cloudTemplateReq.Name, cloudTemplateReq.Description, cloudTemplateReq.ProjectID, cloudTemplateReq.Content, cloudTemplateReq.RequestScopeOrg)
-		// if err != nil {
-		// 	log.Errorln("Unable to create Cloud Template(s): ", err)
-		// }
-		// helpers.PrettyPrint(cloudTemplate)
+		// Check if input is piped JSON
+		if helpers.IsInputFromPipe() {
+			if err := json.NewDecoder(os.Stdin).Decode(&cloudTemplateReq); err != nil {
+				log.Warnln(err)
+			}
+		}
+		// If project name flag is set, get the project ID and update the request
+		if projectName != "" {
+			log.Debugln("Project: " + projectName)
+			projectObj, pErr := cloudassembly.GetProject(apiClient, apiVersion, projectName, "")
+			if pErr != nil {
+				log.Fatalln(pErr)
+			} else if len(projectObj) == 1 {
+				projectID = *projectObj[0].ID
+				log.Debugln("Project ID: " + projectID)
+				cloudTemplateReq.ProjectID = projectID
+			} else {
+				log.Fatalln("Unable to find Project \"" + projectName + "\"")
+			}
+		}
+		// If name flag is set, update the request
+		if name != "" {
+			cloudTemplateReq.Name = name
+		}
+		// If description flag is set, update the request
+		if description != "" {
+			cloudTemplateReq.Description = description
+		}
+		// If content flag is set, update the request
+		if content != "" {
+			cloudTemplateReq.Content = content
+		}
+		// If scope flag is set, update the request
+		if scope == "org" {
+			cloudTemplateReq.RequestScopeOrg = true
+		} else if scope == "project" {
+			cloudTemplateReq.RequestScopeOrg = false
+		}
+		// Create the cloud template
+		cloudTemplate, err := cloudassembly.CreateCloudTemplate(apiClient, cloudTemplateReq.Name, cloudTemplateReq.Description, cloudTemplateReq.ProjectID, cloudTemplateReq.Content, cloudTemplateReq.RequestScopeOrg)
+		if err != nil {
+			log.Errorln("Unable to create Cloud Template(s): ", err)
+		}
+		helpers.PrettyPrint(cloudTemplate)
 	},
 }
 
@@ -208,31 +210,31 @@ var deleteCloudTemplateCmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 
-		// if name != "" {
-		// 	response, err := getCloudTemplate(id, name, projectName, "")
-		// 	if err != nil {
-		// 		log.Fatalln(err)
-		// 	}
-		// 	if len(response) > 1 {
-		// 		log.Warnln("There are multiple Cloud Templates matching your criteria, please use the Cloud Template ID")
-		// 		// Print result table
-		// 		table := tablewriter.NewWriter(os.Stdout)
-		// 		table.SetHeader([]string{"Id", "Name", "Project", "Status", "Valid"})
-		// 		for _, c := range response {
-		// 			table.Append([]string{c.ID, c.Name, c.ProjectName, c.Status, strconv.FormatBool(c.Valid)})
-		// 		}
-		// 		table.Render()
-		// 	} else {
-		// 		id = response[0].ID
-		// 	}
-		// }
-		// if id != "" {
-		// 	if err := deleteCloudTemplate(id); err != nil {
-		// 		log.Errorln("Unable to delete Cloud Template: ", err)
-		// 	} else {
-		// 		log.Infoln("Cloud Template with id " + id + " deleted")
-		// 	}
-		// }
+		if name != "" {
+			response, err := cloudassembly.GetCloudTemplate(apiClient, id, name, projectName)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			if len(response) > 1 {
+				log.Warnln("There are multiple Cloud Templates matching your criteria, please use the Cloud Template ID")
+				// Print result table
+				table := tablewriter.NewWriter(os.Stdout)
+				table.SetHeader([]string{"Id", "Name", "Project", "Status", "Valid"})
+				for _, c := range response {
+					table.Append([]string{c.ID, c.Name, c.ProjectName, c.Status, strconv.FormatBool(*c.Valid)})
+				}
+				table.Render()
+			} else {
+				id = response[0].ID
+			}
+		}
+		if id != "" {
+			if err := cloudassembly.DeleteCloudTemplate(apiClient, id); err != nil {
+				log.Errorln("Unable to delete Cloud Template: ", err)
+			} else {
+				log.Infoln("Cloud Template with id " + id + " deleted")
+			}
+		}
 
 	},
 }
