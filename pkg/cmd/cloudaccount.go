@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/sammcgeown/vra-cli/pkg/cmd/cloudassembly"
 	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
@@ -52,7 +53,7 @@ Get Cloud Accounts by Type:
 		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
-		cloudAccounts, err := getCloudAccounts(id, name, cloudaccounttype)
+		cloudAccounts, err := cloudassembly.GetCloudAccounts(apiClient, id, name, cloudaccounttype)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -126,20 +127,20 @@ Create a new AWS Cloud Account:
 		// 	}
 		// }
 		if cloudaccounttype == "aws" {
-			newAccount, err := createCloudAccountAws(name, awsaccesskeyid, awssecretaccesskey, awsregions, tags)
+			newAccount, err := cloudassembly.CreateCloudAccountAWS(apiClient, name, awsaccesskeyid, awssecretaccesskey, awsregions, tags)
 			if err != nil {
 				log.Fatalln(err)
 			}
 			helpers.PrettyPrint(newAccount)
 		} else if cloudaccounttype == "vsphere" {
 
-			newAccount, err := createCloudAccountvSphere(name, description, fqdn, username, password, nsxaccount, cloudproxy, tags, insecure, createcloudzone)
+			newAccount, err := cloudassembly.CreateCloudAccountvSphere(apiClient, name, description, fqdn, username, password, nsxaccount, cloudproxy, tags, insecure, createcloudzone)
 			if err != nil {
 				log.Fatalln(err)
 			}
 			helpers.PrettyPrint(newAccount)
 		} else if cloudaccounttype == "nsxt" {
-			newAccount, err := createCloudAccountNsxT(name, description, fqdn, username, password, vccloudaccount, cloudproxy, tags, nsxtglobal, nsxtmanager, insecure)
+			newAccount, err := cloudassembly.CreateCloudAccountNsxT(apiClient, name, description, fqdn, username, password, vccloudaccount, cloudproxy, tags, nsxtglobal, nsxtmanager, insecure)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -163,7 +164,7 @@ Delete a Cloud Account by ID:
 		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
-		if account, err := getCloudAccounts(id, name, ""); err != nil {
+		if account, err := cloudassembly.GetCloudAccounts(apiClient, id, name, ""); err != nil {
 			log.Fatalln(err) // There was an error getting the cloud account
 		} else {
 			if len(account) == 0 {
@@ -174,7 +175,7 @@ Delete a Cloud Account by ID:
 				log.Fatalln("More than one Cloud Account matching the request was found")
 			} else {
 				// There was only one cloud account
-				if err := deleteCloudAccount(*account[0].ID); err != nil {
+				if err := cloudassembly.DeleteCloudAccount(apiClient, *account[0].ID); err != nil {
 					log.Fatalln(err) // There was an error deleting the cloud account
 				} else {
 					log.Infoln("Cloud Account deleted successfully")

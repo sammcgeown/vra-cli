@@ -1,8 +1,8 @@
 /*
-Package variable Copyright 2021 VMware, Inc.
+Package codestream Copyright 2021 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause
 */
-package variable
+package codestream
 
 import (
 	"bytes"
@@ -47,7 +47,7 @@ func GetVariable(client *resty.Client, id, name, project, exportPath string) ([]
 		filters = append(filters, "(project eq '"+project+"')")
 	}
 	if len(filters) > 0 {
-		client.QueryParam.Add("$filter", "("+strings.Join(filters, ") and (")+")")
+		client.QueryParam.Set("$filter", "("+strings.Join(filters, ") and (")+")")
 		log.Debugln(client.QueryParam)
 	}
 
@@ -89,6 +89,8 @@ func CreateVariable(client *resty.Client, name string, description string, varia
 		SetResult(&types.VariableResponse{}).
 		SetError(&types.Exception{}).
 		Post("/pipeline/api/variables")
+
+	log.Debugln(queryResponse.RawResponse)
 	if queryResponse.IsError() {
 		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
@@ -136,13 +138,19 @@ func DeleteVariable(client *resty.Client, id string) (bool, error) {
 }
 
 // DeleteVariableByProject - Delete all Variables in a Project
-func DeleteVariableByProject(client *resty.Client, project string) ([]*types.VariableResponse, error) {
+func DeleteVariableByProject(client *resty.Client, confirm bool, project string) ([]*types.VariableResponse, error) {
 	var deletedVariables []*types.VariableResponse
 	Variables, err := GetVariable(client, "", "", project, "")
 	if err != nil {
 		return nil, err
 	}
-	confirm := helpers.AskForConfirmation("This will attempt to delete " + fmt.Sprint(len(Variables)) + " variables in " + project + ", are you sure?")
+	if len(Variables) == 0 {
+		log.Infoln("No variables found for project:", project)
+		return deletedVariables, nil
+	}
+	if !confirm {
+		confirm = helpers.AskForConfirmation("This will attempt to delete " + fmt.Sprint(len(Variables)) + " variables in " + project + ", are you sure?")
+	}
 	if confirm {
 		for _, Variable := range Variables {
 			_, err := DeleteVariable(client, Variable.ID)

@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
-	"github.com/sammcgeown/vra-cli/pkg/cmd/project"
+	"github.com/sammcgeown/vra-cli/pkg/cmd/cloudassembly"
 	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
@@ -41,7 +41,7 @@ Get Project by Name (case sensitive):
 			log.Fatalln(err)
 		}
 
-		response, err := project.GetProject(apiClient, apiVersion, id, projectName)
+		response, err := cloudassembly.GetProject(apiClient, apiVersion, id, projectName)
 		if err != nil {
 			log.Errorln("Unable to get Code Stream Projects: ", err)
 		}
@@ -112,7 +112,7 @@ var createProjectCommand = &cobra.Command{
 		memberUsers := helpers.CreateUserArray(strings.Split(members, ","))
 		viewerUsers := helpers.CreateUserArray(strings.Split(viewers, ","))
 
-		newProject, err := project.CreateProject(apiClient, apiVersion, projectName, description, adminUsers, memberUsers, viewerUsers, nil, nil, operationTimeout, machineNamingTemplate, &sharedResources)
+		newProject, err := cloudassembly.CreateProject(apiClient, apiVersion, projectName, description, adminUsers, memberUsers, viewerUsers, nil, nil, operationTimeout, machineNamingTemplate, &sharedResources)
 		if err != nil {
 			log.Fatal("Unable to create Project", err)
 		} else {
@@ -139,7 +139,7 @@ var updateProjectCommand = &cobra.Command{
 		memberUsers := helpers.CreateUserArray(strings.Split(members, ","))
 		viewerUsers := helpers.CreateUserArray(strings.Split(viewers, ","))
 
-		newProject, err := project.UpdateProject(apiClient, apiVersion, id, projectName, description, adminUsers, memberUsers, viewerUsers, nil, nil, operationTimeout, machineNamingTemplate, &sharedResources)
+		newProject, err := cloudassembly.UpdateProject(apiClient, apiVersion, id, projectName, description, adminUsers, memberUsers, viewerUsers, nil, nil, operationTimeout, machineNamingTemplate, &sharedResources)
 		if err != nil {
 			log.Fatal("Unable to update Project", err)
 		} else {
@@ -162,7 +162,7 @@ Delete by ID:
 			log.Fatalln(err)
 		}
 		if id != "" {
-			err := project.DeleteProject(apiClient, apiVersion, id)
+			err := cloudassembly.DeleteProject(apiClient, apiVersion, id)
 			if err != nil {
 				log.Errorln("Delete Project failed:", err)
 			}

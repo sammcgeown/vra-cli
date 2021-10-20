@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/sammcgeown/vra-cli/pkg/cmd/codestream"
 	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
@@ -38,7 +39,7 @@ vra-cli get execution --status FAILED --project "Field Demo" --name "Learn Code 
 			log.Fatalln(err)
 		}
 
-		response, err := getExecutions(id, projectName, status, name, nested)
+		response, err := codestream.GetExecution(restClient, id, projectName, status, name, nested)
 		if err != nil {
 			log.Errorln("Unable to get executions: ", err)
 		}
@@ -73,14 +74,14 @@ var delExecutionCmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 		if id != "" {
-			response, err := deleteExecution(id)
+			_, err := codestream.DeleteExecution(restClient, id)
 			if err != nil {
 				log.Errorln("Unable to delete execution: ", err)
 			} else {
-				log.Infoln("Execution with id " + response.ID + " deleted")
+				log.Infoln("Execution with id " + id + " deleted")
 			}
 		} else if projectName != "" {
-			response, err := deleteExecutions(projectName, status, name, nested)
+			response, err := codestream.DeleteExecutions(restClient, confirm, projectName, status, name, nested)
 			if err != nil {
 				log.Errorln("Unable to delete executions: ", err)
 			} else {
@@ -102,7 +103,7 @@ var createExecutionCmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 
-		response, err := createExecution(id, inputs, comments)
+		response, err := codestream.CreateExecution(restClient, id, inputs, comments)
 		if err != nil {
 			log.Errorln("Unable to create execution: ", err)
 		}

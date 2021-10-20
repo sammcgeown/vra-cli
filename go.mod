@@ -6,6 +6,7 @@ require (
 	github.com/go-openapi/runtime v0.19.16 // indirect
 	github.com/go-openapi/strfmt v0.19.5 // indirect
 	github.com/go-resty/resty/v2 v2.6.0
+	github.com/google/uuid v1.1.2 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.4.1

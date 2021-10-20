@@ -7,7 +7,7 @@ package cmd
 import (
 	"os"
 
-	"github.com/sammcgeown/vra-cli/pkg/cmd/variable"
+	"github.com/sammcgeown/vra-cli/pkg/cmd/codestream"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 
 	log "github.com/sirupsen/logrus"
@@ -32,7 +32,7 @@ vra-cli get variable --name my-variable
 vra-cli get variable --project production`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		response, err := variable.GetVariable(restClient, id, name, projectName, exportPath)
+		response, err := codestream.GetVariable(restClient, id, name, projectName, exportPath)
 		if err != nil {
 			log.Fatalln("Unable to get Code Stream Variables: ", err)
 		}
@@ -43,7 +43,7 @@ vra-cli get variable --project production`,
 		} else if resultCount == 1 {
 			// Print the single result
 			if exportPath != "" {
-				variable.ExportVariable(response[0], exportPath)
+				codestream.ExportVariable(response[0], exportPath)
 			}
 			helpers.PrettyPrint(response[0])
 		} else {
@@ -66,12 +66,12 @@ var createVariableCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if importPath != "" { // If we are importing a file
-			variables := variable.ImportVariables(importPath)
+			variables := codestream.ImportVariables(importPath)
 			for _, value := range variables {
 				if projectName != "" { // If the project is specified update the object
 					value.Project = projectName
 				}
-				createResponse, err := variable.CreateVariable(restClient, value.Name, value.Description, value.Type, value.Project, value.Value)
+				createResponse, err := codestream.CreateVariable(restClient, value.Name, value.Description, value.Type, value.Project, value.Value)
 				if err != nil {
 					log.Warnln("Unable to create Code Stream Variable: ", err)
 				} else {
@@ -79,7 +79,7 @@ var createVariableCmd = &cobra.Command{
 				}
 			}
 		} else {
-			createResponse, err := variable.CreateVariable(restClient, name, description, typename, projectName, value)
+			createResponse, err := codestream.CreateVariable(restClient, name, description, typename, projectName, value)
 			if err != nil {
 				log.Errorln("Unable to create Code Stream Variable: ", err)
 			} else {
@@ -97,13 +97,13 @@ var updateVariableCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if importPath != "" { // If we are importing a file
-			variables := variable.ImportVariables(importPath)
+			variables := codestream.ImportVariables(importPath)
 			for _, value := range variables {
-				exisitingVariable, err := variable.GetVariable(restClient, "", value.Name, value.Project, "")
+				exisitingVariable, err := codestream.GetVariable(restClient, "", value.Name, value.Project, "")
 				if err != nil {
 					log.Errorln("Update failed - unable to find existing Code Stream Variable", value.Name, "in", value.Project)
 				} else {
-					_, err := variable.UpdateVariable(restClient, exisitingVariable[0].ID, value.Name, value.Description, value.Type, value.Value)
+					_, err := codestream.UpdateVariable(restClient, exisitingVariable[0].ID, value.Name, value.Description, value.Type, value.Value)
 					if err != nil {
 						log.Errorln("Unable to update Code Stream Variable: ", err)
 					} else {
@@ -112,7 +112,7 @@ var updateVariableCmd = &cobra.Command{
 				}
 			}
 		} else { // Else we are updating using flags
-			updateResponse, err := variable.UpdateVariable(restClient, id, name, description, typename, value)
+			updateResponse, err := codestream.UpdateVariable(restClient, id, name, description, typename, value)
 			if err != nil {
 				log.Errorln("Unable to update Code Stream Variable: ", err)
 			}
@@ -142,14 +142,14 @@ vra-cli delete variable --project "My Project"
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if id != "" {
-			_, err := variable.DeleteVariable(restClient, id)
+			_, err := codestream.DeleteVariable(restClient, id)
 			if err != nil {
 				log.Errorln("Unable to delete variable: ", err)
 			} else {
 				log.Infoln("Variable " + id + " deleted")
 			}
 		} else if projectName != "" {
-			response, err := variable.DeleteVariableByProject(restClient, projectName)
+			response, err := codestream.DeleteVariableByProject(restClient, confirm, projectName)
 			if err != nil {
 				log.Errorln("Delete Variables in "+projectName+" failed:", err)
 			} else {
@@ -189,5 +189,4 @@ func init() {
 	deleteCmd.AddCommand(deleteVariableCmd)
 	deleteVariableCmd.Flags().StringVarP(&id, "id", "i", "", "Delete variable by id")
 	deleteVariableCmd.Flags().StringVarP(&projectName, "project", "p", "", "The project in which to delete the variable, or delete all variables in project")
-
 }

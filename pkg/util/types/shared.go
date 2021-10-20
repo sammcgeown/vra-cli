@@ -4,6 +4,7 @@ SPDX-License-Identifier: BSD-2-Clause
 */
 package types
 
+// Config - main configuration struct
 type Config struct {
 	Name        string
 	Domain      string
@@ -12,6 +13,9 @@ type Config struct {
 	Username    string
 	ApiToken    string
 	AccessToken string
+}
+
+type Pagination struct {
 }
 
 // Exception - Generic exception struct

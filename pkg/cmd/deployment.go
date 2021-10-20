@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/olekukonko/tablewriter"
-	"github.com/sammcgeown/vra-cli/pkg/cmd/variable"
 	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
@@ -37,7 +36,7 @@ var getDeploymentCmd = &cobra.Command{
 		} else if resultCount == 1 {
 			// Print the single result
 			if exportPath != "" {
-				variable.ExportVariable(response[0], exportPath)
+				//variable.ExportVariable(response[0], exportPath)
 			}
 			helpers.PrettyPrint(response[0])
 		} else {

@@ -15,7 +15,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/olekukonko/tablewriter"
-	"github.com/sammcgeown/vra-cli/pkg/cmd/variable"
+	"github.com/sammcgeown/vra-cli/pkg/cmd/codestream"
 	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
@@ -46,7 +46,7 @@ vra-cli get execution --status Failed`,
 			log.Fatalln(err)
 		}
 
-		response, err := getPipelines(id, name, projectName, exportPath)
+		response, err := codestream.GetPipeline(restClient, id, name, projectName, exportPath)
 		if err != nil {
 			log.Errorln("Unable to get Code Stream Pipelines: ", err)
 		}
@@ -114,7 +114,7 @@ vra-cli get execution --status Failed`,
 					if len(variables) > 0 {
 						log.Infoln(c.Name, "depends on Variables:", strings.Join(variables, ", "))
 						for _, v := range variables {
-							variable.GetVariable(restClient, "", v, c.Project, exportPath)
+							codestream.GetVariable(restClient, "", v, c.Project, exportPath)
 						}
 					}
 					pipelines = helpers.RemoveDuplicateStrings(pipelines)
@@ -122,7 +122,7 @@ vra-cli get execution --status Failed`,
 					if len(pipelines) > 0 {
 						log.Infoln(c.Name, "depends on Pipelines:", strings.Join(pipelines, ", "))
 						for _, p := range pipelines {
-							getPipelines("", p, c.Project, filepath.Join(exportPath, "pipelines"))
+							codestream.GetPipeline(restClient, "", p, c.Project, filepath.Join(exportPath, "pipelines"))
 						}
 					}
 					endpoints = helpers.RemoveDuplicateStrings(endpoints)
@@ -175,7 +175,7 @@ vra-cli update pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 		}
 
 		if state != "" {
-			response, err := patchPipeline(id, `{"state":"`+state+`"}`)
+			response, err := codestream.PatchPipeline(restClient, id, `{"state":"`+state+`"}`)
 			if err != nil {
 				log.Errorln("Unable to update Code Stream Pipeline: ", err)
 			}
@@ -252,13 +252,13 @@ vra-cli delete pipeline --project "My Project"
 			log.Fatalln(err)
 		}
 		if id != "" {
-			response, err := deletePipeline(id)
+			response, err := codestream.DeletePipeline(restClient, id)
 			if err != nil {
 				log.Errorln("Delete Pipeline failed:", err)
 			}
 			log.Infoln("Pipeline with id " + response.ID + " deleted")
 		} else if projectName != "" {
-			response, err := deletePipelineInProject(projectName)
+			response, err := codestream.DeletePipelineInProject(restClient, projectName)
 			if err != nil {
 				log.Errorln("Delete Pipelines in "+projectName+" failed:", err)
 			} else {

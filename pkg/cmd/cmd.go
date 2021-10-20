@@ -32,6 +32,7 @@ var (
 	// Global Flags
 	debug      bool
 	ignoreCert bool
+	confirm    bool
 	// API Paging
 	count int
 	skip  int
@@ -70,6 +71,7 @@ func init() {
 	cobra.OnInitialize(InitConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.vra-cli.yaml)")
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Enable debug logging")
+	rootCmd.PersistentFlags().BoolVar(&confirm, "confirm", false, "Confirm action without prompting for confirmation")
 	rootCmd.PersistentFlags().BoolVar(&ignoreCert, "ignoreCertificateWarnings", false, "Disable HTTPS Certificate Validation")
 	// API Paging
 	rootCmd.PersistentFlags().IntVar(&count, "count", 100, "API Paging - Count")

@@ -1,8 +1,8 @@
 /*
-Package project Copyright 2021 VMware, Inc.
+Package cloudassembly Copyright 2021 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause
 */
-package project
+package cloudassembly
 
 import (
 	"errors"
@@ -14,6 +14,7 @@ import (
 	"github.com/vmware/vra-sdk-go/pkg/models"
 )
 
+// GetProject - Get Projects
 func GetProject(apiClient *client.MulticloudIaaS, apiVersion string, name string, id string) ([]*models.Project, error) {
 	var filters []string
 	var filter string
@@ -44,6 +45,7 @@ func GetProject(apiClient *client.MulticloudIaaS, apiVersion string, name string
 	return ret.Payload.Content, nil
 }
 
+// DeleteProject - Delete Project
 func DeleteProject(apiClient *client.MulticloudIaaS, apiVersion string, id string) error {
 
 	// Workaround an issue where the cloud regions need to be removed before the project can be deleted.
@@ -61,6 +63,7 @@ func DeleteProject(apiClient *client.MulticloudIaaS, apiVersion string, id strin
 	return nil
 }
 
+// CreateProject - Create Project
 func CreateProject(apiClient *client.MulticloudIaaS, apiVersion string, name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.Project, error) {
 	createdProject, err := apiClient.Project.CreateProject(project.NewCreateProjectParams().WithAPIVersion(&apiVersion).WithBody(&models.ProjectSpecification{
 		Administrators:               administrators,
@@ -80,6 +83,7 @@ func CreateProject(apiClient *client.MulticloudIaaS, apiVersion string, name str
 	return createdProject.Payload, nil
 }
 
+// UpdateProject - Update Project
 func UpdateProject(apiClient *client.MulticloudIaaS, apiVersion string, id string, name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.Project, error) {
 	ProjectSpecification := models.ProjectSpecification{}
 
