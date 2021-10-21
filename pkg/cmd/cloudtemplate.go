@@ -161,11 +161,12 @@ var createCloudTemplateCmd = &cobra.Command{
 		// If project name flag is set, get the project ID and update the request
 		if projectName != "" {
 			log.Debugln("Project: " + projectName)
-			projectObj, pErr := cloudassembly.GetProject(apiClient, apiVersion, projectName, "")
+			projectObjs, pErr := cloudassembly.GetProject(apiClient, apiVersion, projectName, "")
 			if pErr != nil {
 				log.Fatalln(pErr)
-			} else if len(projectObj) == 1 {
-				projectID = *projectObj[0].ID
+			} else if len(projectObjs) == 1 {
+				projectObj := projectObjs[0]
+				projectID = *projectObj.ID
 				log.Debugln("Project ID: " + projectID)
 				cloudTemplateReq.ProjectID = projectID
 			} else {

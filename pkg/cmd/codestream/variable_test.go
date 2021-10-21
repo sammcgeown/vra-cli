@@ -17,7 +17,7 @@ import (
 
 var (
 	targetConfig *types.Config
-	client       *resty.Client
+	RESTClient   *resty.Client
 	// Config
 	insecure = false
 	cases    = []struct{ name, description, variableType, project, value string }{
@@ -40,11 +40,11 @@ func init() {
 }
 
 func TestCreateVariable(t *testing.T) {
-	client = auth.GetRestClient(targetConfig, insecure)
+	RESTClient = auth.GetRestClient(targetConfig, insecure)
 
 	for _, c := range cases {
 		log.Infoln("Creating variable: ", c.name)
-		variable, err := CreateVariable(client, c.name, c.description, c.variableType, c.project, c.value)
+		variable, err := CreateVariable(RESTClient, c.name, c.description, c.variableType, c.project, c.value)
 		if err != nil {
 			log.Warnln(err)
 		}
@@ -61,10 +61,10 @@ func TestCreateVariable(t *testing.T) {
 
 func TestGetVariable(t *testing.T) {
 	for _, c := range cases { // Test each case has been created
-		client = auth.GetRestClient(targetConfig, insecure) // Re-initialize client
+		RESTClient = auth.GetRestClient(targetConfig, insecure) // Re-initialize client
 		log.Infoln("Getting variable: ", c.name)
 
-		variable, err := GetVariable(client, "", c.name, c.project, "")
+		variable, err := GetVariable(RESTClient, "", c.name, c.project, "")
 
 		if err != nil {
 			log.Warnln(err)
@@ -88,12 +88,12 @@ func TestGetVariable(t *testing.T) {
 func TestDeleteVariable(t *testing.T) {
 	for _, c := range cases { // Delete each test case
 		log.Infoln("Deleting variable: ", c.name)
-		variable, err := GetVariable(client, "", c.name, c.project, "")
+		variable, err := GetVariable(RESTClient, "", c.name, c.project, "")
 		if err != nil {
 			log.Warnln(err)
 		}
 		assert.Assert(t, len(variable) == 1) // Getter should return exactly one variable
-		deleted, err := DeleteVariable(client, variable[0].ID)
+		deleted, err := DeleteVariable(RESTClient, variable[0].ID)
 		assert.NilError(t, err) // Deleter should not return an error
 
 		assert.Equal(t, deleted, true) // Deleter should return true

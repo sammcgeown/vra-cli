@@ -27,7 +27,7 @@ func GetCloudTemplate(apiclient *client.MulticloudIaaS, id string, name string, 
 			if perr != nil {
 				return nil, perr
 			}
-			CloudTemplateParams.Projects = []string{*p[0].ID}
+			CloudTemplateParams.Projects = []string{*(p[0]).ID}
 		}
 
 		log.Debug(CloudTemplateParams)

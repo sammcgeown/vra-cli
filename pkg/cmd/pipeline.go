@@ -130,7 +130,7 @@ vra-cli get execution --status Failed`,
 					if len(endpoints) > 0 {
 						log.Infoln(c.Name, "depends on Endpoints:", strings.Join(endpoints, ", "))
 						for _, e := range endpoints {
-							getEndpoint("", e, c.Project, "", filepath.Join(exportPath, "endpoints"))
+							codestream.GetEndpoint(restClient, "", e, c.Project, "", filepath.Join(exportPath, "endpoints"))
 						}
 					}
 					customintegrations = helpers.RemoveDuplicateStrings(customintegrations)

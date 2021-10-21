@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/sammcgeown/vra-cli/pkg/cmd/codestream"
 	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
@@ -27,7 +28,7 @@ var getEndpointCmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 
-		response, err := getEndpoint(id, name, projectName, typename, exportPath)
+		response, err := codestream.GetEndpoint(restClient, id, name, projectName, typename, exportPath)
 		if err != nil {
 			log.Infoln("Unable to get endpoints: ", err)
 		}
@@ -36,7 +37,7 @@ var getEndpointCmd = &cobra.Command{
 			// No results
 			log.Infoln("No results found")
 		} else if resultCount == 1 {
-			helpers.PrettyPrint(response[0])
+			helpers.PrettyPrint(response)
 		} else {
 			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)
@@ -152,22 +153,26 @@ vra-cli delete endpoint --project "My Project"
 			log.Fatalln(err)
 		}
 		if name != "" {
-			response, err := getEndpoint(id, name, projectName, typename, exportPath)
+			response, err := codestream.GetEndpoint(restClient, id, name, projectName, typename, exportPath)
 			if err != nil {
 				log.Fatalln(err)
 			}
-			id = response[0].ID
+			// return first element of map[string]
+			for _, c := range response {
+				id = c.ID
+				break
+			}
 		}
 
 		if id != "" {
 
-			response, err := deleteEndpoint(id)
+			err := codestream.DeleteEndpoint(restClient, id)
 			if err != nil {
 				log.Errorln("Unable to delete Endpoint: ", err)
 			}
-			log.Infoln("Endpoint with id " + response.ID + " deleted")
+			log.Infoln("Endpoint with id " + id + " deleted")
 		} else if projectName != "" {
-			response, err := deleteEndpointByProject(projectName)
+			response, err := codestream.DeleteEndpointByProject(restClient, projectName)
 			if err != nil {
 				log.Errorln("Unable to delete Endpoint: ", err)
 			}

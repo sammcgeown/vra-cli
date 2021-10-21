@@ -15,7 +15,7 @@ import (
 )
 
 // GetProject - Get Projects
-func GetProject(apiClient *client.MulticloudIaaS, apiVersion string, name string, id string) ([]*models.Project, error) {
+func GetProject(apiClient *client.MulticloudIaaS, apiVersion string, name string, id string) ([]*models.IaaSProject, error) {
 	var filters []string
 	var filter string
 	if id != "" {
@@ -49,7 +49,7 @@ func GetProject(apiClient *client.MulticloudIaaS, apiVersion string, name string
 func DeleteProject(apiClient *client.MulticloudIaaS, apiVersion string, id string) error {
 
 	// Workaround an issue where the cloud regions need to be removed before the project can be deleted.
-	_, err := apiClient.Project.UpdateProject(project.NewUpdateProjectParams().WithAPIVersion(&apiVersion).WithID(id).WithBody(&models.ProjectSpecification{
+	_, err := apiClient.Project.UpdateProject(project.NewUpdateProjectParams().WithAPIVersion(&apiVersion).WithID(id).WithBody(&models.IaaSProjectSpecification{
 		ZoneAssignmentConfigurations: []*models.ZoneAssignmentSpecification{},
 	}))
 	if err != nil {
@@ -64,16 +64,16 @@ func DeleteProject(apiClient *client.MulticloudIaaS, apiVersion string, id strin
 }
 
 // CreateProject - Create Project
-func CreateProject(apiClient *client.MulticloudIaaS, apiVersion string, name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.Project, error) {
-	createdProject, err := apiClient.Project.CreateProject(project.NewCreateProjectParams().WithAPIVersion(&apiVersion).WithBody(&models.ProjectSpecification{
+func CreateProject(apiClient *client.MulticloudIaaS, apiVersion string, name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.IaaSProject, error) {
+	createdProject, err := apiClient.Project.CreateProject(project.NewCreateProjectParams().WithAPIVersion(&apiVersion).WithBody(&models.IaaSProjectSpecification{
 		Administrators:               administrators,
 		Constraints:                  constraints,
 		Description:                  description,
 		MachineNamingTemplate:        machineNamingTemplate,
 		Members:                      members,
 		Name:                         &name,
-		OperationTimeout:             int64(operationTimeout),
-		SharedResources:              sharedResources,
+		OperationTimeout:             &operationTimeout,
+		SharedResources:              *sharedResources,
 		Viewers:                      viewers,
 		ZoneAssignmentConfigurations: zoneAssignment,
 	}))
@@ -84,8 +84,8 @@ func CreateProject(apiClient *client.MulticloudIaaS, apiVersion string, name str
 }
 
 // UpdateProject - Update Project
-func UpdateProject(apiClient *client.MulticloudIaaS, apiVersion string, id string, name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.Project, error) {
-	ProjectSpecification := models.ProjectSpecification{}
+func UpdateProject(apiClient *client.MulticloudIaaS, apiVersion string, id string, name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.IaaSProject, error) {
+	ProjectSpecification := models.IaaSProjectSpecification{}
 
 	if len(administrators) > 0 {
 		ProjectSpecification.Administrators = administrators
@@ -109,13 +109,13 @@ func UpdateProject(apiClient *client.MulticloudIaaS, apiVersion string, id strin
 		ProjectSpecification.Description = description
 	}
 	if operationTimeout != 0 {
-		ProjectSpecification.OperationTimeout = int64(operationTimeout)
+		ProjectSpecification.OperationTimeout = &operationTimeout
 	}
 	if machineNamingTemplate != "" {
 		ProjectSpecification.MachineNamingTemplate = machineNamingTemplate
 	}
 	if *sharedResources == bool(true) {
-		ProjectSpecification.SharedResources = sharedResources
+		ProjectSpecification.SharedResources = *sharedResources
 	}
 
 	updatedProject, err := apiClient.Project.UpdateProject(project.NewUpdateProjectParams().WithAPIVersion(&apiVersion).WithID(id).WithBody(&ProjectSpecification))
