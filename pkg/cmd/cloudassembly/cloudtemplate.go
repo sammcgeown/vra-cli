@@ -5,6 +5,9 @@ SPDX-License-Identifier: BSD-2-Clause
 package cloudassembly
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/go-openapi/strfmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/vmware/vra-sdk-go/pkg/client"
@@ -110,4 +113,34 @@ func CreateCloudTemplate(apiclient *client.MulticloudIaaS, name string, descript
 		return nil, err
 	}
 	return ret.Payload, err
+}
+
+// ExportCloudTemplate - Export a Cloud Assembly Cloud Template
+func ExportCloudTemplate(name, project, content, path string) error {
+	var exportPath string
+	if path != "" {
+		exportPath = path
+		_, folderError := os.Stat(exportPath) // Get file system info
+		if os.IsNotExist(folderError) {       // If it doesn't exist
+			log.Debugln("Folder doesn't exist - creating")
+			mkdirErr := os.MkdirAll(exportPath, os.FileMode(0755)) // Attempt to make it
+			if mkdirErr != nil {
+				return mkdirErr
+			}
+		}
+	} else {
+		// If path is not specified, use the current path
+		exportPath, _ = os.Getwd()
+	}
+	exportPath = filepath.Join(exportPath, project+" - "+name+".yaml")
+	f, cerr := os.Create(exportPath) // Open the file for writing
+	if cerr != nil {
+		return cerr
+	}
+	defer f.Close() // Defer closing until just before this function returns
+	_, werr := f.WriteString(content)
+	if werr != nil {
+		return werr
+	}
+	return nil
 }

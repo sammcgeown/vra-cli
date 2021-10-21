@@ -188,7 +188,7 @@ vra-cli update pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 		}
 		for _, yamlFilePath := range yamlFilePaths {
 			yamlFileName := filepath.Base(yamlFilePath)
-			err := importYaml(yamlFilePath, "apply", "", "endpoint")
+			err := codestream.ImportYaml(restClient, yamlFilePath, "apply", "", "endpoint")
 			if err != nil {
 				log.Warnln("Failed to import", yamlFilePath, "as Pipeline", err)
 			}
@@ -219,7 +219,7 @@ vra-cli create pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 		}
 		for _, yamlFilePath := range yamlFilePaths {
 			yamlFileName := filepath.Base(yamlFilePath)
-			err := importYaml(yamlFilePath, "create", projectName, "pipeline")
+			err := codestream.ImportYaml(restClient, yamlFilePath, "create", projectName, "pipeline")
 			if err != nil {
 				log.Warnln("Failed to import", yamlFilePath, "as Pipeline", err)
 			} else {
