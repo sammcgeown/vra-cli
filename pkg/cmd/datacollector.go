@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/sammcgeown/vra-cli/pkg/cmd/cloudassembly"
 	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
@@ -29,7 +30,7 @@ Get all Data Collectors:
 		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
-		dataCollectors, err := getDataCollectors(id)
+		dataCollectors, err := cloudassembly.GetDataCollector(apiClient, id)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -40,7 +41,7 @@ Get all Data Collectors:
 			helpers.PrettyPrint(dataCollectors[0])
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Id", "Name", "Hostname", "IP Address, Status"})
+			table.SetHeader([]string{"Id", "Name", "Hostname", "IP Address", "Status"})
 			for _, c := range dataCollectors {
 				table.Append([]string{*c.DcID, *c.Name, *c.HostName, *c.IPAddress, *c.Status})
 			}

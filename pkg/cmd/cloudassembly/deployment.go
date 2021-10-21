@@ -55,49 +55,14 @@ func GetDeployments(apiclient *client.MulticloudIaaS, id string, name string, pr
 
 	}
 	return Deployments.Payload.Content, nil
+}
 
-	// var arrResults []*types.Deployment
-	// client := resty.New()
-
-	// if id != "" {
-	// 	queryResponse, _ := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-	// 		SetQueryParams(qParams).
-	// 		SetHeader("Accept", "application/json").
-	// 		SetResult(&types.Deployment{}).
-	// 		SetAuthToken(targetConfig.AccessToken).
-	// 		SetError(&types.Exception{}).
-	// 		Get("https://" + targetConfig.Server + "/deployment/api/deployments/" + id)
-
-	// 	log.Debugln(queryResponse.Request.RawRequest.URL)
-	// 	// log.Debugln(queryResponse.String())
-
-	// 	if queryResponse.IsError() {
-	// 		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
-	// 	}
-
-	// 	arrResults = append(arrResults, queryResponse.Result().(*types.Deployment))
-	// } else {
-	// 	queryResponse, _ := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-	// 		SetQueryParams(qParams).
-	// 		SetHeader("Accept", "application/json").
-	// 		SetResult(&types.ContentsList{}).
-	// 		SetAuthToken(targetConfig.AccessToken).
-	// 		SetError(&types.Exception{}).
-	// 		Get("https://" + targetConfig.Server + "/deployment/api/deployments")
-
-	// 	log.Debugln(queryResponse.Request.RawRequest.URL)
-	// 	// log.Debugln(queryResponse.String())
-
-	// 	if queryResponse.IsError() {
-	// 		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
-	// 	}
-
-	// 	for _, value := range queryResponse.Result().(*types.ContentsList).Content {
-	// 		c := types.Deployment{}
-	// 		mapstructure.Decode(value, &c)
-	// 		arrResults = append(arrResults, &c)
-	// 	}
-
-	// }
-	// return arrResults, nil
+// DeleteDeployment - Delete a deployment
+func DeleteDeployment(apiclient *client.MulticloudIaaS, id string) error {
+	DeleteParams := deployments.NewDeleteDeploymentUsingDELETEParams().WithDeploymentID(strfmt.UUID(id))
+	_, err := apiclient.Deployments.DeleteDeploymentUsingDELETE(DeleteParams)
+	if err != nil {
+		return err
+	}
+	return nil
 }

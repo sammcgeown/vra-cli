@@ -52,13 +52,52 @@ var getDeploymentCmd = &cobra.Command{
 	},
 }
 
+// deleteDeploymentCmd represents the delete Deployment command
+var deleteDeploymentCmd = &cobra.Command{
+	Use:   "deployment",
+	Short: "Delete a Deployment",
+	Long: `Delete a Deployment with a specific ID
+
+Delete a Deployment by ID:
+  vra-cli delete deployment --id <Deployment ID>`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := auth.GetConnection(&targetConfig, debug); err != nil {
+			log.Fatalln(err)
+		}
+		deployment, err := cloudassembly.GetDeployments(apiClient, id, "", "", "")
+		if err != nil {
+			log.Debug(err) // There was an error getting the Deployment
+		}
+
+		if len(deployment) == 0 {
+			// No error was throw, but there was no Deployment
+			log.Fatalln("No Deployment matching the request was found")
+		} else if len(deployment) > 1 {
+			// There was more than one Deployment
+			log.Fatalln("More than one Deployment matching the request was found")
+		} else {
+			// There was only one Deployment
+			if err := cloudassembly.DeleteDeployment(apiClient, (deployment[0].ID).String()); err != nil {
+				log.Fatalln(err) // There was an error deleting the Deployment
+			} else {
+				log.Infoln("Deployment deleted successfully")
+			}
+		}
+
+	},
+}
+
 func init() {
-	// Get Variable
+	// Get Deployment
 	getCmd.AddCommand(getDeploymentCmd)
 	getDeploymentCmd.Flags().StringVarP(&name, "name", "n", "", "List Deployments with name")
 	getDeploymentCmd.Flags().StringVarP(&projectName, "project", "p", "", "List Deployments in Project")
 	getDeploymentCmd.Flags().StringVarP(&id, "id", "i", "", "List Deployments by ID")
 	getDeploymentCmd.Flags().StringVarP(&status, "status", "s", "", "List Deployments by Status")
 	getDeploymentCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
+
+	// Delete Deployment
+	deleteCmd.AddCommand(deleteDeploymentCmd)
+	deleteDeploymentCmd.Flags().StringVarP(&id, "id", "i", "", "Delete Deployment by ID")
 
 }
