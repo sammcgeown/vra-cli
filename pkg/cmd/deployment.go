@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/sammcgeown/vra-cli/pkg/cmd/cloudassembly"
 	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
@@ -25,7 +26,7 @@ var getDeploymentCmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 
-		response, err := getDeployments(id)
+		response, err := cloudassembly.GetDeployments(apiClient, id, name, projectName, status)
 		if err != nil {
 			log.Fatalln("Unable to get Deployments: ", err)
 		}
@@ -42,9 +43,9 @@ var getDeploymentCmd = &cobra.Command{
 		} else {
 			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Id", "Name", "Project", "Description"})
+			table.SetHeader([]string{"Id", "Name", "Project", "Description", "Owner", "Status"})
 			for _, c := range response {
-				table.Append([]string{c.Id, c.Name, c.ProjectId, c.Description})
+				table.Append([]string{c.ID.String(), *c.Name, c.Project.Name, c.Description, c.OwnedBy, c.Status})
 			}
 			table.Render()
 		}
@@ -54,9 +55,10 @@ var getDeploymentCmd = &cobra.Command{
 func init() {
 	// Get Variable
 	getCmd.AddCommand(getDeploymentCmd)
-	getDeploymentCmd.Flags().StringVarP(&name, "name", "n", "", "List variable with name")
-	getDeploymentCmd.Flags().StringVarP(&projectName, "project", "p", "", "List variables in project")
-	getDeploymentCmd.Flags().StringVarP(&id, "id", "i", "", "List variables by id")
+	getDeploymentCmd.Flags().StringVarP(&name, "name", "n", "", "List Deployments with name")
+	getDeploymentCmd.Flags().StringVarP(&projectName, "project", "p", "", "List Deployments in Project")
+	getDeploymentCmd.Flags().StringVarP(&id, "id", "i", "", "List Deployments by ID")
+	getDeploymentCmd.Flags().StringVarP(&status, "status", "s", "", "List Deployments by Status")
 	getDeploymentCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
 
 }
