@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sammcgeown/vra-cli/pkg/cmd/catalogitem"
+	"github.com/sammcgeown/vra-cli/pkg/cmd/servicebroker"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
@@ -28,7 +28,7 @@ var getCatalogItemCmd = &cobra.Command{
 	Long:  `Get Catalog Items`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		response, err := catalogitem.GetCatalogItems(restClient, id, name, projectName)
+		response, err := servicebroker.GetCatalogItems(restClient, id, name, projectName)
 		if err != nil {
 			log.Infoln("Unable to get CatalogItems: ", err)
 		}

@@ -1,8 +1,8 @@
 /*
-Package catalogitem Copyright 2021 VMware, Inc.
+Package servicebroker Copyright 2021 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause
 */
-package catalogitem
+package servicebroker
 
 import (
 	"errors"
@@ -14,6 +14,7 @@ import (
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
 )
 
+// GetCatalogItems returns a catalog item by name, id or project
 func GetCatalogItems(client *resty.Client, id string, name string, project string) ([]*types.CatalogItem, error) {
 	var arrResults []*types.CatalogItem
 
