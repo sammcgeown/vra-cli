@@ -1,11 +1,10 @@
 /*
-Package cmd Copyright 2021 VMware, Inc.
+Package codestream Copyright 2021 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause
 */
-package cmd
+package codestream
 
 import (
-	"crypto/tls"
 	"strings"
 
 	"github.com/go-resty/resty/v2"
@@ -13,9 +12,9 @@ import (
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
 )
 
-func getCustomIntegration(id, name string) ([]*types.CustomIntegration, error) {
+// GetCustomIntegration returns a custom integration
+func GetCustomIntegration(client *resty.Client, id, name string) ([]*types.CustomIntegration, error) {
 	var arrCustomIntegrations []*types.CustomIntegration
-	client := resty.New()
 
 	var filters []string
 	if id != "" {
@@ -25,15 +24,12 @@ func getCustomIntegration(id, name string) ([]*types.CustomIntegration, error) {
 		filters = append(filters, "(name eq '"+name+"')")
 	}
 	if len(filters) > 0 {
-		qParams["$filter"] = "(" + strings.Join(filters, " and ") + ")"
+		client.QueryParam.Set("$filter", "("+strings.Join(filters, " and ")+")")
 	}
-
-	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-		SetQueryParams(qParams).
-		SetHeader("Accept", "application/json").
+	queryResponse, err := client.R().
 		SetResult(&types.DocumentsList{}).
-		SetAuthToken(targetConfig.AccessToken).
-		Get("https://" + targetConfig.Server + "/pipeline/api/custom-integrations")
+		SetError(&types.Exception{}).
+		Get("/pipeline/api/custom-integrations")
 
 	if queryResponse.IsError() {
 		return nil, queryResponse.Error().(error)

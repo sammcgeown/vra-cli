@@ -7,6 +7,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/sammcgeown/vra-cli/pkg/cmd/codestream"
 	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
@@ -33,7 +34,7 @@ Get by Project
 		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
-		response, err := getCustomIntegration(id, name)
+		response, err := codestream.GetCustomIntegration(restClient, id, name)
 		if err != nil {
 			log.Errorln("Unable to get Code Stream CustomIntegrations: ", err)
 		}
@@ -50,12 +51,12 @@ Get by Project
 		} else {
 			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Id", "Name", "Status", "Description"})
+			table.SetHeader([]string{"Id", "Name", "Description", "Status", "Version"})
 			for _, c := range response {
 				//if export {
 				//exportCustomIntegration(c, exportFile)
 				//}
-				table.Append([]string{c.ID, c.Name, c.Status, c.Description})
+				table.Append([]string{c.ID, c.Name, c.Description, c.Status, c.Version})
 			}
 			table.Render()
 		}

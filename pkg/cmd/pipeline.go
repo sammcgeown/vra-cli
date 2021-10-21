@@ -138,7 +138,7 @@ vra-cli get execution --status Failed`,
 					if len(customintegrations) > 0 {
 						log.Infoln(c.Name, "depends on Custom Integrations:", strings.Join(customintegrations, ", "))
 						for _, ci := range customintegrations {
-							getCustomIntegration("", ci)
+							codestream.GetCustomIntegration(restClient, "", ci)
 						}
 					}
 				}
