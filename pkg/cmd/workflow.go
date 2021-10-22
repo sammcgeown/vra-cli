@@ -42,16 +42,19 @@ vra-cli get workflow --status FAILED --project "Field Demo" --name "Learn Code S
 		if resultCount == 0 {
 			// No results
 			log.Infoln("No results found")
-		} else if resultCount == 1 {
-			helpers.PrettyPrint(response[0])
 		} else {
-			// Print result table
-			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Id", "Name", "Version", "Description"})
-			for _, c := range response {
-				table.Append([]string{c.ID, c.Name, c.Version, c.Description})
+			if output == "table" {
+				// Print result table
+				table := tablewriter.NewWriter(os.Stdout)
+				table.SetHeader([]string{"Id", "Name", "Version", "Description", "Category"})
+				for _, c := range response {
+					category, _ := orchestrator.GetCategoryByID(restClient, c.CategoryID)
+					table.Append([]string{c.ID, c.Name, c.Version, c.Description, category.Path})
+				}
+				table.Render()
+			} else {
+				helpers.PrettyPrint(response)
 			}
-			table.Render()
 		}
 
 	},

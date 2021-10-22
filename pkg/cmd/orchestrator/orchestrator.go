@@ -20,7 +20,7 @@ func GetCategoryByID(client *resty.Client, id string) (*types.WsCategory, error)
 	var Category *types.WsCategory
 
 	queryResponse, err := client.R().
-		SetResult(&types.InventoryItemsList{}).
+		SetResult(&types.WsCategory{}).
 		SetError(&types.Exception{}).
 		Get("/vco/api/categories/" + id)
 

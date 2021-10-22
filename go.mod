@@ -3,6 +3,8 @@ module github.com/sammcgeown/vra-cli
 go 1.16
 
 require (
+	github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2 // indirect
+	github.com/fatih/color v1.13.0 // indirect
 	github.com/go-openapi/errors v0.20.1 // indirect
 	github.com/go-openapi/loads v0.20.3 // indirect
 	github.com/go-openapi/runtime v0.20.0
@@ -12,6 +14,8 @@ require (
 	github.com/go-resty/resty/v2 v2.6.0
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/hokaccha/go-prettyjson v0.0.0-20210113012101-fb4e108d2519 // indirect
+	github.com/mattn/go-colorable v0.1.11 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.4.2
