@@ -182,7 +182,7 @@ vra-cli update pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 			log.Infoln("Setting pipeline " + response.Name + " to " + state)
 		}
 
-		yamlFilePaths := helpers.GetYamlFilePaths(importPath)
+		yamlFilePaths := helpers.GetFilePaths(importPath, ".yaml")
 		if len(yamlFilePaths) == 0 {
 			log.Warnln("No YAML files were found in", importPath)
 		}
@@ -213,7 +213,7 @@ vra-cli create pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 		if err := auth.GetConnection(&targetConfig, debug); err != nil {
 			log.Fatalln(err)
 		}
-		yamlFilePaths := helpers.GetYamlFilePaths(importPath)
+		yamlFilePaths := helpers.GetFilePaths(importPath, ".yaml")
 		if len(yamlFilePaths) == 0 {
 			log.Warnln("No YAML files were found in", importPath)
 		}

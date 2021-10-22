@@ -69,7 +69,7 @@ var createEndpointCmd = &cobra.Command{
 		}
 
 		if importPath != "" {
-			yamlFilePaths := helpers.GetYamlFilePaths(importPath)
+			yamlFilePaths := helpers.GetFilePaths(importPath, "yaml")
 			if len(yamlFilePaths) == 0 {
 				log.Warnln("No YAML files were found in", importPath)
 			}
@@ -103,7 +103,7 @@ var updateEndpointCmd = &cobra.Command{
 		}
 
 		if importPath != "" {
-			yamlFilePaths := helpers.GetYamlFilePaths(importPath)
+			yamlFilePaths := helpers.GetFilePaths(importPath, ".yaml")
 			if len(yamlFilePaths) == 0 {
 				log.Warnln("No YAML files were found in", importPath)
 			}

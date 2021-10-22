@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"os"
+	"strings"
 
 	"github.com/sammcgeown/vra-cli/pkg/cmd/orchestrator"
 
@@ -52,6 +53,17 @@ vra-cli get workflow --status FAILED --project "Field Demo" --name "Learn Code S
 					table.Append([]string{c.ID, c.Name, c.Version, c.Description, category.Path})
 				}
 				table.Render()
+			} else if output == "export" {
+				// Export the Worfklow
+				for _, workflow := range response {
+					err := orchestrator.ExportWorkflow(restClient, workflow.ID, workflow.Name, category)
+					if err != nil {
+						log.Warnln("Unable to export workflow: ", err)
+					} else {
+						log.Infoln("Workflow", workflow.Name, "exported")
+					}
+				}
+
 			} else {
 				helpers.PrettyPrint(response)
 			}
@@ -89,26 +101,49 @@ vra-cli get workflow --status FAILED --project "Field Demo" --name "Learn Code S
 // 	},
 // }
 
-// // createExecutionCmd represents the workflows command
-// var createExecutionCmd = &cobra.Command{
-// 	Use:   "workflow",
-// 	Short: "Create an Execution",
-// 	Long: `Create an Execution with a specific pipeline ID and form payload.
+// createWorkflowCmd represents the workflows command
+var createWorkflowCmd = &cobra.Command{
+	Use:   "workflow",
+	Short: "Create a Workflow",
+	Long:  `Create a Workflow`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := auth.GetConnection(&targetConfig, debug); err != nil {
+			log.Fatalln(err)
+		}
+		log.Debugln("Category Path:", category)
+		categoryName := (strings.Split(category, "/"))[len(strings.Split(category, "/"))-1]
+		log.Debugln("Category Name:", categoryName)
 
-// 	`,
-// 	Run: func(cmd *cobra.Command, args []string) {
-// 		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-// 			log.Fatalln(err)
-// 		}
+		var CategoryID string
+		categories, _ := orchestrator.GetCategoryByName(restClient, categoryName)
+		if len(categories) == 0 {
+			log.Fatalln("Unable to find category:", categoryName)
+		} else if len(categories) == 1 {
+			// Only one category found
+			log.Debugln("Category found:", categories[0].ID)
+		} else {
+			for _, matchedCategory := range categories {
+				if matchedCategory.Path == category {
+					log.Debugln("Category ID:", matchedCategory.ID)
+					CategoryID = matchedCategory.ID
+					break
+				}
+			}
+			if CategoryID == "" {
+				log.Fatalln("Multiple categories found, try using a more specific path - e.g.: path/to/category")
+			}
+		}
+		// for _, path := range helpers.GetFilePaths(importPath, ".zip") {
+		// 	workflow, err := orchestrator.ImportWorkflow(restClient, path, category, force)
+		// 	if err != nil {
+		// 		log.Errorln("Unable to import workflow: ", err)
+		// 	} else {
+		// 		log.Infoln("Workflow imported: ", workflow.Name, "with ID: ", workflow.ID)
+		// 	}
+		// }
 
-// 		response, err := codestream.CreateExecution(restClient, id, inputs, comments)
-// 		if err != nil {
-// 			log.Errorln("Unable to create workflow: ", err)
-// 		}
-// 		log.Infoln("Execution " + response.ExecutionLink + " created")
-
-// 	},
-// }
+	},
+}
 
 func init() {
 	// Get
@@ -123,11 +158,9 @@ func init() {
 	// delExecutionCmd.Flags().StringVarP(&status, "status", "s", "", "Delete workflows by status (Completed|Waiting|Pausing|Paused|Resuming|Running)")
 	// delExecutionCmd.Flags().StringVarP(&projectName, "project", "p", "", "Delete workflows by Project")
 	// delExecutionCmd.Flags().BoolVarP(&nested, "nested", "", false, "Delete nested workflows")
-	// // Create
-	// createCmd.AddCommand(createExecutionCmd)
-	// createExecutionCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the pipeline to execute")
-	// createExecutionCmd.Flags().StringVarP(&inputs, "inputs", "", "", "JSON form inputs")
-	// createExecutionCmd.Flags().StringVarP(&inputPath, "inputPath", "", "", "JSON input file")
-	// createExecutionCmd.Flags().StringVarP(&comments, "comments", "", "", "Execution comments")
-	// createExecutionCmd.MarkFlagRequired("id")
+	// Create
+	createCmd.AddCommand(createWorkflowCmd)
+	createWorkflowCmd.Flags().StringVarP(&category, "category", "c", "", "Category to import")
+	createWorkflowCmd.Flags().StringVar(&importPath, "importPath", "", "Path to the zip file, or folder containing zip files, to import")
+	createWorkflowCmd.Flags().BoolVarP(&force, "force", "", false, "Overwrite existing workflows")
 }

@@ -49,6 +49,7 @@ var (
 	exportPath  string
 	importPath  string
 	category    string
+	force       bool
 )
 
 var qParams = map[string]string{

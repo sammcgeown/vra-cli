@@ -5,10 +5,15 @@ SPDX-License-Identifier: BSD-2-Clause
 package orchestrator
 
 import (
+	"errors"
 	"net/url"
+	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 )
@@ -61,6 +66,53 @@ func GetWorkflow(client *resty.Client, id string, category string, name string) 
 		}
 	}
 	return Workflows, err
+}
+
+// ExportWorkflow - exports a workflow
+func ExportWorkflow(client *resty.Client, id string, name string, path string) error {
+	var exportPath string
+	if path != "" {
+		exportPath = path
+	} else {
+		exportPath, _ = os.Getwd()
+	}
+
+	queryResponse, err := client.R().
+		SetError(&types.Exception{}).
+		SetOutput(filepath.Join(exportPath, name+".zip")).
+		SetHeader("Accept", "application/zip").
+		Get("/vco/api/workflows/" + id)
+
+	if err != nil {
+		return err
+	}
+
+	if queryResponse.IsError() {
+		return errors.New(queryResponse.Status())
+	}
+	return nil
+}
+
+// ImportWorkflow - imports a workflow
+func ImportWorkflow(client *resty.Client, path string, categoryID string, overwrite bool) (*types.WsWorkflow, error) {
+	var formData = map[string]string{}
+	formData["categoryId"] = categoryID
+	formData["overwrite"] = strconv.FormatBool(overwrite)
+
+	queryResponse, err := client.R().
+		SetError(&types.Exception{}).
+		SetFile("file", path).
+		SetFormData(formData).
+		SetHeader("Accept", "application/zip").
+		Post("/vco/api/workflows/")
+
+	if err != nil {
+		return nil, err
+	}
+
+	helpers.PrettyPrint(queryResponse.Result())
+
+	return nil, nil
 }
 
 // // DeleteExecution - deletes an execution by ID
