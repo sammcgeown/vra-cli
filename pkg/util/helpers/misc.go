@@ -7,7 +7,6 @@ package helpers
 import (
 	"archive/zip"
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -16,12 +15,13 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/hokaccha/go-prettyjson"
 	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
 	"github.com/vmware/vra-sdk-go/pkg/models"
 )
 
-// isInputFromPipe - pipeline detection
+// IsInputFromPipe - pipeline detection
 func IsInputFromPipe() bool {
 	fileInfo, _ := os.Stdin.Stat()
 	return fileInfo.Mode()&os.ModeCharDevice == 0
@@ -41,11 +41,17 @@ func IsInputFromPipe() bool {
 
 // PrettyPrint prints interfaces
 func PrettyPrint(v interface{}) (err error) {
-	b, err := json.MarshalIndent(v, "", "  ")
-	if err == nil {
-		fmt.Println(string(b))
+	s, err := prettyjson.Marshal(v)
+	if err != nil {
+		return err
 	}
-	return
+	fmt.Println(string(s))
+
+	// b, err := json.MarshalIndent(v, "", "  ")
+	// if err == nil {
+	// 	fmt.Println(string(b))
+	// }
+	return nil
 }
 
 // PrintTable prints an array of objects with table headers
@@ -67,6 +73,7 @@ func PrintTable(objects []interface{}, headers []string) {
 	table.Render()
 }
 
+// GetYamlFilePaths - Get all yaml files in a directory
 func GetYamlFilePaths(importPath string) []string {
 	var yamlFiles []string
 	// Read importPath
@@ -89,6 +96,7 @@ func GetYamlFilePaths(importPath string) []string {
 	return yamlFiles
 }
 
+// RemoveDuplicateStrings - remote duplicate strings from a slice
 func RemoveDuplicateStrings(elements []string) []string {
 	encountered := map[string]bool{}
 	// Create a map of all unique elements.
@@ -103,6 +111,7 @@ func RemoveDuplicateStrings(elements []string) []string {
 	return result
 }
 
+// ZipFiles compresses one or many files into a single zip archive file.
 func ZipFiles(filename string, files []string, basedir string) error {
 	newZipFile, err := os.Create(filename)
 	if err != nil {
@@ -122,6 +131,7 @@ func ZipFiles(filename string, files []string, basedir string) error {
 	return nil
 }
 
+// AddFileToZip - adds a file to a zip archive
 func AddFileToZip(zipWriter *zip.Writer, filename string, basedir string) error {
 	fileToZip, err := os.Open(filename)
 	if err != nil {
@@ -168,7 +178,7 @@ func AddFileToZip(zipWriter *zip.Writer, filename string, basedir string) error 
 // 	return inputs
 // }
 
-// helpers.AskForConfirmation - Credit - https://gist.github.com/r0l1/3dcbb0c8f6cfe9c66ab8008f55f8f28b
+// AskForConfirmation - Credit - https://gist.github.com/r0l1/3dcbb0c8f6cfe9c66ab8008f55f8f28b
 func AskForConfirmation(s string) bool {
 	reader := bufio.NewReader(os.Stdin)
 
@@ -202,6 +212,7 @@ func AskForConfirmation(s string) bool {
 // 	return inputs
 // }
 
+// StringToTags - split a string into tags
 func StringToTags(tags string) []*models.Tag {
 	var tagsArray []*models.Tag
 	if tags == "" {
@@ -218,6 +229,7 @@ func StringToTags(tags string) []*models.Tag {
 	return tagsArray
 }
 
+// CreateUserArray - Create an array of users from emails
 func CreateUserArray(emails []string) []*models.User {
 	if emails[0] == "" {
 		return nil
