@@ -36,6 +36,7 @@ type CloudTemplate struct {
 	ContentSourceSyncAt       time.Time     `json:"contentSourceSyncAt"`
 }
 
+// CloudTemplateRequest - Struct
 type CloudTemplateRequest struct {
 	Content         string `json:"content"`
 	Description     string `json:"description"`
@@ -44,6 +45,7 @@ type CloudTemplateRequest struct {
 	RequestScopeOrg bool   `json:"requestScopeOrg"`
 }
 
+// CloudTemplateInputSchema - Struct
 type CloudTemplateInputSchema struct {
 	Type       string                 `json:"type"`
 	Encrypted  bool                   `json:"encrypted"`
@@ -51,6 +53,7 @@ type CloudTemplateInputSchema struct {
 	Properties map[string]interface{} `json:"properties"`
 }
 
+// CloudTemplateInputProperty - Struct
 type CloudTemplateInputProperty struct {
 	Type      string `json:"type"`
 	Encrypted bool   `json:"encrypted"`
@@ -72,25 +75,27 @@ type CloudTemplateInputProperty struct {
 	MinLength   int      `json:"minLength"`
 }
 
+// DeploymentInput - Struct
 type DeploymentInput struct {
 	Inputs map[string]interface{} `json:"inputs"`
 }
 
+// Deployment - Struct
 type Deployment struct {
-	Id                 string            `json:"id"`
+	ID                 string            `json:"id"`
 	Name               string            `json:"name"`
 	Description        string            `json:"description"`
-	OrgId              string            `json:"orgId"`
-	BlueprintId        string            `json:"blueprintId"`
+	OrgID              string            `json:"orgId"`
+	BlueprintID        string            `json:"blueprintId"`
 	CreatedAt          time.Time         `json:"createdAt"`
 	CreatedBy          string            `json:"createdBy"`
 	LastUpdatedAt      time.Time         `json:"lastUpdatedAt"`
 	LastUpdatedBy      string            `json:"lastUpdatedBy"`
 	Inputs             map[string]string `json:"inputs"`
-	ProjectId          string            `json:"projectId"`
+	ProjectID          string            `json:"projectId"`
 	Status             string            `json:"status"`
 	BlueprintVersion   string            `json:"blueprintVersion"`
-	CatalogItemId      string            `json:"catalogItemId"`
-	IconId             string            `json:"iconId"`
+	CatalogItemID      string            `json:"catalogItemId"`
+	IconID             string            `json:"iconId"`
 	CatalogItemVersion string            `json:"catalogItemVersion"`
 }

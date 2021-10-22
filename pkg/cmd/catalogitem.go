@@ -28,7 +28,7 @@ var getCatalogItemCmd = &cobra.Command{
 	Long:  `Get Catalog Items`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		response, err := servicebroker.GetCatalogItems(restClient, id, name, projectName)
+		response, err := servicebroker.GetCatalogItems(apiClient, id, name, projectName)
 		if err != nil {
 			log.Infoln("Unable to get CatalogItems: ", err)
 		}
@@ -47,7 +47,7 @@ var getCatalogItemCmd = &cobra.Command{
 				for _, Project := range c.Projects {
 					projectList = append(projectList, Project.Name)
 				}
-				table.Append([]string{c.Id, c.Name, c.Type.Name, strings.Join(projectList, ", ")})
+				table.Append([]string{c.ID.String(), *c.Name, c.Type.Name, strings.Join(projectList, ", ")})
 			}
 			table.Render()
 		}

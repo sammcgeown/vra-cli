@@ -47,6 +47,7 @@ var (
 	printJSON   bool
 	exportPath  string
 	importPath  string
+	category    string
 )
 
 var qParams = map[string]string{
@@ -116,6 +117,7 @@ func InitConfig() {
 		SetAuthToken(targetConfig.AccessToken).
 		SetHostURL("https://"+targetConfig.Server).
 		SetHeader("Accept", "application/json").
+		SetHeader("Content-Type", "application/json").
 		SetError(&types.Exception{})
 
 	apiClient = auth.GetAPIClient(&targetConfig, debug)

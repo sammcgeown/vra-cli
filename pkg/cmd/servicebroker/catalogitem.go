@@ -5,56 +5,50 @@ SPDX-License-Identifier: BSD-2-Clause
 package servicebroker
 
 import (
-	"errors"
-
-	log "github.com/sirupsen/logrus"
-
-	"github.com/go-resty/resty/v2"
-	"github.com/mitchellh/mapstructure"
-	"github.com/sammcgeown/vra-cli/pkg/util/types"
+	"github.com/go-openapi/strfmt"
+	"github.com/sammcgeown/vra-cli/pkg/cmd/cloudassembly"
+	"github.com/vmware/vra-sdk-go/pkg/client"
+	"github.com/vmware/vra-sdk-go/pkg/client/catalog_items"
+	"github.com/vmware/vra-sdk-go/pkg/models"
 )
 
 // GetCatalogItems returns a catalog item by name, id or project
-func GetCatalogItems(client *resty.Client, id string, name string, project string) ([]*types.CatalogItem, error) {
-	var arrResults []*types.CatalogItem
-
-	client.QueryParam.Add("expandProjects", "true")
+func GetCatalogItems(apiclient *client.MulticloudIaaS, id string, name string, project string) ([]*models.CatalogItem, error) {
 
 	if id != "" {
-		queryResponse, _ := client.R().
-			SetResult(&types.CatalogItem{}).
-			SetError(&types.Exception{}).
-			Get("/catalog/api/items/" + id)
-
-		log.Debugln(queryResponse.Request.RawRequest.URL)
-		// log.Debugln(queryResponse.String())
-
-		if queryResponse.IsError() {
-			return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
+		CatalogItemParams := catalog_items.
+			NewGetCatalogItemUsingGET1Params().
+			WithAPIVersion(&apiVersion).
+			WithID(strfmt.UUID(id)).
+			WithExpandProjects(&expandProjects)
+		catalogItems, err := apiclient.CatalogItems.GetCatalogItemUsingGET1(CatalogItemParams)
+		if err != nil {
+			return nil, err
 		}
-
-		arrResults = append(arrResults, queryResponse.Result().(*types.CatalogItem))
-	} else {
-		queryResponse, _ := client.R().
-			SetResult(&types.ContentsList{}).
-			SetError(&types.Exception{}).
-			Get("/catalog/api/items")
-
-		log.Debugln(queryResponse.Request.RawRequest.URL)
-		// log.Debugln(queryResponse.String())
-
-		if queryResponse.IsError() {
-			return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
-		}
-
-		for _, value := range queryResponse.Result().(*types.ContentsList).Content {
-			c := types.CatalogItem{}
-			mapstructure.Decode(value, &c)
-			arrResults = append(arrResults, &c)
-		}
-
+		return []*models.CatalogItem{catalogItems.Payload}, nil
 	}
-	return arrResults, nil
+	CatalogItemParams := catalog_items.
+		NewGetCatalogItemsUsingGET1Params().
+		WithAPIVersion(&apiVersion).
+		WithExpandProjects(&expandProjects)
+
+	if project != "" {
+		Projects, err := cloudassembly.GetProject(apiclient, apiVersion, project, "")
+		if err != nil {
+			return nil, err
+		}
+		ProjectID := Projects[0].ID
+		CatalogItemParams.WithProjects([]string{*ProjectID})
+	}
+	if name != "" {
+		CatalogItemParams.WithSearch(&name)
+	}
+
+	catalogItems, err := apiclient.CatalogItems.GetCatalogItemsUsingGET1(CatalogItemParams)
+	if err != nil {
+		return nil, err
+	}
+	return catalogItems.Payload.Content, nil
 }
 
 // func createCatalogItemRequest(id string, request types.CatalogItemRequest) (*types.CatalogItemRequestResponse, error) {

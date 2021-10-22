@@ -92,7 +92,7 @@ func AuthenticateAPIToken(config *types.Config, ignoreCert bool) (string, error)
 	queryResponse, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
 		SetBody(types.Authentication{RefreshToken: config.ApiToken}).
 		SetResult(&types.AuthenticationResponse{}).
-		SetError(&types.Authentication{}).
+		SetError(&types.AuthenticationError{}).
 		Post("https://" + config.Server + "/iaas/api/login")
 	if queryResponse.IsError() {
 		log.Debug("Refresh Token failed")

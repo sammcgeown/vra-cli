@@ -123,12 +123,14 @@ type Pipeline struct {
 	State      string        `json:"state"`
 }
 
+// PipelineStage - Code Stream Pipeline Stage API
 type PipelineStage struct {
 	Tags      []string               `json:"tags"`
 	TaskOrder []string               `json:"taskOrder"`
 	Tasks     map[string]interface{} `json:"tasks"`
 }
 
+// PipelineTask - Code Stream Pipeline Task API
 type PipelineTask struct {
 	Configured    bool              `json:"_configured"`
 	Endpoints     map[string]string `json:"endpoints"`
@@ -201,7 +203,7 @@ type CustomIntegration struct {
 	Yaml               string `json:"yaml"`
 }
 
-// Exception - Generic exception struct
+// PipelineImportResponse - Code Stream Pipeline Import Response
 type PipelineImportResponse struct {
 	Name          string `yaml:"name"`
 	Status        string `yaml:"status"`
@@ -229,6 +231,7 @@ type Project struct {
 	SharedResources  bool `json:"sharedResources"`
 }
 
+// ProjectList - Project List
 type ProjectList struct {
 	Content  []Project `json:"content"`
 	Pageable struct {
@@ -269,6 +272,7 @@ type ProjectList struct {
 	Empty            bool `json:"empty"`
 }
 
+// PipelineYaml - Code Stream Pipeline YAML
 type PipelineYaml struct {
 	Project     string      `yaml:"project"`
 	Kind        string      `yaml:"kind"`
@@ -284,6 +288,7 @@ type PipelineYaml struct {
 	Stages      interface{} `yaml:"stages"`
 }
 
+// EndpointYaml - Code Stream Endpoint YAML
 type EndpointYaml struct {
 	Project     string            `yaml:"project"`
 	Kind        string            `yaml:"kind"`
