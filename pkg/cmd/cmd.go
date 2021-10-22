@@ -33,6 +33,7 @@ var (
 	debug      bool
 	ignoreCert bool
 	confirm    bool
+	output     string = "table"
 	// API Paging
 	count int
 	skip  int
@@ -74,6 +75,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Enable debug logging")
 	rootCmd.PersistentFlags().BoolVar(&confirm, "confirm", false, "Confirm action without prompting for confirmation")
 	rootCmd.PersistentFlags().BoolVar(&ignoreCert, "ignoreCertificateWarnings", false, "Disable HTTPS Certificate Validation")
+	rootCmd.PersistentFlags().StringVarP(&output, "out", "o", "table", "Output - default is table, can be json")
 	// API Paging
 	rootCmd.PersistentFlags().IntVar(&count, "count", 100, "API Paging - Count")
 	rootCmd.PersistentFlags().IntVar(&skip, "skip", 0, "API Paging - Skip")
