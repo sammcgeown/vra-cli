@@ -7,13 +7,13 @@ package servicebroker
 import (
 	"github.com/go-openapi/strfmt"
 	"github.com/sammcgeown/vra-cli/pkg/cmd/cloudassembly"
-	"github.com/vmware/vra-sdk-go/pkg/client"
+	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	"github.com/vmware/vra-sdk-go/pkg/client/catalog_items"
 	"github.com/vmware/vra-sdk-go/pkg/models"
 )
 
 // GetCatalogItems returns a catalog item by name, id or project
-func GetCatalogItems(apiclient *client.MulticloudIaaS, id string, name string, project string) ([]*models.CatalogItem, error) {
+func GetCatalogItems(APIClient *types.APIClientOptions, id string, name string, project string) ([]*models.CatalogItem, error) {
 
 	if id != "" {
 		CatalogItemParams := catalog_items.
@@ -21,7 +21,7 @@ func GetCatalogItems(apiclient *client.MulticloudIaaS, id string, name string, p
 			WithAPIVersion(&apiVersion).
 			WithID(strfmt.UUID(id)).
 			WithExpandProjects(&expandProjects)
-		catalogItems, err := apiclient.CatalogItems.GetCatalogItemUsingGET1(CatalogItemParams)
+		catalogItems, err := APIClient.SDKClient.CatalogItems.GetCatalogItemUsingGET1(CatalogItemParams)
 		if err != nil {
 			return nil, err
 		}
@@ -33,7 +33,7 @@ func GetCatalogItems(apiclient *client.MulticloudIaaS, id string, name string, p
 		WithExpandProjects(&expandProjects)
 
 	if project != "" {
-		Projects, err := cloudassembly.GetProject(apiclient, apiVersion, project, "")
+		Projects, err := cloudassembly.GetProject(APIClient, project, "")
 		if err != nil {
 			return nil, err
 		}
@@ -44,7 +44,7 @@ func GetCatalogItems(apiclient *client.MulticloudIaaS, id string, name string, p
 		CatalogItemParams.WithSearch(&name)
 	}
 
-	catalogItems, err := apiclient.CatalogItems.GetCatalogItemsUsingGET1(CatalogItemParams)
+	catalogItems, err := APIClient.SDKClient.CatalogItems.GetCatalogItemsUsingGET1(CatalogItemParams)
 	if err != nil {
 		return nil, err
 	}

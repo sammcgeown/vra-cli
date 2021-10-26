@@ -7,13 +7,12 @@ package codestream
 import (
 	"strings"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
 )
 
 // GetCustomIntegration returns a custom integration
-func GetCustomIntegration(client *resty.Client, id, name string) ([]*types.CustomIntegration, error) {
+func GetCustomIntegration(APIClient *types.APIClientOptions, id, name string) ([]*types.CustomIntegration, error) {
 	var arrCustomIntegrations []*types.CustomIntegration
 
 	var filters []string
@@ -24,9 +23,9 @@ func GetCustomIntegration(client *resty.Client, id, name string) ([]*types.Custo
 		filters = append(filters, "(name eq '"+name+"')")
 	}
 	if len(filters) > 0 {
-		client.QueryParam.Set("$filter", "("+strings.Join(filters, " and ")+")")
+		APIClient.RESTClient.QueryParam.Set("$filter", "("+strings.Join(filters, " and ")+")")
 	}
-	queryResponse, err := client.R().
+	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.DocumentsList{}).
 		SetError(&types.Exception{}).
 		Get("/pipeline/api/custom-integrations")

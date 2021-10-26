@@ -9,7 +9,6 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/sammcgeown/vra-cli/pkg/cmd/cloudassembly"
-	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
@@ -22,11 +21,11 @@ var getDeploymentCmd = &cobra.Command{
 	Short: "Get Deployments",
 	Long:  `Get Deployments`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
-		response, err := cloudassembly.GetDeployments(apiClient, id, name, projectName, status)
+		response, err := cloudassembly.GetDeployments(APIClient, id, name, projectName, status)
 		if err != nil {
 			log.Fatalln("Unable to get Deployments: ", err)
 		}
@@ -61,10 +60,10 @@ var deleteDeploymentCmd = &cobra.Command{
 Delete a Deployment by ID:
   vra-cli delete deployment --id <Deployment ID>`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
-		deployment, err := cloudassembly.GetDeployments(apiClient, id, "", "", "")
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
+		deployment, err := cloudassembly.GetDeployments(APIClient, id, "", "", "")
 		if err != nil {
 			log.Debug(err) // There was an error getting the Deployment
 		}
@@ -77,7 +76,7 @@ Delete a Deployment by ID:
 			log.Fatalln("More than one Deployment matching the request was found")
 		} else {
 			// There was only one Deployment
-			if err := cloudassembly.DeleteDeployment(apiClient, (deployment[0].ID).String()); err != nil {
+			if err := cloudassembly.DeleteDeployment(APIClient, (deployment[0].ID).String()); err != nil {
 				log.Fatalln(err) // There was an error deleting the Deployment
 			} else {
 				log.Infoln("Deployment deleted successfully")

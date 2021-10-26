@@ -5,25 +5,25 @@ SPDX-License-Identifier: BSD-2-Clause
 package orchestrator
 
 import (
+	"bytes"
 	"errors"
+	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 
-	"github.com/go-resty/resty/v2"
-	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 )
 
 // GetWorkflow - returns a list of executions
-func GetWorkflow(client *resty.Client, id string, category string, name string) ([]*types.WsWorkflow, error) {
+func GetWorkflow(APIClient *types.APIClientOptions, id string, category string, name string) ([]*types.WsWorkflow, error) {
 
 	var Workflows []*types.WsWorkflow
 	if id != "" {
-		queryResponse, err := client.R().
+		queryResponse, err := APIClient.RESTClient.R().
 			SetResult(&types.WsWorkflow{}).
 			SetError(&types.Exception{}).
 			Get("/vco/api/workflows/" + id)
@@ -42,10 +42,10 @@ func GetWorkflow(client *resty.Client, id string, category string, name string) 
 	if category != "" {
 		conditions = append(conditions, "categoryName~"+url.QueryEscape(category))
 	}
-	client.QueryParam.Set("conditions", strings.Join(conditions, ","))
-	log.Debugln("query params:", client.QueryParam)
+	APIClient.RESTClient.QueryParam.Set("conditions", strings.Join(conditions, ","))
+	log.Debugln("query params:", APIClient.RESTClient.QueryParam)
 
-	queryResponse, err := client.R().
+	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.InventoryItemsList{}).
 		SetError(&types.Exception{}).
 		Get("/vco/api/workflows")
@@ -59,7 +59,7 @@ func GetWorkflow(client *resty.Client, id string, category string, name string) 
 	for _, value := range queryResponse.Result().(*types.InventoryItemsList).Link {
 		for _, attribute := range value.Attributes {
 			if attribute.Name == "id" {
-				Workflow, _ := GetWorkflow(client, attribute.Value, "", "")
+				Workflow, _ := GetWorkflow(APIClient, attribute.Value, "", "")
 				Workflows = append(Workflows, Workflow...)
 			}
 
@@ -69,7 +69,8 @@ func GetWorkflow(client *resty.Client, id string, category string, name string) 
 }
 
 // ExportWorkflow - exports a workflow
-func ExportWorkflow(client *resty.Client, id string, name string, path string) error {
+func ExportWorkflow(APIClient *types.APIClientOptions, id string, name string, path string) error {
+	log.Debugln("ID:", id, "Name:", name, "Path:", path)
 	var exportPath string
 	if path != "" {
 		exportPath = path
@@ -77,7 +78,7 @@ func ExportWorkflow(client *resty.Client, id string, name string, path string) e
 		exportPath, _ = os.Getwd()
 	}
 
-	queryResponse, err := client.R().
+	queryResponse, err := APIClient.RESTClient.R().
 		SetError(&types.Exception{}).
 		SetOutput(filepath.Join(exportPath, name+".zip")).
 		SetHeader("Accept", "application/zip").
@@ -94,30 +95,25 @@ func ExportWorkflow(client *resty.Client, id string, name string, path string) e
 }
 
 // ImportWorkflow - imports a workflow
-func ImportWorkflow(client *resty.Client, path string, categoryID string, overwrite bool) (*types.WsWorkflow, error) {
-	var formData = map[string]string{}
-	formData["categoryId"] = categoryID
-	formData["overwrite"] = strconv.FormatBool(overwrite)
-
-	queryResponse, err := client.R().
-		SetError(&types.Exception{}).
-		SetFile("file", path).
-		SetFormData(formData).
-		SetHeader("Accept", "application/zip").
-		Post("/vco/api/workflows/")
-
+func ImportWorkflow(APIClient *types.APIClientOptions, path string, categoryID string, overwrite bool) error {
+	log.Debugln("Path:", path, "CategoryID:", categoryID, "Overwrite:", overwrite)
+	zipFileBytes, _ := ioutil.ReadFile(path)
+	APIClient.RESTClient.QueryParam.Set("categoryId", categoryID)
+	APIClient.RESTClient.QueryParam.Set("overwrite", strconv.FormatBool(overwrite))
+	queryResponse, err := APIClient.RESTClient.R().
+		SetFileReader("file", "upload.zip", bytes.NewReader(zipFileBytes)).
+		Post("/vco/api/workflows")
+	log.Debugln(queryResponse.Request.URL)
+	log.Debugln(queryResponse.StatusCode())
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	helpers.PrettyPrint(queryResponse.Result())
-
-	return nil, nil
+	return nil
 }
 
 // // DeleteExecution - deletes an execution by ID
-// func DeleteExecution(client *resty.Client, id string) (bool, error) {
-// 	queryResponse, err := client.R().
+// func DeleteExecution(APIClient *types.APIClientOptions, id string) (bool, error) {
+// 	queryResponse, err := APIClient.RESTClient.R().
 // 		SetResult(&types.Executions{}).
 // 		SetError(&types.Exception{}).
 // 		Delete("/pipeline/api/executions/" + id)
@@ -130,7 +126,7 @@ func ImportWorkflow(client *resty.Client, path string, categoryID string, overwr
 // }
 
 // // DeleteExecutions - deletes an execution by project, status, or pipeline name
-// func DeleteExecutions(client *resty.Client, confirm bool, project string, status string, name string, nested bool) ([]*types.Executions, error) {
+// func DeleteExecutions(APIClient *types.APIClientOptions, confirm bool, project string, status string, name string, nested bool) ([]*types.Executions, error) {
 // 	var deletedExecutions []*types.Executions
 // 	Executions, err := GetExecution(client, "", project, status, name, nested)
 // 	if err != nil {
@@ -154,7 +150,7 @@ func ImportWorkflow(client *resty.Client, path string, categoryID string, overwr
 // }
 
 // // CreateExecution - creates an execution
-// func CreateExecution(client *resty.Client, id string, inputs string, comment string) (*types.CreateExecutionResponse, error) {
+// func CreateExecution(APIClient *types.APIClientOptions, id string, inputs string, comment string) (*types.CreateExecutionResponse, error) {
 // 	// Convert JSON string to byte array
 // 	var inputBytes = []byte(inputs)
 // 	// Unmarshal inputs using a generic interface
@@ -172,7 +168,7 @@ func ImportWorkflow(client *resty.Client, path string, categoryID string, overwr
 // 	if err != nil {
 // 		return nil, err
 // 	}
-// 	queryResponse, _ := client.R().
+// 	queryResponse, _ := APIClient.RESTClient.R().
 // 		SetBody(executionBytes).
 // 		SetResult(&types.CreateExecutionResponse{}).
 // 		SetError(&types.Exception{}).

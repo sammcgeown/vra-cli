@@ -10,16 +10,17 @@ import (
 
 // *** Service Broker ***
 
+// CatalogItem - A service broker catalog item
 type CatalogItem struct {
-	Id   string `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 	Type struct {
-		Id   string `json:"id"`
+		ID   string `json:"id"`
 		Link string `json:"link"`
 		Name string `json:"name"`
 	} `json:"type"`
 	Projects []struct {
-		Id   string `json:"id"`
+		ID   string `json:"id"`
 		Name string `json:"name"`
 	} `json:"projects"`
 	CreatedAt     time.Time `json:"createdAt"`
@@ -33,6 +34,7 @@ type CatalogItem struct {
 	BulkRequestLimit int `json:"bulkRequestLimit"`
 }
 
+// CatalogItemSchemaProperties - A service broker catalog item schema properties
 type CatalogItemSchemaProperties struct {
 	Type        string `json:"type"`
 	Title       string `json:"title"`
@@ -40,15 +42,17 @@ type CatalogItemSchemaProperties struct {
 	Default     string `json:"default"`
 }
 
+// CatalogItemRequest - A service broker catalog item request
 type CatalogItemRequest struct {
 	DeploymentName string            `json:"deploymentName"`
 	Inputs         map[string]string `json:"inputs"`
-	ProjectId      string            `json:"projectId"`
+	ProjectID      string            `json:"projectId"`
 	Reason         string            `json:"reason"`
 	Version        string            `json:"version"`
 }
 
+// CatalogItemRequestResponse - A service broker catalog item request response
 type CatalogItemRequestResponse struct {
-	DeploymentId   string `json:"deploymentId"`
+	DeploymentID   string `json:"deploymentId"`
 	DeploymentName string `json:"deploymentName"`
 }

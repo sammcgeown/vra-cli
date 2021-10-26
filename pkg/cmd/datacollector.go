@@ -9,7 +9,6 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/sammcgeown/vra-cli/pkg/cmd/cloudassembly"
-	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -27,10 +26,10 @@ Get Data Collector by ID:
 Get all Data Collectors:
   vra-cli get datacollector`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
-		dataCollectors, err := cloudassembly.GetDataCollector(apiClient, id)
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
+		dataCollectors, err := cloudassembly.GetDataCollector(APIClient, id)
 		if err != nil {
 			log.Fatalln(err)
 		}

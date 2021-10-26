@@ -17,18 +17,17 @@ import (
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
 	"gopkg.in/yaml.v2"
 )
 
 // GetVariable - Get a Code Stream Variable
-func GetVariable(client *resty.Client, id, name, project, exportPath string) ([]*types.VariableResponse, error) {
+func GetVariable(APIClient *types.APIClientOptions, id, name, project, exportPath string) ([]*types.VariableResponse, error) {
 	var arrVariables []*types.VariableResponse
 
 	// Get by ID
 	if id != "" {
-		queryResponse, err := client.R().
+		queryResponse, err := APIClient.RESTClient.R().
 			SetResult(&types.VariableResponse{}).
 			Get("/pipeline/api/variables/" + id)
 
@@ -47,11 +46,11 @@ func GetVariable(client *resty.Client, id, name, project, exportPath string) ([]
 		filters = append(filters, "(project eq '"+project+"')")
 	}
 	if len(filters) > 0 {
-		client.QueryParam.Set("$filter", "("+strings.Join(filters, ") and (")+")")
-		log.Debugln(client.QueryParam)
+		APIClient.RESTClient.QueryParam.Set("$filter", "("+strings.Join(filters, ") and (")+")")
+		log.Debugln(APIClient.RESTClient.QueryParam)
 	}
 
-	queryResponse, err := client.R().
+	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.DocumentsList{}).
 		SetError(&types.Exception{}).
 		Get("/pipeline/api/variables")
@@ -75,8 +74,8 @@ func GetVariable(client *resty.Client, id, name, project, exportPath string) ([]
 }
 
 // CreateVariable - Create a new Code Stream Variable
-func CreateVariable(client *resty.Client, name string, description string, variableType string, project string, value string) (*types.VariableResponse, error) {
-	queryResponse, err := client.R().
+func CreateVariable(APIClient *types.APIClientOptions, name string, description string, variableType string, project string, value string) (*types.VariableResponse, error) {
+	queryResponse, err := APIClient.RESTClient.R().
 		SetBody(
 			types.VariableRequest{
 				Project:     project,
@@ -98,8 +97,8 @@ func CreateVariable(client *resty.Client, name string, description string, varia
 }
 
 // UpdateVariable - Update an existing Code Stream Variable
-func UpdateVariable(client *resty.Client, id string, name string, description string, typename string, value string) (*types.VariableResponse, error) {
-	variables, _ := GetVariable(client, id, "", "", "")
+func UpdateVariable(APIClient *types.APIClientOptions, id string, name string, description string, typename string, value string) (*types.VariableResponse, error) {
+	variables, _ := GetVariable(APIClient, id, "", "", "")
 	variable := variables[0]
 	if name != "" {
 		variable.Name = name
@@ -114,7 +113,7 @@ func UpdateVariable(client *resty.Client, id string, name string, description st
 		variable.Value = value
 	}
 
-	queryResponse, err := client.R().
+	queryResponse, err := APIClient.RESTClient.R().
 		SetBody(variable).
 		SetResult(&types.VariableResponse{}).
 		SetError(&types.Exception{}).
@@ -127,8 +126,8 @@ func UpdateVariable(client *resty.Client, id string, name string, description st
 }
 
 // DeleteVariable - Delete a Code Stream Variable
-func DeleteVariable(client *resty.Client, id string) (bool, error) {
-	queryResponse, err := client.R().
+func DeleteVariable(APIClient *types.APIClientOptions, id string) (bool, error) {
+	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.VariableResponse{}).
 		Delete("/pipeline/api/variables/" + id)
 	if queryResponse.IsError() {
@@ -138,9 +137,9 @@ func DeleteVariable(client *resty.Client, id string) (bool, error) {
 }
 
 // DeleteVariableByProject - Delete all Variables in a Project
-func DeleteVariableByProject(client *resty.Client, confirm bool, project string) ([]*types.VariableResponse, error) {
+func DeleteVariableByProject(APIClient *types.APIClientOptions, confirm bool, project string) ([]*types.VariableResponse, error) {
 	var deletedVariables []*types.VariableResponse
-	Variables, err := GetVariable(client, "", "", project, "")
+	Variables, err := GetVariable(APIClient, "", "", project, "")
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +152,7 @@ func DeleteVariableByProject(client *resty.Client, confirm bool, project string)
 	}
 	if confirm {
 		for _, Variable := range Variables {
-			_, err := DeleteVariable(client, Variable.ID)
+			_, err := DeleteVariable(APIClient, Variable.ID)
 			if err != nil {
 				log.Warnln("Unable to delete "+Variable.Name, err)
 			}

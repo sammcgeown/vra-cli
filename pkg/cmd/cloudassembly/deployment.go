@@ -6,20 +6,20 @@ package cloudassembly
 
 import (
 	"github.com/go-openapi/strfmt"
+	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
-	"github.com/vmware/vra-sdk-go/pkg/client"
 	"github.com/vmware/vra-sdk-go/pkg/client/deployments"
 	"github.com/vmware/vra-sdk-go/pkg/models"
 )
 
 // GetDeployments returns a list of deployments
-func GetDeployments(apiclient *client.MulticloudIaaS, id string, name string, project string, status string) ([]*models.Deployment, error) {
+func GetDeployments(APIClient *types.APIClientOptions, id string, name string, project string, status string) ([]*models.Deployment, error) {
 	// Get deployment by ID
 	if id != "" {
 		DeploymentsParams := deployments.NewGetDeploymentByIDUsingGETParams().
 			WithExpand([]string{"project"}).
 			WithDeploymentID(strfmt.UUID(id))
-		Deployments, err := apiclient.Deployments.GetDeploymentByIDUsingGET(DeploymentsParams)
+		Deployments, err := APIClient.SDKClient.Deployments.GetDeploymentByIDUsingGET(DeploymentsParams)
 		if err != nil {
 			return nil, err
 
@@ -35,7 +35,7 @@ func GetDeployments(apiclient *client.MulticloudIaaS, id string, name string, pr
 	}
 
 	if project != "" {
-		Project, err := GetProject(apiclient, apiVersion, project, "")
+		Project, err := GetProject(APIClient, project, "")
 		p := Project[0]
 		if err != nil {
 			return nil, err
@@ -49,7 +49,7 @@ func GetDeployments(apiclient *client.MulticloudIaaS, id string, name string, pr
 
 	log.Debug("GetDeployments: ", DeploymentsParams)
 
-	Deployments, err := apiclient.Deployments.GetDeploymentsUsingGET(DeploymentsParams)
+	Deployments, err := APIClient.SDKClient.Deployments.GetDeploymentsUsingGET(DeploymentsParams)
 	if err != nil {
 		return nil, err
 
@@ -58,9 +58,9 @@ func GetDeployments(apiclient *client.MulticloudIaaS, id string, name string, pr
 }
 
 // DeleteDeployment - Delete a deployment
-func DeleteDeployment(apiclient *client.MulticloudIaaS, id string) error {
+func DeleteDeployment(APIClient *types.APIClientOptions, id string) error {
 	DeleteParams := deployments.NewDeleteDeploymentUsingDELETEParams().WithDeploymentID(strfmt.UUID(id))
-	_, err := apiclient.Deployments.DeleteDeploymentUsingDELETE(DeleteParams)
+	_, err := APIClient.SDKClient.Deployments.DeleteDeploymentUsingDELETE(DeleteParams)
 	if err != nil {
 		return err
 	}

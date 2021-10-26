@@ -5,7 +5,6 @@ SPDX-License-Identifier: BSD-2-Clause
 package orchestrator
 
 import (
-	"github.com/go-resty/resty/v2"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
 )
 
@@ -15,10 +14,10 @@ var (
 )
 
 // GetCategoryByID returns the category by ID
-func GetCategoryByID(client *resty.Client, id string) (*types.WsCategory, error) {
+func GetCategoryByID(APIClient *types.APIClientOptions, id string) (*types.WsCategory, error) {
 	var Category *types.WsCategory
 
-	queryResponse, err := client.R().
+	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.WsCategory{}).
 		SetError(&types.Exception{}).
 		Get("/vco/api/categories/" + id)
@@ -33,11 +32,11 @@ func GetCategoryByID(client *resty.Client, id string) (*types.WsCategory, error)
 }
 
 // GetCategoryByName returns the category by ID
-func GetCategoryByName(client *resty.Client, name string) ([]*types.WsCategory, error) {
+func GetCategoryByName(APIClient *types.APIClientOptions, name string) ([]*types.WsCategory, error) {
 	var Categories []*types.WsCategory
-	client.QueryParam.Set("conditions", "name~"+name)
+	APIClient.RESTClient.QueryParam.Set("conditions", "name~"+name)
 
-	queryResponse, err := client.R().
+	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.InventoryItemsList{}).
 		SetError(&types.Exception{}).
 		Get("/vco/api/catalog/System/WorkflowCategory/")
@@ -49,25 +48,26 @@ func GetCategoryByName(client *resty.Client, name string) ([]*types.WsCategory, 
 	for _, value := range queryResponse.Result().(*types.InventoryItemsList).Link {
 		for _, attribute := range value.Attributes {
 			if attribute.Name == "id" {
-				Category, _ := GetCategoryByID(client, attribute.Value)
+				Category, _ := GetCategoryByID(APIClient, attribute.Value)
 				Categories = append(Categories, Category)
 			}
 
 		}
 	}
+	APIClient.RESTClient.QueryParam.Del("conditions")
 
 	return Categories, nil
 }
 
 // GetCategory returns the category
-// func GetCategory(client *resty.Client, root bool) ([]*types.CategoryContext, error) {
+// func GetCategory(APIClient *types.APIClientOptions, root bool) ([]*types.CategoryContext, error) {
 // 	var Categories []*types.CategoryContext
 
 // 	if root {
 // 		client.SetQueryParam("isRoot", "true")
 // 	}
 
-// 	queryResponse, err := client.R().
+// 	queryResponse, err := APIClient.RESTClient.R().
 // 		SetResult(&types.InventoryItemsList{}).
 // 		SetError(&types.Exception{}).
 // 		Get("/vco/api/categories")

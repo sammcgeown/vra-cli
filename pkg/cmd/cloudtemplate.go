@@ -11,7 +11,6 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/sammcgeown/vra-cli/pkg/cmd/cloudassembly"
-	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
@@ -31,10 +30,10 @@ var getCloudTemplateCmd = &cobra.Command{
 	Short: "Get Cloud Templates",
 	Long:  `Get Cloud Templates by ID, name or status`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
-		response, err := cloudassembly.GetCloudTemplate(apiClient, id, name, projectName)
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
+		response, err := cloudassembly.GetCloudTemplate(APIClient, id, name, projectName)
 		if err != nil {
 			log.Warnln("Unable to get Cloud Template(s): ", err)
 		}
@@ -148,9 +147,9 @@ var createCloudTemplateCmd = &cobra.Command{
 		var cloudTemplateReq types.CloudTemplate
 		var projectID string
 
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
 		// Check if input is piped JSON
 		if helpers.IsInputFromPipe() {
@@ -161,7 +160,7 @@ var createCloudTemplateCmd = &cobra.Command{
 		// If project name flag is set, get the project ID and update the request
 		if projectName != "" {
 			log.Debugln("Project: " + projectName)
-			projectObjs, pErr := cloudassembly.GetProject(apiClient, apiVersion, projectName, "")
+			projectObjs, pErr := cloudassembly.GetProject(APIClient, projectName, "")
 			if pErr != nil {
 				log.Fatalln(pErr)
 			} else if len(projectObjs) == 1 {
@@ -192,7 +191,7 @@ var createCloudTemplateCmd = &cobra.Command{
 			cloudTemplateReq.RequestScopeOrg = false
 		}
 		// Create the cloud template
-		cloudTemplate, err := cloudassembly.CreateCloudTemplate(apiClient, cloudTemplateReq.Name, cloudTemplateReq.Description, cloudTemplateReq.ProjectID, cloudTemplateReq.Content, cloudTemplateReq.RequestScopeOrg)
+		cloudTemplate, err := cloudassembly.CreateCloudTemplate(APIClient, cloudTemplateReq.Name, cloudTemplateReq.Description, cloudTemplateReq.ProjectID, cloudTemplateReq.Content, cloudTemplateReq.RequestScopeOrg)
 		if err != nil {
 			log.Errorln("Unable to create Cloud Template(s): ", err)
 		}
@@ -207,12 +206,12 @@ var deleteCloudTemplateCmd = &cobra.Command{
 	Long: `Delete a Blueprint with a specific ID
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
 		if name != "" {
-			response, err := cloudassembly.GetCloudTemplate(apiClient, id, name, projectName)
+			response, err := cloudassembly.GetCloudTemplate(APIClient, id, name, projectName)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -230,7 +229,7 @@ var deleteCloudTemplateCmd = &cobra.Command{
 			}
 		}
 		if id != "" {
-			if err := cloudassembly.DeleteCloudTemplate(apiClient, id); err != nil {
+			if err := cloudassembly.DeleteCloudTemplate(APIClient, id); err != nil {
 				log.Errorln("Unable to delete Cloud Template: ", err)
 			} else {
 				log.Infoln("Cloud Template with id " + id + " deleted")

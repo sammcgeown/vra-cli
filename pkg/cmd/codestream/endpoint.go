@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
@@ -17,10 +16,10 @@ import (
 )
 
 // GetEndpoint returns an endpoint
-func GetEndpoint(client *resty.Client, id, name, project, endpointtype string, exportPath string) ([]*types.Endpoint, error) {
+func GetEndpoint(APIClient *types.APIClientOptions, id, name, project, endpointtype string, exportPath string) ([]*types.Endpoint, error) {
 	var endpoints []*types.Endpoint
 
-	client.QueryParam.Set("expand", "true")
+	APIClient.RESTClient.QueryParam.Set("expand", "true")
 	var filters []string
 	if id != "" {
 		filters = append(filters, "(id eq '"+id+"')")
@@ -35,10 +34,10 @@ func GetEndpoint(client *resty.Client, id, name, project, endpointtype string, e
 		filters = append(filters, "(type eq '"+endpointtype+"')")
 	}
 	if len(filters) > 0 {
-		client.QueryParam.Set("$filter", "("+strings.Join(filters, " and ")+")")
+		APIClient.RESTClient.QueryParam.Set("$filter", "("+strings.Join(filters, " and ")+")")
 	}
 
-	queryResponse, err := client.R().
+	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.DocumentsList{}).
 		SetError(&types.Exception{}).
 		Get("/pipeline/api/endpoints")
@@ -62,8 +61,8 @@ func GetEndpoint(client *resty.Client, id, name, project, endpointtype string, e
 }
 
 // DeleteEndpoint deletes an endpoint
-func DeleteEndpoint(client *resty.Client, id string) error {
-	queryResponse, _ := client.R().
+func DeleteEndpoint(APIClient *types.APIClientOptions, id string) error {
+	queryResponse, _ := APIClient.RESTClient.R().
 		SetResult(&types.DocumentsList{}).
 		SetError(&types.Exception{}).
 		Get("/pipeline/api/endpoints/" + id)
@@ -75,9 +74,9 @@ func DeleteEndpoint(client *resty.Client, id string) error {
 }
 
 // DeleteEndpointByProject deletes an endpoint by project
-func DeleteEndpointByProject(client *resty.Client, project string) ([]*types.Endpoint, error) {
+func DeleteEndpointByProject(APIClient *types.APIClientOptions, project string) ([]*types.Endpoint, error) {
 	var deletedEndpoints []*types.Endpoint
-	Endpoints, err := GetEndpoint(client, "", "", project, "", "")
+	Endpoints, err := GetEndpoint(APIClient, "", "", project, "", "")
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +84,7 @@ func DeleteEndpointByProject(client *resty.Client, project string) ([]*types.End
 	if confirm {
 
 		for _, endpoint := range Endpoints {
-			err := DeleteEndpoint(client, endpoint.ID)
+			err := DeleteEndpoint(APIClient, endpoint.ID)
 			if err != nil {
 				log.Warnln("Unable to delete "+endpoint.Name, err)
 			}

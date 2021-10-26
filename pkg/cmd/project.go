@@ -10,7 +10,6 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/sammcgeown/vra-cli/pkg/cmd/cloudassembly"
-	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -37,11 +36,11 @@ Get Projects by ID:
 Get Project by Name (case sensitive):
   vra-cli get project --name <project name>`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
-		response, err := cloudassembly.GetProject(apiClient, apiVersion, id, projectName)
+		response, err := cloudassembly.GetProject(APIClient, id, projectName)
 		if err != nil {
 			log.Errorln("Unable to get Code Stream Projects: ", err)
 		}
@@ -104,15 +103,15 @@ var createProjectCommand = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
 		adminUsers := helpers.CreateUserArray(strings.Split(admins, ","))
 		memberUsers := helpers.CreateUserArray(strings.Split(members, ","))
 		viewerUsers := helpers.CreateUserArray(strings.Split(viewers, ","))
 
-		newProject, err := cloudassembly.CreateProject(apiClient, apiVersion, projectName, description, adminUsers, memberUsers, viewerUsers, nil, nil, operationTimeout, machineNamingTemplate, &sharedResources)
+		newProject, err := cloudassembly.CreateProject(APIClient, projectName, description, adminUsers, memberUsers, viewerUsers, nil, nil, operationTimeout, machineNamingTemplate, &sharedResources)
 		if err != nil {
 			log.Fatal("Unable to create Project", err)
 		} else {
@@ -131,15 +130,15 @@ var updateProjectCommand = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
 		adminUsers := helpers.CreateUserArray(strings.Split(admins, ","))
 		memberUsers := helpers.CreateUserArray(strings.Split(members, ","))
 		viewerUsers := helpers.CreateUserArray(strings.Split(viewers, ","))
 
-		newProject, err := cloudassembly.UpdateProject(apiClient, apiVersion, id, projectName, description, adminUsers, memberUsers, viewerUsers, nil, nil, operationTimeout, machineNamingTemplate, &sharedResources)
+		newProject, err := cloudassembly.UpdateProject(APIClient, id, projectName, description, adminUsers, memberUsers, viewerUsers, nil, nil, operationTimeout, machineNamingTemplate, &sharedResources)
 		if err != nil {
 			log.Fatal("Unable to update Project", err)
 		} else {
@@ -158,11 +157,11 @@ var deleteProjectCommand = &cobra.Command{
 Delete by ID:
   vra-cli delete project --id <project ID>`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 		if id != "" {
-			err := cloudassembly.DeleteProject(apiClient, apiVersion, id)
+			err := cloudassembly.DeleteProject(APIClient, id)
 			if err != nil {
 				log.Errorln("Delete Project failed:", err)
 			}

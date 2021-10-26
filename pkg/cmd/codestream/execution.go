@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
@@ -19,10 +18,10 @@ import (
 )
 
 // GetExecution - returns a list of executions
-func GetExecution(client *resty.Client, id string, project string, status string, name string, nested bool) ([]*types.Executions, error) {
+func GetExecution(APIClient *types.APIClientOptions, id string, project string, status string, name string, nested bool) ([]*types.Executions, error) {
 	var arrExecutions []*types.Executions
 	if id != "" {
-		queryResponse, err := client.R().
+		queryResponse, err := APIClient.RESTClient.R().
 			SetResult(&types.Executions{}).
 			SetError(&types.Exception{}).
 			Get("/pipeline/api/executions/" + id)
@@ -50,11 +49,11 @@ func GetExecution(client *resty.Client, id string, project string, status string
 		filters = append(filters, "(project eq '"+project+"')")
 	}
 	if len(filters) > 0 {
-		client.QueryParam.Set("$filter", "("+strings.Join(filters, ") and (")+")")
-		log.Debugln(client.QueryParam)
+		APIClient.RESTClient.QueryParam.Set("$filter", "("+strings.Join(filters, ") and (")+")")
+		log.Debugln(APIClient.RESTClient.QueryParam)
 	}
 
-	queryResponse, err := client.R().
+	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.DocumentsList{}).
 		SetError(&types.Exception{}).
 		Get("/pipeline/api/executions")
@@ -72,8 +71,8 @@ func GetExecution(client *resty.Client, id string, project string, status string
 }
 
 // DeleteExecution - deletes an execution by ID
-func DeleteExecution(client *resty.Client, id string) (bool, error) {
-	queryResponse, err := client.R().
+func DeleteExecution(APIClient *types.APIClientOptions, id string) (bool, error) {
+	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.Executions{}).
 		SetError(&types.Exception{}).
 		Delete("/pipeline/api/executions/" + id)
@@ -86,9 +85,9 @@ func DeleteExecution(client *resty.Client, id string) (bool, error) {
 }
 
 // DeleteExecutions - deletes an execution by project, status, or pipeline name
-func DeleteExecutions(client *resty.Client, confirm bool, project string, status string, name string, nested bool) ([]*types.Executions, error) {
+func DeleteExecutions(APIClient *types.APIClientOptions, confirm bool, project string, status string, name string, nested bool) ([]*types.Executions, error) {
 	var deletedExecutions []*types.Executions
-	Executions, err := GetExecution(client, "", project, status, name, nested)
+	Executions, err := GetExecution(APIClient, "", project, status, name, nested)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +96,7 @@ func DeleteExecutions(client *resty.Client, confirm bool, project string, status
 	}
 	if confirm {
 		for _, Execution := range Executions {
-			_, err := DeleteExecution(client, Execution.ID)
+			_, err := DeleteExecution(APIClient, Execution.ID)
 			if err != nil {
 				log.Warnln("Unable to delete "+Execution.ID, err)
 			}
@@ -110,7 +109,7 @@ func DeleteExecutions(client *resty.Client, confirm bool, project string, status
 }
 
 // CreateExecution - creates an execution
-func CreateExecution(client *resty.Client, id string, inputs string, comment string) (*types.CreateExecutionResponse, error) {
+func CreateExecution(APIClient *types.APIClientOptions, id string, inputs string, comment string) (*types.CreateExecutionResponse, error) {
 	// Convert JSON string to byte array
 	var inputBytes = []byte(inputs)
 	// Unmarshal inputs using a generic interface
@@ -128,7 +127,7 @@ func CreateExecution(client *resty.Client, id string, inputs string, comment str
 	if err != nil {
 		return nil, err
 	}
-	queryResponse, _ := client.R().
+	queryResponse, _ := APIClient.RESTClient.R().
 		SetBody(executionBytes).
 		SetResult(&types.CreateExecutionResponse{}).
 		SetError(&types.Exception{}).

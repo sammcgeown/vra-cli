@@ -10,23 +10,22 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	"gopkg.in/yaml.v2"
 )
 
 // ExportYaml exports the Pipeline or Endpoint to a YAML file
-func ExportYaml(client *resty.Client, id, name, project, path, object string) error {
+func ExportYaml(APIClient *types.APIClientOptions, id, name, project, path, object string) error {
 	var exportPath string
 	if path != "" {
 		exportPath = path
 	} else {
 		exportPath, _ = os.Getwd()
 	}
-	client.QueryParam.Set(object, name)
-	client.QueryParam.Set("project", project)
+	APIClient.RESTClient.QueryParam.Set(object, name)
+	APIClient.RESTClient.QueryParam.Set("project", project)
 
-	queryResponse, err := client.R().
+	queryResponse, err := APIClient.RESTClient.R().
 		SetError(&types.Exception{}).
 		SetOutput(filepath.Join(exportPath, name+".yaml")).
 		SetHeader("Accept", "application/x-yaml;charset=UTF-8").
@@ -43,11 +42,11 @@ func ExportYaml(client *resty.Client, id, name, project, path, object string) er
 }
 
 // ImportYaml import a yaml pipeline or endpoint
-func ImportYaml(client *resty.Client, yamlPath, action, project, importType string) error {
+func ImportYaml(APIClient *types.APIClientOptions, yamlPath, action, project, importType string) error {
 	var pipeline types.PipelineYaml
 	var endpoint types.EndpointYaml
 
-	client.QueryParam.Set("action", action)
+	APIClient.RESTClient.QueryParam.Set("action", action)
 
 	yamlBytes, err := ioutil.ReadFile(yamlPath)
 	if err != nil {
@@ -73,7 +72,7 @@ func ImportYaml(client *resty.Client, yamlPath, action, project, importType stri
 	}
 	yamlPayload := string(yamlBytes)
 
-	queryResponse, err := client.R().
+	queryResponse, err := APIClient.RESTClient.R().
 		SetError(&types.Exception{}).
 		SetBody(yamlPayload).
 		SetHeader("Content-Type", "application/x-yaml").

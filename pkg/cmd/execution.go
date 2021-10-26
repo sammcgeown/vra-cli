@@ -9,7 +9,6 @@ import (
 	"os"
 
 	"github.com/sammcgeown/vra-cli/pkg/cmd/codestream"
-	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
@@ -35,11 +34,11 @@ vra-cli get execution --id bb3f6aff-311a-45fe-8081-5845a529068d
 # Get Failed executions in Project "Field Demo" with the name "Learn Code Stream"
 vra-cli get execution --status FAILED --project "Field Demo" --name "Learn Code Stream"`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
-		response, err := codestream.GetExecution(restClient, id, projectName, status, name, nested)
+		response, err := codestream.GetExecution(APIClient, id, projectName, status, name, nested)
 		if err != nil {
 			log.Errorln("Unable to get executions: ", err)
 		}
@@ -70,18 +69,18 @@ var delExecutionCmd = &cobra.Command{
 	
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 		if id != "" {
-			_, err := codestream.DeleteExecution(restClient, id)
+			_, err := codestream.DeleteExecution(APIClient, id)
 			if err != nil {
 				log.Errorln("Unable to delete execution: ", err)
 			} else {
 				log.Infoln("Execution with id " + id + " deleted")
 			}
 		} else if projectName != "" {
-			response, err := codestream.DeleteExecutions(restClient, confirm, projectName, status, name, nested)
+			response, err := codestream.DeleteExecutions(APIClient, confirm, projectName, status, name, nested)
 			if err != nil {
 				log.Errorln("Unable to delete executions: ", err)
 			} else {
@@ -99,11 +98,11 @@ var createExecutionCmd = &cobra.Command{
 	
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
-		response, err := codestream.CreateExecution(restClient, id, inputs, comments)
+		response, err := codestream.CreateExecution(APIClient, id, inputs, comments)
 		if err != nil {
 			log.Errorln("Unable to create execution: ", err)
 		}

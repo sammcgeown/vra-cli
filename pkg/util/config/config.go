@@ -24,7 +24,7 @@ func GetConfigFromEnv() *types.Config {
 		Server:      sanitize.URL(viper.GetString("server")),
 		Username:    viper.GetString("username"),
 		Password:    viper.GetString("password"),
-		ApiToken:    viper.GetString("apitoken"),
+		APIToken:    viper.GetString("apitoken"),
 		AccessToken: viper.GetString("accesstoken"),
 	}
 	log.Debugln("Config:", config)
@@ -73,7 +73,7 @@ func GetConfigFromFile(configFile string) *types.Config {
 			Server:      sanitize.URL(configuration.GetString("server")),
 			Username:    configuration.GetString("username"),
 			Password:    configuration.GetString("password"),
-			ApiToken:    configuration.GetString("apitoken"),
+			APIToken:    configuration.GetString("apitoken"),
 			AccessToken: configuration.GetString("accesstoken"),
 		}
 	} else {

@@ -5,17 +5,14 @@ SPDX-License-Identifier: BSD-2-Clause
 package cmd
 
 import (
-	"crypto/tls"
 	"fmt"
 	"os"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/config"
 	types "github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/vmware/vra-sdk-go/pkg/client"
 )
 
 var (
@@ -26,9 +23,13 @@ var (
 	commit       = "none"
 	date         = "unknown"
 	builtBy      = "unknown"
-	apiVersion   = "2019-10-17"
-	restClient   *resty.Client
-	apiClient    *client.MulticloudIaaS
+	// APIClient - API Client Options
+	APIClient = &types.APIClientOptions{
+		Version: "2019-10-17",
+	}
+	// apiVersion   = "2019-10-17"
+	// restClient   *resty.Client
+	// apiClient    *client.MulticloudIaaS
 	// Global Flags
 	debug      bool
 	ignoreCert bool
@@ -73,9 +74,9 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(InitConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.vra-cli.yaml)")
-	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Enable debug logging")
+	rootCmd.PersistentFlags().BoolVar(&APIClient.Debug, "debug", false, "Enable debug logging")
 	rootCmd.PersistentFlags().BoolVar(&confirm, "confirm", false, "Confirm action without prompting for confirmation")
-	rootCmd.PersistentFlags().BoolVar(&ignoreCert, "ignoreCertificateWarnings", false, "Disable HTTPS Certificate Validation")
+	rootCmd.PersistentFlags().BoolVar(&APIClient.VerifySSL, "ignoreCertificateWarnings", false, "Disable HTTPS Certificate Validation")
 	rootCmd.PersistentFlags().StringVarP(&output, "out", "o", "table", "Output - default is table, can be json")
 	// API Paging
 	rootCmd.PersistentFlags().IntVar(&count, "count", 100, "API Paging - Count")
@@ -94,7 +95,7 @@ func init() {
 func InitConfig() {
 	// Debug logging
 	log.SetFormatter(&log.TextFormatter{TimestampFormat: "2006-01-02 15:04:05", FullTimestamp: true})
-	if debug {
+	if APIClient.Debug {
 		log.SetLevel(log.DebugLevel)
 		log.Debugln("Debug logging enabled")
 	} else {
@@ -107,23 +108,29 @@ func InitConfig() {
 	} else {
 		// If we're using a config file
 		targetConfig = *config.GetConfigFromFile(cfgFile)
-
 	}
 	// Validate the configuration and credentials
-	if err := auth.GetConnection(&targetConfig, debug); err != nil {
+	// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+	// 	log.Fatalln(err)
+	// }
+
+	// Configure the REST client defaults
+	// APIClient.SDKClient.RESTClient = resty.New().
+	// 	SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).
+	// 	SetAuthToken(targetConfig.AccessToken).
+	// 	SetHostURL("https://"+targetConfig.Server).
+	// 	SetHeader("Accept", "application/json").
+	// 	SetHeader("Content-Type", "application/json").
+	// 	SetError(&types.Exception{})
+
+	APIClient.Config = &targetConfig
+	err := auth.ValidateConfiguration(APIClient)
+	if err != nil {
 		log.Fatalln(err)
 	}
 
-	// Configure the REST client defaults
-	restClient = resty.New().
-		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).
-		SetAuthToken(targetConfig.AccessToken).
-		SetHostURL("https://"+targetConfig.Server).
-		SetHeader("Accept", "application/json").
-		SetHeader("Content-Type", "application/json").
-		SetError(&types.Exception{})
-
-	apiClient = auth.GetAPIClient(&targetConfig, debug)
+	APIClient.RESTClient = auth.GetRESTClient(&targetConfig, insecure, debug)
+	APIClient.SDKClient = auth.GetAPIClient(&targetConfig, debug)
 
 }
 

@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
@@ -17,7 +16,7 @@ import (
 )
 
 // GetPipeline - Get Code Stream Pipeline
-func GetPipeline(client *resty.Client, id string, name string, project string, exportPath string) ([]*types.Pipeline, error) {
+func GetPipeline(APIClient *types.APIClientOptions, id string, name string, project string, exportPath string) ([]*types.Pipeline, error) {
 	var arrResults []*types.Pipeline
 
 	var filters []string
@@ -31,11 +30,11 @@ func GetPipeline(client *resty.Client, id string, name string, project string, e
 		filters = append(filters, "(project eq '"+project+"')")
 	}
 	if len(filters) > 0 {
-		client.QueryParam.Add("$filter", "("+strings.Join(filters, ") and (")+")")
-		log.Debugln(client.QueryParam)
+		APIClient.RESTClient.QueryParam.Add("$filter", "("+strings.Join(filters, ") and (")+")")
+		log.Debugln(APIClient.RESTClient.QueryParam)
 	}
 
-	queryResponse, err := client.R().
+	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.DocumentsList{}).
 		SetError(&types.Exception{}).
 		Get("/pipeline/api/pipelines")
@@ -63,8 +62,8 @@ func GetPipeline(client *resty.Client, id string, name string, project string, e
 }
 
 // PatchPipeline - Patch Code Stream Pipeline by ID
-func PatchPipeline(client *resty.Client, id string, payload string) (*types.Pipeline, error) {
-	queryResponse, err := client.R().
+func PatchPipeline(APIClient *types.APIClientOptions, id string, payload string) (*types.Pipeline, error) {
+	queryResponse, err := APIClient.RESTClient.R().
 		SetBody(payload).
 		SetResult(&types.Pipeline{}).
 		SetError(&types.Exception{}).
@@ -76,8 +75,8 @@ func PatchPipeline(client *resty.Client, id string, payload string) (*types.Pipe
 }
 
 // DeletePipeline - Delete Code Stream Pipeline by ID
-func DeletePipeline(client *resty.Client, id string) (*types.Pipeline, error) {
-	queryResponse, err := client.R().
+func DeletePipeline(APIClient *types.APIClientOptions, id string) (*types.Pipeline, error) {
+	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.Pipeline{}).
 		SetError(&types.Exception{}).
 		Delete("/pipeline/api/pipelines/" + id)
@@ -88,16 +87,16 @@ func DeletePipeline(client *resty.Client, id string) (*types.Pipeline, error) {
 }
 
 // DeletePipelineInProject - Delete Code Stream Pipeline by Project
-func DeletePipelineInProject(client *resty.Client, project string) ([]*types.Pipeline, error) {
+func DeletePipelineInProject(APIClient *types.APIClientOptions, project string) ([]*types.Pipeline, error) {
 	var deletedPipes []*types.Pipeline
-	pipelines, err := GetPipeline(client, "", "", project, "")
+	pipelines, err := GetPipeline(APIClient, "", "", project, "")
 	if err != nil {
 		return nil, err
 	}
 	confirm := helpers.AskForConfirmation("This will attempt to delete " + fmt.Sprint(len(pipelines)) + " Pipelines in " + project + ", are you sure?")
 	if confirm {
 		for _, pipeline := range pipelines {
-			deletedPipe, err := DeletePipeline(client, pipeline.ID)
+			deletedPipe, err := DeletePipeline(APIClient, pipeline.ID)
 			if err != nil {
 				log.Warnln("Unable to delete "+pipeline.Name, err)
 			}

@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 
 	"github.com/sammcgeown/vra-cli/pkg/cmd/codestream"
-	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
@@ -24,11 +23,11 @@ var getEndpointCmd = &cobra.Command{
 	Short: "Get Endpoint Configurations",
 	Long:  `Get Code Stream Endpoint Configurations`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
-		response, err := codestream.GetEndpoint(restClient, id, name, projectName, typename, exportPath)
+		response, err := codestream.GetEndpoint(APIClient, id, name, projectName, typename, exportPath)
 		if err != nil {
 			log.Infoln("Unable to get endpoints: ", err)
 		}
@@ -64,9 +63,9 @@ var createEndpointCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
 		if importPath != "" {
 			yamlFilePaths := helpers.GetFilePaths(importPath, "yaml")
@@ -75,7 +74,7 @@ var createEndpointCmd = &cobra.Command{
 			}
 			for _, yamlFilePath := range yamlFilePaths {
 				yamlFileName := filepath.Base(yamlFilePath)
-				err := codestream.ImportYaml(restClient, yamlFilePath, "create", projectName, "endpoint")
+				err := codestream.ImportYaml(APIClient, yamlFilePath, "create", projectName, "endpoint")
 				if err != nil {
 					log.Warnln("Failed to import", yamlFilePath, "as Endpoint", err)
 				} else {
@@ -98,9 +97,9 @@ var updateEndpointCmd = &cobra.Command{
 	vra-cli update endpoint --importPath "/Users/sammcgeown/vra-cli/endpoints"
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
 		if importPath != "" {
 			yamlFilePaths := helpers.GetFilePaths(importPath, ".yaml")
@@ -109,7 +108,7 @@ var updateEndpointCmd = &cobra.Command{
 			}
 			for _, yamlFilePath := range yamlFilePaths {
 				yamlFileName := filepath.Base(yamlFilePath)
-				err := codestream.ImportYaml(restClient, yamlFilePath, "apply", "", "endpoint")
+				err := codestream.ImportYaml(APIClient, yamlFilePath, "apply", "", "endpoint")
 				if err != nil {
 					log.Warnln("Failed to import", yamlFilePath, "as Endpoint", err)
 				} else {
@@ -149,11 +148,11 @@ vra-cli delete endpoint --project "My Project"
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 		if name != "" {
-			response, err := codestream.GetEndpoint(restClient, id, name, projectName, typename, exportPath)
+			response, err := codestream.GetEndpoint(APIClient, id, name, projectName, typename, exportPath)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -166,13 +165,13 @@ vra-cli delete endpoint --project "My Project"
 
 		if id != "" {
 
-			err := codestream.DeleteEndpoint(restClient, id)
+			err := codestream.DeleteEndpoint(APIClient, id)
 			if err != nil {
 				log.Errorln("Unable to delete Endpoint: ", err)
 			}
 			log.Infoln("Endpoint with id " + id + " deleted")
 		} else if projectName != "" {
-			response, err := codestream.DeleteEndpointByProject(restClient, projectName)
+			response, err := codestream.DeleteEndpointByProject(APIClient, projectName)
 			if err != nil {
 				log.Errorln("Unable to delete Endpoint: ", err)
 			}

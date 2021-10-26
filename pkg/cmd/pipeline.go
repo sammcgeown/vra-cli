@@ -16,7 +16,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/olekukonko/tablewriter"
 	"github.com/sammcgeown/vra-cli/pkg/cmd/codestream"
-	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
@@ -42,11 +41,11 @@ get execution --name vra-authenticateUser
 # View executions by status
 vra-cli get execution --status Failed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
-		response, err := codestream.GetPipeline(restClient, id, name, projectName, exportPath)
+		response, err := codestream.GetPipeline(APIClient, id, name, projectName, exportPath)
 		if err != nil {
 			log.Errorln("Unable to get Code Stream Pipelines: ", err)
 		}
@@ -114,7 +113,7 @@ vra-cli get execution --status Failed`,
 					if len(variables) > 0 {
 						log.Infoln(c.Name, "depends on Variables:", strings.Join(variables, ", "))
 						for _, v := range variables {
-							codestream.GetVariable(restClient, "", v, c.Project, exportPath)
+							codestream.GetVariable(APIClient, "", v, c.Project, exportPath)
 						}
 					}
 					pipelines = helpers.RemoveDuplicateStrings(pipelines)
@@ -122,7 +121,7 @@ vra-cli get execution --status Failed`,
 					if len(pipelines) > 0 {
 						log.Infoln(c.Name, "depends on Pipelines:", strings.Join(pipelines, ", "))
 						for _, p := range pipelines {
-							codestream.GetPipeline(restClient, "", p, c.Project, filepath.Join(exportPath, "pipelines"))
+							codestream.GetPipeline(APIClient, "", p, c.Project, filepath.Join(exportPath, "pipelines"))
 						}
 					}
 					endpoints = helpers.RemoveDuplicateStrings(endpoints)
@@ -130,7 +129,7 @@ vra-cli get execution --status Failed`,
 					if len(endpoints) > 0 {
 						log.Infoln(c.Name, "depends on Endpoints:", strings.Join(endpoints, ", "))
 						for _, e := range endpoints {
-							codestream.GetEndpoint(restClient, "", e, c.Project, "", filepath.Join(exportPath, "endpoints"))
+							codestream.GetEndpoint(APIClient, "", e, c.Project, "", filepath.Join(exportPath, "endpoints"))
 						}
 					}
 					customintegrations = helpers.RemoveDuplicateStrings(customintegrations)
@@ -138,7 +137,7 @@ vra-cli get execution --status Failed`,
 					if len(customintegrations) > 0 {
 						log.Infoln(c.Name, "depends on Custom Integrations:", strings.Join(customintegrations, ", "))
 						for _, ci := range customintegrations {
-							codestream.GetCustomIntegration(restClient, "", ci)
+							codestream.GetCustomIntegration(APIClient, "", ci)
 						}
 					}
 				}
@@ -170,12 +169,12 @@ vra-cli update pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
 		if state != "" {
-			response, err := codestream.PatchPipeline(restClient, id, `{"state":"`+state+`"}`)
+			response, err := codestream.PatchPipeline(APIClient, id, `{"state":"`+state+`"}`)
 			if err != nil {
 				log.Errorln("Unable to update Code Stream Pipeline: ", err)
 			}
@@ -188,7 +187,7 @@ vra-cli update pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 		}
 		for _, yamlFilePath := range yamlFilePaths {
 			yamlFileName := filepath.Base(yamlFilePath)
-			err := codestream.ImportYaml(restClient, yamlFilePath, "apply", "", "endpoint")
+			err := codestream.ImportYaml(APIClient, yamlFilePath, "apply", "", "endpoint")
 			if err != nil {
 				log.Warnln("Failed to import", yamlFilePath, "as Pipeline", err)
 			}
@@ -210,16 +209,16 @@ vra-cli create pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 		yamlFilePaths := helpers.GetFilePaths(importPath, ".yaml")
 		if len(yamlFilePaths) == 0 {
 			log.Warnln("No YAML files were found in", importPath)
 		}
 		for _, yamlFilePath := range yamlFilePaths {
 			yamlFileName := filepath.Base(yamlFilePath)
-			err := codestream.ImportYaml(restClient, yamlFilePath, "create", projectName, "pipeline")
+			err := codestream.ImportYaml(APIClient, yamlFilePath, "create", projectName, "pipeline")
 			if err != nil {
 				log.Warnln("Failed to import", yamlFilePath, "as Pipeline", err)
 			} else {
@@ -248,17 +247,17 @@ vra-cli delete pipeline --name "My Pipeline" --project "My Project"
 vra-cli delete pipeline --project "My Project"
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 		if id != "" {
-			response, err := codestream.DeletePipeline(restClient, id)
+			response, err := codestream.DeletePipeline(APIClient, id)
 			if err != nil {
 				log.Errorln("Delete Pipeline failed:", err)
 			}
 			log.Infoln("Pipeline with id " + response.ID + " deleted")
 		} else if projectName != "" {
-			response, err := codestream.DeletePipelineInProject(restClient, projectName)
+			response, err := codestream.DeletePipelineInProject(APIClient, projectName)
 			if err != nil {
 				log.Errorln("Delete Pipelines in "+projectName+" failed:", err)
 			} else {

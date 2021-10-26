@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/sammcgeown/vra-cli/pkg/cmd/codestream"
-	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 
@@ -31,10 +30,10 @@ Get by Name
 Get by Project
 	vra-cli get customintegration --project production`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
-		response, err := codestream.GetCustomIntegration(restClient, id, name)
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
+		response, err := codestream.GetCustomIntegration(APIClient, id, name)
 		if err != nil {
 			log.Errorln("Unable to get Code Stream CustomIntegrations: ", err)
 		}

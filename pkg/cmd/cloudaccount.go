@@ -9,7 +9,6 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/sammcgeown/vra-cli/pkg/cmd/cloudassembly"
-	"github.com/sammcgeown/vra-cli/pkg/util/auth"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -50,10 +49,10 @@ Get Cloud Account by Name:
 Get Cloud Accounts by Type:
   vra-cli get cloudaccount --type <cloudaccount-type>`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
-		cloudAccounts, err := cloudassembly.GetCloudAccounts(apiClient, id, name, cloudaccounttype)
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
+		cloudAccounts, err := cloudassembly.GetCloudAccounts(APIClient, id, name, cloudaccounttype)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -116,9 +115,9 @@ Create a new AWS Cloud Account:
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
 
 		// if helpers.IsInputFromPipe() { // If it's a pipe, then read from stdin
 		// 	// Decode JSON to struct
@@ -127,20 +126,20 @@ Create a new AWS Cloud Account:
 		// 	}
 		// }
 		if cloudaccounttype == "aws" {
-			newAccount, err := cloudassembly.CreateCloudAccountAWS(apiClient, name, awsaccesskeyid, awssecretaccesskey, awsregions, tags)
+			newAccount, err := cloudassembly.CreateCloudAccountAWS(APIClient, name, awsaccesskeyid, awssecretaccesskey, awsregions, tags)
 			if err != nil {
 				log.Fatalln(err)
 			}
 			helpers.PrettyPrint(newAccount)
 		} else if cloudaccounttype == "vsphere" {
 
-			newAccount, err := cloudassembly.CreateCloudAccountvSphere(apiClient, name, description, fqdn, username, password, nsxaccount, cloudproxy, tags, insecure, createcloudzone)
+			newAccount, err := cloudassembly.CreateCloudAccountvSphere(APIClient, name, description, fqdn, username, password, nsxaccount, cloudproxy, tags, insecure, createcloudzone)
 			if err != nil {
 				log.Fatalln(err)
 			}
 			helpers.PrettyPrint(newAccount)
 		} else if cloudaccounttype == "nsxt" {
-			newAccount, err := cloudassembly.CreateCloudAccountNsxT(apiClient, name, description, fqdn, username, password, vccloudaccount, cloudproxy, tags, nsxtglobal, nsxtmanager, insecure)
+			newAccount, err := cloudassembly.CreateCloudAccountNsxT(APIClient, name, description, fqdn, username, password, vccloudaccount, cloudproxy, tags, nsxtglobal, nsxtmanager, insecure)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -161,10 +160,10 @@ Delete a Cloud Account by Name:
 Delete a Cloud Account by ID:
   vra-cli delete cloudaccount --id <Cloud Account ID>`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-			log.Fatalln(err)
-		}
-		if account, err := cloudassembly.GetCloudAccounts(apiClient, id, name, ""); err != nil {
+		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
+		// 	log.Fatalln(err)
+		// }
+		if account, err := cloudassembly.GetCloudAccounts(APIClient, id, name, ""); err != nil {
 			log.Fatalln(err) // There was an error getting the cloud account
 		} else {
 			if len(account) == 0 {
@@ -175,7 +174,7 @@ Delete a Cloud Account by ID:
 				log.Fatalln("More than one Cloud Account matching the request was found")
 			} else {
 				// There was only one cloud account
-				if err := cloudassembly.DeleteCloudAccount(apiClient, *account[0].ID); err != nil {
+				if err := cloudassembly.DeleteCloudAccount(APIClient, *account[0].ID); err != nil {
 					log.Fatalln(err) // There was an error deleting the cloud account
 				} else {
 					log.Infoln("Cloud Account deleted successfully")

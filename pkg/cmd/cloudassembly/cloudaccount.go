@@ -10,13 +10,13 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
-	"github.com/vmware/vra-sdk-go/pkg/client"
+	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	"github.com/vmware/vra-sdk-go/pkg/client/cloud_account"
 	"github.com/vmware/vra-sdk-go/pkg/models"
 )
 
 // GetCloudAccounts returns a list of cloud accounts
-func GetCloudAccounts(apiclient *client.MulticloudIaaS, id string, name string, cloudaccounttype string) ([]*models.CloudAccount, error) {
+func GetCloudAccounts(APIClient *types.APIClientOptions, id string, name string, cloudaccounttype string) ([]*models.CloudAccount, error) {
 
 	// transport := httptransport.New(&targetConfig.Server, "", nil)
 	// // transport.SetDebug(debug)
@@ -43,7 +43,7 @@ func GetCloudAccounts(apiclient *client.MulticloudIaaS, id string, name string, 
 	CloudAccountParams := cloud_account.NewGetCloudAccountsParams()
 	CloudAccountParams.DollarFilter = &filter
 
-	ret, err := apiclient.CloudAccount.GetCloudAccounts(CloudAccountParams)
+	ret, err := APIClient.SDKClient.CloudAccount.GetCloudAccounts(CloudAccountParams)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func GetCloudAccounts(apiclient *client.MulticloudIaaS, id string, name string, 
 }
 
 // CreateCloudAccountAWS creates a new AWS cloud account
-func CreateCloudAccountAWS(apiclient *client.MulticloudIaaS, name, accesskey, secretkey, regions, tags string) (*models.CloudAccountAws, error) {
+func CreateCloudAccountAWS(APIClient *types.APIClientOptions, name, accesskey, secretkey, regions, tags string) (*models.CloudAccountAws, error) {
 	AwsSpec := models.CloudAccountAwsSpecification{}
 	AwsSpec.Name = &name
 	AwsSpec.AccessKeyID = &accesskey
@@ -60,7 +60,7 @@ func CreateCloudAccountAWS(apiclient *client.MulticloudIaaS, name, accesskey, se
 	AwsSpec.RegionIds = strings.Split(regions, ",")
 	AwsSpec.Tags = helpers.StringToTags(tags)
 
-	createResp, err := apiclient.CloudAccount.CreateAwsCloudAccount(cloud_account.NewCreateAwsCloudAccountParams().WithBody(&AwsSpec))
+	createResp, err := APIClient.SDKClient.CloudAccount.CreateAwsCloudAccount(cloud_account.NewCreateAwsCloudAccountParams().WithBody(&AwsSpec))
 	if err != nil {
 		return nil, err
 	}
@@ -69,9 +69,9 @@ func CreateCloudAccountAWS(apiclient *client.MulticloudIaaS, name, accesskey, se
 }
 
 // CreateCloudAccountvSphere creates a new vSphere cloud account
-func CreateCloudAccountvSphere(apiclient *client.MulticloudIaaS, name, description, fqdn, username, password, nsxcloudaccount, cloudproxy, tags string, insecure, createcloudzone bool) (*models.CloudAccountVsphere, error) {
+func CreateCloudAccountvSphere(APIClient *types.APIClientOptions, name, description, fqdn, username, password, nsxcloudaccount, cloudproxy, tags string, insecure, createcloudzone bool) (*models.CloudAccountVsphere, error) {
 
-	DatacenterIds, _ := GetvSphereRegions(apiclient, fqdn, username, password, cloudproxy, insecure)
+	DatacenterIds, _ := GetvSphereRegions(APIClient, fqdn, username, password, cloudproxy, insecure)
 
 	vSphereSpec := models.CloudAccountVsphereSpecification{
 		Name:                        &name,
@@ -88,7 +88,7 @@ func CreateCloudAccountvSphere(apiclient *client.MulticloudIaaS, name, descripti
 		vSphereSpec.AssociatedCloudAccountIds = []string{nsxcloudaccount}
 	}
 
-	createResp, err := apiclient.CloudAccount.CreateVSphereCloudAccount(cloud_account.NewCreateVSphereCloudAccountParams().WithBody(&vSphereSpec))
+	createResp, err := APIClient.SDKClient.CloudAccount.CreateVSphereCloudAccount(cloud_account.NewCreateVSphereCloudAccountParams().WithBody(&vSphereSpec))
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func CreateCloudAccountvSphere(apiclient *client.MulticloudIaaS, name, descripti
 }
 
 // GetvSphereRegions returns a list of vSphere regions
-func GetvSphereRegions(apiclient *client.MulticloudIaaS, fqdn, username, password, cloudproxy string, insecure bool) (*models.CloudAccountRegions, error) {
+func GetvSphereRegions(APIClient *types.APIClientOptions, fqdn, username, password, cloudproxy string, insecure bool) (*models.CloudAccountRegions, error) {
 
 	vSphereSpec := models.CloudAccountVsphereSpecification{
 		AcceptSelfSignedCertificate: insecure,
@@ -109,7 +109,7 @@ func GetvSphereRegions(apiclient *client.MulticloudIaaS, fqdn, username, passwor
 		vSphereSpec.Dcid = cloudproxy
 	}
 	// Get Regions
-	getResp, err := apiclient.CloudAccount.EnumerateVSphereRegions(cloud_account.NewEnumerateVSphereRegionsParams().WithBody(&vSphereSpec))
+	getResp, err := APIClient.SDKClient.CloudAccount.EnumerateVSphereRegions(cloud_account.NewEnumerateVSphereRegionsParams().WithBody(&vSphereSpec))
 	if err != nil {
 		return nil, err
 	}
@@ -118,10 +118,10 @@ func GetvSphereRegions(apiclient *client.MulticloudIaaS, fqdn, username, passwor
 }
 
 // CreateCloudAccountNsxT creates a new NSX-T cloud account
-func CreateCloudAccountNsxT(apiclient *client.MulticloudIaaS, name, description, fqdn, username, password, vccloudaccount, cloudproxy, tags string, global, manager, insecure bool) (*models.CloudAccountNsxT, error) {
+func CreateCloudAccountNsxT(APIClient *types.APIClientOptions, name, description, fqdn, username, password, vccloudaccount, cloudproxy, tags string, global, manager, insecure bool) (*models.CloudAccountNsxT, error) {
 
 	if vccloudaccount != "" {
-		if vCenter, err := GetCloudAccounts(apiclient, "", vccloudaccount, "vsphere"); err != nil {
+		if vCenter, err := GetCloudAccounts(APIClient, "", vccloudaccount, "vsphere"); err != nil {
 			log.Warnln("Unable to find a vSphere Cloud Account named "+vccloudaccount+" to associate with NSXT Cloud Account", err)
 			vccloudaccount = ""
 		} else {
@@ -147,7 +147,7 @@ func CreateCloudAccountNsxT(apiclient *client.MulticloudIaaS, name, description,
 		NsxTSpec.Dcid = &cloudproxy
 	}
 
-	createResp, err := apiclient.CloudAccount.CreateNsxTCloudAccount(cloud_account.NewCreateNsxTCloudAccountParams().WithBody(&NsxTSpec))
+	createResp, err := APIClient.SDKClient.CloudAccount.CreateNsxTCloudAccount(cloud_account.NewCreateNsxTCloudAccountParams().WithBody(&NsxTSpec))
 	if err != nil {
 		return nil, err
 	}
@@ -156,9 +156,9 @@ func CreateCloudAccountNsxT(apiclient *client.MulticloudIaaS, name, description,
 }
 
 // DeleteCloudAccount deletes a cloud account
-func DeleteCloudAccount(apiclient *client.MulticloudIaaS, id string) error {
+func DeleteCloudAccount(APIClient *types.APIClientOptions, id string) error {
 
-	_, err := apiclient.CloudAccount.DeleteAwsCloudAccount(cloud_account.NewDeleteAwsCloudAccountParams().WithID(id))
+	_, err := APIClient.SDKClient.CloudAccount.DeleteAwsCloudAccount(cloud_account.NewDeleteAwsCloudAccountParams().WithID(id))
 	if err != nil {
 		return err
 	}

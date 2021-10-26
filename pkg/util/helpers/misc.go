@@ -79,19 +79,21 @@ func GetFilePaths(filePath string, filetype string) []string {
 	// Read importPath
 	stat, err := os.Stat(filePath)
 	if err == nil && stat.IsDir() {
-		// log.Debugln("importPath is a directory")
+		log.Debugln("GetFilePaths -", filePath, "is a directory, looking for filetype", filetype)
 		fileList, err := ioutil.ReadDir(filePath)
 		if err != nil {
 			log.Fatal(err)
 		}
 		for _, f := range fileList {
 			if strings.Contains(f.Name(), filetype) {
-				files = append(files, filepath.Join(filePath, f.Name()))
+				absPath, _ := filepath.Abs(filepath.Join(filePath, f.Name()))
+				files = append(files, absPath)
 			}
 		}
 	} else {
 		log.Debugln("importPath is a file")
-		files = append(files, filePath)
+		absPath, _ := filepath.Abs(filePath)
+		files = append(files, absPath)
 	}
 	return files
 }

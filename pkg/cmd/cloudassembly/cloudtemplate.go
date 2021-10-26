@@ -9,14 +9,14 @@ import (
 	"path/filepath"
 
 	"github.com/go-openapi/strfmt"
+	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
-	"github.com/vmware/vra-sdk-go/pkg/client"
 	"github.com/vmware/vra-sdk-go/pkg/client/blueprint"
 	"github.com/vmware/vra-sdk-go/pkg/models"
 )
 
 // GetCloudTemplate - Get a Cloud Assembly Cloud Template
-func GetCloudTemplate(apiclient *client.MulticloudIaaS, id string, name string, project string) ([]*models.Blueprint, error) {
+func GetCloudTemplate(APIClient *types.APIClientOptions, id string, name string, project string) ([]*models.Blueprint, error) {
 	var result []*models.Blueprint
 
 	if id == "" {
@@ -26,7 +26,7 @@ func GetCloudTemplate(apiclient *client.MulticloudIaaS, id string, name string, 
 			CloudTemplateParams.Name = &name
 		}
 		if project != "" {
-			p, perr := GetProject(apiclient, "2019-10-17", project, "")
+			p, perr := GetProject(APIClient, project, "")
 			if perr != nil {
 				return nil, perr
 			}
@@ -35,7 +35,7 @@ func GetCloudTemplate(apiclient *client.MulticloudIaaS, id string, name string, 
 
 		log.Debug(CloudTemplateParams)
 
-		ret, err := apiclient.Blueprint.ListBlueprintsUsingGET1(CloudTemplateParams)
+		ret, err := APIClient.SDKClient.Blueprint.ListBlueprintsUsingGET1(CloudTemplateParams)
 		if err != nil {
 			return nil, err
 		}
@@ -45,7 +45,7 @@ func GetCloudTemplate(apiclient *client.MulticloudIaaS, id string, name string, 
 		CloudTemplateParams := blueprint.NewGetBlueprintUsingGET1Params()
 		CloudTemplateParams.BlueprintID = strfmt.UUID(id)
 
-		ret, err := apiclient.Blueprint.GetBlueprintUsingGET1(CloudTemplateParams)
+		ret, err := APIClient.SDKClient.Blueprint.GetBlueprintUsingGET1(CloudTemplateParams)
 		if err != nil {
 			return nil, err
 		}
@@ -56,11 +56,11 @@ func GetCloudTemplate(apiclient *client.MulticloudIaaS, id string, name string, 
 }
 
 // GetCloudTemplateInputSchema - Get a Cloud Assembly Cloud Template Schema
-// func GetCloudTemplateInputSchema(apiclient *client.MulticloudIaaS, id string) (*models., error) {
+// func GetCloudTemplateInputSchema(APIClient *types.APIClientOptions, id string) (*models., error) {
 // 	SchemaParams := blueprint.NewGetBlueprintInputsSchemaUsingGET1Params()
 // 	SchemaParams.BlueprintID = id
 
-// 	ret, err := apiclient.Blueprint.GetBlueprintInputsSchemaUsingGET1(SchemaParams)
+// 	ret, err := APIClient.SDKClient.Blueprint.GetBlueprintInputsSchemaUsingGET1(SchemaParams)
 
 // 	if err != nil {
 // 		return nil, err
@@ -88,10 +88,10 @@ func GetCloudTemplate(apiclient *client.MulticloudIaaS, id string, name string, 
 // }
 
 // DeleteCloudTemplate - Delete a Cloud Assembly Cloud Template
-func DeleteCloudTemplate(apiclient *client.MulticloudIaaS, id string) error {
+func DeleteCloudTemplate(APIClient *types.APIClientOptions, id string) error {
 	DeleteParams := blueprint.NewDeleteBlueprintUsingDELETE1Params()
 	DeleteParams.BlueprintID = strfmt.UUID(id)
-	_, err := apiclient.Blueprint.DeleteBlueprintUsingDELETE1(DeleteParams)
+	_, err := APIClient.SDKClient.Blueprint.DeleteBlueprintUsingDELETE1(DeleteParams)
 	if err != nil {
 		return err
 	}
@@ -99,7 +99,7 @@ func DeleteCloudTemplate(apiclient *client.MulticloudIaaS, id string) error {
 }
 
 // CreateCloudTemplate - Create a new Cloud Assembly Cloud Template
-func CreateCloudTemplate(apiclient *client.MulticloudIaaS, name string, description string, projectID string, content string, scope bool) (*models.Blueprint, error) {
+func CreateCloudTemplate(APIClient *types.APIClientOptions, name string, description string, projectID string, content string, scope bool) (*models.Blueprint, error) {
 	CreateParams := blueprint.NewCreateBlueprintUsingPOST1Params()
 	CreateParams.Blueprint = &models.Blueprint{
 		Name:            name,
@@ -108,7 +108,7 @@ func CreateCloudTemplate(apiclient *client.MulticloudIaaS, name string, descript
 		Content:         content,
 		RequestScopeOrg: scope,
 	}
-	ret, err := apiclient.Blueprint.CreateBlueprintUsingPOST1(CreateParams)
+	ret, err := APIClient.SDKClient.Blueprint.CreateBlueprintUsingPOST1(CreateParams)
 	if err != nil {
 		return nil, err
 	}

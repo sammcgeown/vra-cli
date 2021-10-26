@@ -4,6 +4,11 @@ SPDX-License-Identifier: BSD-2-Clause
 */
 package types
 
+import (
+	"github.com/go-resty/resty/v2"
+	"github.com/vmware/vra-sdk-go/pkg/client"
+)
+
 // Config - main configuration struct
 type Config struct {
 	Name        string
@@ -11,11 +16,22 @@ type Config struct {
 	Password    string
 	Server      string
 	Username    string
-	ApiToken    string
+	APIToken    string
 	AccessToken string
 }
 
-type Pagination struct {
+// APIClientOptions - options for the API client
+type APIClientOptions struct {
+	Version    string
+	Debug      bool
+	VerifySSL  bool
+	RESTClient *resty.Client
+	SDKClient  *client.MulticloudIaaS
+	Pagination struct {
+		PageSize int
+		Page     int
+	}
+	Config *Config
 }
 
 // Exception - Generic exception struct
@@ -32,7 +48,7 @@ type Exception struct {
 	ReferenceID interface{} `json:"referenceId"`
 }
 
-// documentsList - Code Stream Documents List structure
+// DocumentsList - Code Stream Documents List structure
 type DocumentsList struct {
 	Count      int                    `json:"count"`
 	TotalCount int                    `json:"totalCount"`
@@ -40,7 +56,7 @@ type DocumentsList struct {
 	Documents  map[string]interface{} `json:"documents"`
 }
 
-// contentsList - Generic Contents List Structure
+// ContentsList - Generic Contents List Structure
 type ContentsList struct {
 	Content  []interface{} `json:"content"`
 	Pageable struct {
@@ -117,6 +133,6 @@ type AuthenticationError struct {
 	Message       string `json:"message"`
 	StatusCode    int64  `json:"statusCode"`
 	ErrorCode     int64  `json:"errorCode"`
-	ServerErrorId string `json:"serverErrorId"`
+	ServerErrorID string `json:"serverErrorId"`
 	DocumentKind  string `json:"documentKind"`
 }

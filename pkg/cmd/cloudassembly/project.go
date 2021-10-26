@@ -8,14 +8,14 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/sammcgeown/vra-cli/pkg/util/types"
 	log "github.com/sirupsen/logrus"
-	"github.com/vmware/vra-sdk-go/pkg/client"
 	"github.com/vmware/vra-sdk-go/pkg/client/project"
 	"github.com/vmware/vra-sdk-go/pkg/models"
 )
 
 // GetProject - Get Projects
-func GetProject(apiClient *client.MulticloudIaaS, apiVersion string, name string, id string) ([]*models.IaaSProject, error) {
+func GetProject(APIClient *types.APIClientOptions, name string, id string) ([]*models.IaaSProject, error) {
 	var filters []string
 	var filter string
 	if id != "" {
@@ -32,9 +32,9 @@ func GetProject(apiClient *client.MulticloudIaaS, apiVersion string, name string
 
 	ProjectParams := project.NewGetProjectsParams()
 	ProjectParams.DollarFilter = &filter
-	ProjectParams.APIVersion = &apiVersion
+	ProjectParams.APIVersion = &APIClient.Version
 
-	ret, err := apiClient.Project.GetProjects(ProjectParams)
+	ret, err := APIClient.SDKClient.Project.GetProjects(ProjectParams)
 	if err != nil {
 		switch err.(type) {
 		case *project.GetProjectNotFound:
@@ -46,17 +46,17 @@ func GetProject(apiClient *client.MulticloudIaaS, apiVersion string, name string
 }
 
 // DeleteProject - Delete Project
-func DeleteProject(apiClient *client.MulticloudIaaS, apiVersion string, id string) error {
+func DeleteProject(APIClient *types.APIClientOptions, id string) error {
 
 	// Workaround an issue where the cloud regions need to be removed before the project can be deleted.
-	_, err := apiClient.Project.UpdateProject(project.NewUpdateProjectParams().WithAPIVersion(&apiVersion).WithID(id).WithBody(&models.IaaSProjectSpecification{
+	_, err := APIClient.SDKClient.Project.UpdateProject(project.NewUpdateProjectParams().WithAPIVersion(&APIClient.Version).WithID(id).WithBody(&models.IaaSProjectSpecification{
 		ZoneAssignmentConfigurations: []*models.ZoneAssignmentSpecification{},
 	}))
 	if err != nil {
 		return err
 	}
 
-	_, err = apiClient.Project.DeleteProject(project.NewDeleteProjectParams().WithID(id))
+	_, err = APIClient.SDKClient.Project.DeleteProject(project.NewDeleteProjectParams().WithID(id))
 	if err != nil {
 		return err
 	}
@@ -64,8 +64,8 @@ func DeleteProject(apiClient *client.MulticloudIaaS, apiVersion string, id strin
 }
 
 // CreateProject - Create Project
-func CreateProject(apiClient *client.MulticloudIaaS, apiVersion string, name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.IaaSProject, error) {
-	createdProject, err := apiClient.Project.CreateProject(project.NewCreateProjectParams().WithAPIVersion(&apiVersion).WithBody(&models.IaaSProjectSpecification{
+func CreateProject(APIClient *types.APIClientOptions, name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.IaaSProject, error) {
+	createdProject, err := APIClient.SDKClient.Project.CreateProject(project.NewCreateProjectParams().WithAPIVersion(&APIClient.Version).WithBody(&models.IaaSProjectSpecification{
 		Administrators:               administrators,
 		Constraints:                  constraints,
 		Description:                  description,
@@ -84,7 +84,7 @@ func CreateProject(apiClient *client.MulticloudIaaS, apiVersion string, name str
 }
 
 // UpdateProject - Update Project
-func UpdateProject(apiClient *client.MulticloudIaaS, apiVersion string, id string, name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.IaaSProject, error) {
+func UpdateProject(APIClient *types.APIClientOptions, id string, name string, description string, administrators []*models.User, members []*models.User, viewers []*models.User, zoneAssignment []*models.ZoneAssignmentSpecification, constraints map[string][]models.Constraint, operationTimeout int64, machineNamingTemplate string, sharedResources *bool) (*models.IaaSProject, error) {
 	ProjectSpecification := models.IaaSProjectSpecification{}
 
 	if len(administrators) > 0 {
@@ -118,7 +118,7 @@ func UpdateProject(apiClient *client.MulticloudIaaS, apiVersion string, id strin
 		ProjectSpecification.SharedResources = *sharedResources
 	}
 
-	updatedProject, err := apiClient.Project.UpdateProject(project.NewUpdateProjectParams().WithAPIVersion(&apiVersion).WithID(id).WithBody(&ProjectSpecification))
+	updatedProject, err := APIClient.SDKClient.Project.UpdateProject(project.NewUpdateProjectParams().WithAPIVersion(&APIClient.Version).WithID(id).WithBody(&ProjectSpecification))
 	if err != nil {
 		return nil, err
 	}
