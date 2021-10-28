@@ -113,7 +113,7 @@ var createWorkflowCmd = &cobra.Command{
 		// Get the category ID
 		var CategoryID string
 		categoryName := (strings.Split(category, "/"))[len(strings.Split(category, "/"))-1]
-		categories, _ := orchestrator.GetCategoryByName(APIClient, categoryName)
+		categories, _ := orchestrator.GetCategoryByName(APIClient, categoryName, "WorkflowCategory")
 		if len(categories) == 0 {
 			log.Fatalln("Unable to find category:", categoryName)
 		} else if len(categories) == 1 {

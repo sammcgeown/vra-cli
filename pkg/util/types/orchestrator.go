@@ -55,26 +55,27 @@ type CategoryContext struct {
 
 // WsCategory is a category
 type WsCategory struct {
-	Description string   `json:"description"`
-	Href        string   `json:"href"`
-	ID          string   `json:"id"`
-	Name        string   `json:"name"`
-	Path        string   `json:"path"`
-	PathIds     []string `json:"pathIds"`
-	Relations   struct {
-		Count int `json:"count"`
-		Links []struct {
+	Href      string `json:"href"`
+	Relations struct {
+		Link []struct {
 			Attributes []struct {
-				DisplayName  string `json:"displayName"`
-				DisplayValue string `json:"displayValue"`
-				Name         string `json:"name"`
-				Value        string `json:"value"`
-			} `json:"attributes"`
+				Value string `json:"value,omitempty"`
+				Name  string `json:"name"`
+			} `json:"attributes,omitempty"`
 			Href string `json:"href"`
 			Rel  string `json:"rel"`
-			Type string `json:"type"`
-		} `json:"links"`
-		StartIndex int `json:"startIndex"`
+		} `json:"link"`
 	} `json:"relations"`
-	Type string `json:"type"`
+	ID      string   `json:"id"`
+	Name    string   `json:"name"`
+	Path    string   `json:"path"`
+	PathIds []string `json:"path-ids"`
+	Type    string   `json:"type"`
+}
+
+// WsCategoryRequest is a category Request
+type WsCategoryRequest struct {
+	Name             string `json:"name"`
+	Type             string `json:"type"`
+	ParentCategoryID string `json:"parent-category-id"`
 }

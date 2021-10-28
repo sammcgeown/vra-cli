@@ -166,10 +166,10 @@ func TestDeleteVariable(t *testing.T) {
 	if err != nil {
 		log.Warnln(err)
 	}
-	assert.Assert(t, len(variable) == 1) // Getter should return exactly one variable
 	deleted, err := DeleteVariable(APIClient, variable[0].ID)
-	assert.NilError(t, err)        // Deleter should not return an error
-	assert.Equal(t, deleted, true) // Deleter should return true
+	assert.Assert(t, len(variable) == 1) // Getter should return exactly one variable
+	assert.NilError(t, err)              // Deleter should not return an error
+	assert.Equal(t, deleted, true)       // Deleter should return true
 }
 
 func TestDeleteVariableByProject(t *testing.T) {
