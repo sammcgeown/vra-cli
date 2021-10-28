@@ -108,7 +108,18 @@ func ValidateConfiguration(APIClient *types.APIClientOptions) error {
 				log.Debugln("Authentication failed")
 				return errors.New(loginResponse.Error().(*types.AuthenticationError).ServerMessage)
 			}
+			APIClient.Config.APIToken = loginResponse.Result().(*types.AuthenticationResponse).RefreshToken
 
+			// Authenticate with the IaaS API
+			queryResponse, _ := APIClient.RESTClient.R().
+				SetBody(types.Authentication{RefreshToken: APIClient.Config.APIToken}).
+				SetResult(&types.AuthenticationResponse{}).
+				SetError(&types.AuthenticationError{}).
+				Post("/iaas/api/login")
+			if queryResponse.IsError() {
+				return errors.New(queryResponse.Error().(*types.AuthenticationError).Message)
+			}
+			APIClient.Config.AccessToken = queryResponse.Result().(*types.AuthenticationResponse).Token
 			log.Debugln("Authentication succeeded")
 			// Else we have a valid token
 		} else {
@@ -124,6 +135,10 @@ func ValidateConfiguration(APIClient *types.APIClientOptions) error {
 	} else {
 		log.Debugln("Access Token OK (Username:", queryResponse.Result().(*types.UserPreferences).UserName, ")")
 	}
+
+	APIClient.RESTClient = GetRESTClient(APIClient.Config, APIClient.VerifySSL, APIClient.Debug)
+	APIClient.SDKClient = GetAPIClient(APIClient.Config, APIClient.Debug)
+
 	return nil
 }
 
