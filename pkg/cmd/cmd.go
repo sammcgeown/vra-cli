@@ -128,10 +128,6 @@ func InitConfig() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	APIClient.RESTClient = auth.GetRESTClient(&targetConfig, insecure, debug)
-	APIClient.SDKClient = auth.GetAPIClient(&targetConfig, debug)
-
 }
 
 // getCmd represents the get command
