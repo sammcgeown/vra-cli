@@ -33,16 +33,16 @@ var (
 	value       string
 	description string
 	status      string
-	printJSON   bool
-	exportPath  string
-	importPath  string
-	category    string
+	// printJSON   bool
+	exportPath string
+	importPath string
+	category   string
 	// force       bool
 )
 
-var qParams = map[string]string{
-	"apiVersion": "2019-10-17",
-}
+// var qParams = map[string]string{
+// 	"apiVersion": "2019-10-17",
+// }
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -98,19 +98,6 @@ func InitConfig() {
 		// If we're using a config file
 		targetConfig = *config.GetConfigFromFile(cfgFile)
 	}
-	// Validate the configuration and credentials
-	// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-	// 	log.Fatalln(err)
-	// }
-
-	// Configure the REST client defaults
-	// APIClient.SDKClient.RESTClient = resty.New().
-	// 	SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).
-	// 	SetAuthToken(targetConfig.AccessToken).
-	// 	SetHostURL("https://"+targetConfig.Server).
-	// 	SetHeader("Accept", "application/json").
-	// 	SetHeader("Content-Type", "application/json").
-	// 	SetError(&types.Exception{})
 
 	APIClient.Config = &targetConfig
 	err := auth.ValidateConfiguration(APIClient)

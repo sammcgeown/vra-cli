@@ -71,34 +71,21 @@ vra-cli get workflow --status FAILED --project "Field Demo" --name "Learn Code S
 	},
 }
 
-// // delExecutionCmd represents the workflows command
-// var delExecutionCmd = &cobra.Command{
-// 	Use:   "workflow",
-// 	Short: "Delete an Execution",
-// 	Long: `Delete an Execution with a specific Execution ID
+// delWorkflowCmd represents the delete workflows command
+var delWorkflowCmd = &cobra.Command{
+	Use:   "workflow",
+	Short: "Delete an Workflow",
+	Long:  `Delete an Workflow with a specific Workflow ID`,
+	Run: func(cmd *cobra.Command, args []string) {
 
-// 	`,
-// 	Run: func(cmd *cobra.Command, args []string) {
-// 		if err := auth.GetConnection(&targetConfig, debug); err != nil {
-// 			log.Fatalln(err)
-// 		}
-// 		if id != "" {
-// 			_, err := codestream.DeleteExecution(APIClient, id)
-// 			if err != nil {
-// 				log.Errorln("Unable to delete workflow: ", err)
-// 			} else {
-// 				log.Infoln("Execution with id " + id + " deleted")
-// 			}
-// 		} else if projectName != "" {
-// 			response, err := codestream.DeleteExecutions(APIClient, confirm, projectName, status, name, nested)
-// 			if err != nil {
-// 				log.Errorln("Unable to delete workflows: ", err)
-// 			} else {
-// 				log.Infoln(len(response), "Executions deleted")
-// 			}
-// 		}
-// 	},
-// }
+		_, err := orchestrator.DeleteWorkflow(APIClient, id)
+		if err != nil {
+			log.Errorln("Unable to delete workflow: ", err)
+		} else {
+			log.Infoln("Workflow with ID " + id + " deleted")
+		}
+	},
+}
 
 // createWorkflowCmd represents the workflows command
 var createWorkflowCmd = &cobra.Command{
@@ -106,10 +93,6 @@ var createWorkflowCmd = &cobra.Command{
 	Short: "Create a Workflow",
 	Long:  `Create a Workflow`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
-
 		// Get the category ID
 		var CategoryID string
 		categoryName := (strings.Split(category, "/"))[len(strings.Split(category, "/"))-1]
@@ -138,11 +121,11 @@ var createWorkflowCmd = &cobra.Command{
 			if err != nil {
 				log.Errorln("Unable to import workflow: ", err)
 			} else {
-				workflow, err := orchestrator.GetWorkflow(APIClient, "", name, CategoryID)
+				workflow, err := orchestrator.GetWorkflow(APIClient, "", categoryName, name)
 				if err != nil {
 					log.Errorln("Workflow imported OK, but I'm unable to get imported workflow details: ", err)
 				}
-				log.Infoln("Workflow imported: ", workflow[0].Name, "with ID: ", workflow[0].ID)
+				log.Infoln("Workflow imported:", workflow[0].Name, "with ID:", workflow[0].ID)
 			}
 		}
 
@@ -152,19 +135,16 @@ var createWorkflowCmd = &cobra.Command{
 func init() {
 	// Get
 	getCmd.AddCommand(getWorkflowCmd)
-	getWorkflowCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the workflow")
-	getWorkflowCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the workflows to list")
-	getWorkflowCmd.Flags().StringVarP(&category, "category", "c", "", "Filter workflows by Category")
-	// // Delete
-	// deleteCmd.AddCommand(delExecutionCmd)
-	// delExecutionCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the pipeline to delete workflows for")
-	// delExecutionCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the workflow to delete")
-	// delExecutionCmd.Flags().StringVarP(&status, "status", "s", "", "Delete workflows by status (Completed|Waiting|Pausing|Paused|Resuming|Running)")
-	// delExecutionCmd.Flags().StringVarP(&projectName, "project", "p", "", "Delete workflows by Project")
-	// delExecutionCmd.Flags().BoolVarP(&nested, "nested", "", false, "Delete nested workflows")
+	getWorkflowCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Workflow")
+	getWorkflowCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Workflows to list")
+	getWorkflowCmd.Flags().StringVarP(&category, "category", "c", "", "Filter Workflows by Category")
+	// Delete
+	deleteCmd.AddCommand(delWorkflowCmd)
+	delWorkflowCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Workflow to delete")
+	delWorkflowCmd.MarkFlagRequired("id")
+
 	// Create
 	createCmd.AddCommand(createWorkflowCmd)
 	createWorkflowCmd.Flags().StringVarP(&category, "category", "c", "", "Category to import")
 	createWorkflowCmd.Flags().StringVar(&importPath, "importPath", "", "Path to the zip file, or folder containing zip files, to import")
-	// createWorkflowCmd.Flags().BoolVarP(&force, "force", "", false, "Overwrite existing workflows")
 }

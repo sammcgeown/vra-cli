@@ -5,6 +5,6 @@ SPDX-License-Identifier: BSD-2-Clause
 package orchestrator
 
 var (
-	apiVersion          = "2019-10-17"
+	//apiVersion          = "2019-10-17"
 	expandProjects bool = true
 )

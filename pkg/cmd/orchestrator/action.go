@@ -18,23 +18,23 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// GetWorkflow - returns a list of executions
-func GetWorkflow(APIClient *types.APIClientOptions, id string, category string, name string) ([]*types.WsWorkflow, error) {
+// GetAction - returns a list of executions
+func GetAction(APIClient *types.APIClientOptions, id string, category string, name string) ([]*types.WsAction, error) {
 
-	var Workflows []*types.WsWorkflow
+	var Actions []*types.WsAction
 	if id != "" {
 		queryResponse, err := APIClient.RESTClient.R().
-			SetResult(&types.WsWorkflow{}).
+			SetResult(&types.WsAction{}).
 			SetError(&types.Exception{}).
-			Get("/vco/api/workflows/" + id)
+			Get("/vco/api/actions/" + id)
 		if err != nil {
 			return nil, err
 		}
-		Workflows = append(Workflows, queryResponse.Result().(*types.WsWorkflow))
-		return Workflows, nil
+		Actions = append(Actions, queryResponse.Result().(*types.WsAction))
+		return Actions, nil
 	}
 
-	// Configure query string
+	// If no ID is specified, use the category and name to find the action
 	var conditions []string
 	if name != "" {
 		conditions = append(conditions, "name~"+name)
@@ -48,29 +48,60 @@ func GetWorkflow(APIClient *types.APIClientOptions, id string, category string, 
 	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.InventoryItemsList{}).
 		SetError(&types.Exception{}).
-		Get("/vco/api/workflows")
-
-	log.Debugln("Query", queryResponse.Request.URL)
+		Get("/vco/api/catalog/System/Action")
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
+	APIClient.RESTClient.QueryParam.Del("conditions")
 
 	for _, value := range queryResponse.Result().(*types.InventoryItemsList).Link {
 		for _, attribute := range value.Attributes {
 			if attribute.Name == "id" {
-
-				Workflow, _ := GetWorkflow(APIClient, attribute.Value, "", "")
-				Workflows = append(Workflows, Workflow...)
+				Action, _ := GetAction(APIClient, attribute.Value, "", "")
+				Actions = append(Actions, Action...)
 			}
 
 		}
 	}
-	return Workflows, err
+
+	// Configure query string
+	// var conditions []string
+	// if name != "" {
+	// 	conditions = append(conditions, "name~"+name)
+	// }
+	// if category != "" {
+	// 	conditions = append(conditions, "categoryName~"+url.QueryEscape(category))
+	// }
+	// APIClient.RESTClient.QueryParam.Set("conditions", strings.Join(conditions, ","))
+	// log.Debugln("query params:", APIClient.RESTClient.QueryParam)
+
+	// queryResponse, err := APIClient.RESTClient.R().
+	// 	SetResult(&types.InventoryItemsList{}).
+	// 	SetError(&types.Exception{}).
+	// 	Get("/vco/api/actions")
+
+	// log.Debugln("Query", queryResponse.Request.URL)
+
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// for _, value := range queryResponse.Result().(*types.InventoryItemsList).Link {
+	// 	for _, attribute := range value.Attributes {
+	// 		if attribute.Name == "id" {
+
+	// 			Action, _ := GetAction(APIClient, attribute.Value, "", "")
+	// 			Actions = append(Actions, Action...)
+	// 		}
+
+	// 	}
+	// }
+	return Actions, err
 }
 
-// ExportWorkflow - exports a workflow
-func ExportWorkflow(APIClient *types.APIClientOptions, id string, name string, path string) error {
+// ExportAction - exports a workflow
+func ExportAction(APIClient *types.APIClientOptions, id string, name string, path string) error {
 	log.Debugln("ID:", id, "Name:", name, "Path:", path)
 	var exportPath string
 	if path != "" {
@@ -95,8 +126,8 @@ func ExportWorkflow(APIClient *types.APIClientOptions, id string, name string, p
 	return nil
 }
 
-// ImportWorkflow - imports a workflow
-func ImportWorkflow(APIClient *types.APIClientOptions, path string, categoryID string) error {
+// ImportAction - imports a workflow
+func ImportAction(APIClient *types.APIClientOptions, path string, categoryID string) error {
 	log.Debugln("Path:", path, "CategoryID:", categoryID, "Overwrite:", APIClient.Force)
 	zipFileBytes, _ := ioutil.ReadFile(path)
 	APIClient.RESTClient.QueryParam.Set("categoryId", categoryID)
@@ -116,8 +147,8 @@ func ImportWorkflow(APIClient *types.APIClientOptions, path string, categoryID s
 	return nil
 }
 
-// DeleteWorkflow - deletes an Workflow by ID
-func DeleteWorkflow(APIClient *types.APIClientOptions, id string) (bool, error) {
+// DeleteAction - deletes an Action by ID
+func DeleteAction(APIClient *types.APIClientOptions, id string) (bool, error) {
 	APIClient.RESTClient.QueryParam.Set("force", strconv.FormatBool(APIClient.Force))
 	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.Executions{}).
