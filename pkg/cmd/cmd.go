@@ -24,20 +24,7 @@ var (
 	date         = "unknown"
 	builtBy      = "unknown"
 	// APIClient - API Client Options
-	APIClient = &types.APIClientOptions{
-		Version: "2019-10-17",
-	}
-	// apiVersion   = "2019-10-17"
-	// restClient   *resty.Client
-	// apiClient    *client.MulticloudIaaS
-	// Global Flags
-	debug      bool
-	ignoreCert bool
-	confirm    bool
-	output     string = "table"
-	// API Paging
-	count int
-	skip  int
+	APIClient = &types.APIClientOptions{}
 	// Command Flags
 	id          string
 	name        string
@@ -50,7 +37,7 @@ var (
 	exportPath  string
 	importPath  string
 	category    string
-	force       bool
+	// force       bool
 )
 
 var qParams = map[string]string{
@@ -75,12 +62,14 @@ func init() {
 	cobra.OnInitialize(InitConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.vra-cli.yaml)")
 	rootCmd.PersistentFlags().BoolVar(&APIClient.Debug, "debug", false, "Enable debug logging")
-	rootCmd.PersistentFlags().BoolVar(&confirm, "confirm", false, "Confirm action without prompting for confirmation")
+	rootCmd.PersistentFlags().BoolVar(&APIClient.Confirm, "confirm", false, "Confirm action without prompting for confirmation")
+	rootCmd.PersistentFlags().BoolVar(&APIClient.Force, "force", false, "Force action")
 	rootCmd.PersistentFlags().BoolVar(&APIClient.VerifySSL, "ignoreCertificateWarnings", false, "Disable HTTPS Certificate Validation")
-	rootCmd.PersistentFlags().StringVarP(&output, "out", "o", "table", "Output - default is table, can be json")
+	rootCmd.PersistentFlags().StringVarP(&APIClient.Output, "out", "o", "table", "Output - default is table, can be json")
+	rootCmd.PersistentFlags().StringVarP(&APIClient.Version, "version", "v", "2019-10-17", "API Version")
 	// API Paging
-	rootCmd.PersistentFlags().IntVar(&count, "count", 100, "API Paging - Count")
-	rootCmd.PersistentFlags().IntVar(&skip, "skip", 0, "API Paging - Skip")
+	rootCmd.PersistentFlags().IntVar(&APIClient.Pagination.PageSize, "count", 100, "API Paging - Count")
+	rootCmd.PersistentFlags().IntVar(&APIClient.Pagination.Skip, "skip", 0, "API Paging - Skip")
 
 	rootCmd.AddCommand(getCmd)
 	rootCmd.AddCommand(updateCmd)

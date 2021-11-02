@@ -59,6 +59,7 @@ func GetWorkflow(APIClient *types.APIClientOptions, id string, category string, 
 	for _, value := range queryResponse.Result().(*types.InventoryItemsList).Link {
 		for _, attribute := range value.Attributes {
 			if attribute.Name == "id" {
+
 				Workflow, _ := GetWorkflow(APIClient, attribute.Value, "", "")
 				Workflows = append(Workflows, Workflow...)
 			}
@@ -95,11 +96,11 @@ func ExportWorkflow(APIClient *types.APIClientOptions, id string, name string, p
 }
 
 // ImportWorkflow - imports a workflow
-func ImportWorkflow(APIClient *types.APIClientOptions, path string, categoryID string, overwrite bool) error {
-	log.Debugln("Path:", path, "CategoryID:", categoryID, "Overwrite:", overwrite)
+func ImportWorkflow(APIClient *types.APIClientOptions, path string, categoryID string) error {
+	log.Debugln("Path:", path, "CategoryID:", categoryID, "Overwrite:", APIClient.Force)
 	zipFileBytes, _ := ioutil.ReadFile(path)
 	APIClient.RESTClient.QueryParam.Set("categoryId", categoryID)
-	APIClient.RESTClient.QueryParam.Set("overwrite", strconv.FormatBool(overwrite))
+	APIClient.RESTClient.QueryParam.Set("overwrite", strconv.FormatBool(APIClient.Force))
 	queryResponse, err := APIClient.RESTClient.R().
 		SetFileReader("file", "upload.zip", bytes.NewReader(zipFileBytes)).
 		Post("/vco/api/workflows")
@@ -111,19 +112,23 @@ func ImportWorkflow(APIClient *types.APIClientOptions, path string, categoryID s
 	return nil
 }
 
-// // DeleteExecution - deletes an execution by ID
-// func DeleteExecution(APIClient *types.APIClientOptions, id string) (bool, error) {
-// 	queryResponse, err := APIClient.RESTClient.R().
-// 		SetResult(&types.Executions{}).
-// 		SetError(&types.Exception{}).
-// 		Delete("/pipeline/api/executions/" + id)
+// DeleteWorkflow - deletes an Workflow by ID
+func DeleteWorkflow(APIClient *types.APIClientOptions, id string, force bool) (bool, error) {
+	APIClient.RESTClient.QueryParam.Set("force", strconv.FormatBool(force))
+	queryResponse, err := APIClient.RESTClient.R().
+		SetResult(&types.Executions{}).
+		SetError(&types.Exception{}).
+		Delete("/vco/api/workflows" + id)
 
-// 	if err != nil {
-// 		return false, errors.New(queryResponse.Error().(*types.Exception).Message)
-// 	}
+	if err != nil {
+		return false, err
+	}
+	if queryResponse.IsError() {
+		return false, errors.New(queryResponse.Error().(*types.Exception).Message)
+	}
 
-// 	return true, err
-// }
+	return true, err
+}
 
 // // DeleteExecutions - deletes an execution by project, status, or pipeline name
 // func DeleteExecutions(APIClient *types.APIClientOptions, confirm bool, project string, status string, name string, nested bool) ([]*types.Executions, error) {

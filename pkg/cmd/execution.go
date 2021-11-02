@@ -80,7 +80,7 @@ var delExecutionCmd = &cobra.Command{
 				log.Infoln("Execution with id " + id + " deleted")
 			}
 		} else if projectName != "" {
-			response, err := codestream.DeleteExecutions(APIClient, confirm, projectName, status, name, nested)
+			response, err := codestream.DeleteExecutions(APIClient, projectName, status, name, nested)
 			if err != nil {
 				log.Errorln("Unable to delete executions: ", err)
 			} else {

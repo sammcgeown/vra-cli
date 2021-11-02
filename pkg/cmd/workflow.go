@@ -43,7 +43,7 @@ vra-cli get workflow --status FAILED --project "Field Demo" --name "Learn Code S
 			// No results
 			log.Infoln("No results found")
 		} else {
-			if output == "table" {
+			if APIClient.Output == "table" {
 				// Print result table
 				table := tablewriter.NewWriter(os.Stdout)
 				table.SetHeader([]string{"Id", "Name", "Version", "Description", "Category"})
@@ -52,7 +52,7 @@ vra-cli get workflow --status FAILED --project "Field Demo" --name "Learn Code S
 					table.Append([]string{c.ID, c.Name, c.Version, c.Description, category.Path})
 				}
 				table.Render()
-			} else if output == "export" {
+			} else if APIClient.Output == "export" {
 				// Export the Worfklow
 				for _, workflow := range response {
 					err := orchestrator.ExportWorkflow(APIClient, workflow.ID, workflow.Name, category)
@@ -134,7 +134,7 @@ var createWorkflowCmd = &cobra.Command{
 		}
 		for _, path := range helpers.GetFilePaths(importPath, ".zip") {
 			log.Infoln("Importing workflow:", path)
-			err := orchestrator.ImportWorkflow(APIClient, path, CategoryID, force)
+			err := orchestrator.ImportWorkflow(APIClient, path, CategoryID)
 			if err != nil {
 				log.Errorln("Unable to import workflow: ", err)
 			} else {
@@ -166,5 +166,5 @@ func init() {
 	createCmd.AddCommand(createWorkflowCmd)
 	createWorkflowCmd.Flags().StringVarP(&category, "category", "c", "", "Category to import")
 	createWorkflowCmd.Flags().StringVar(&importPath, "importPath", "", "Path to the zip file, or folder containing zip files, to import")
-	createWorkflowCmd.Flags().BoolVarP(&force, "force", "", false, "Overwrite existing workflows")
+	// createWorkflowCmd.Flags().BoolVarP(&force, "force", "", false, "Overwrite existing workflows")
 }

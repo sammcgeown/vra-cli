@@ -48,7 +48,7 @@ var getCategoryCmd = &cobra.Command{
 			// No results
 			log.Infoln("No results found")
 		} else {
-			if output == "table" {
+			if APIClient.Output == "table" {
 				// Print result table
 				table := tablewriter.NewWriter(os.Stdout)
 				table.SetHeader([]string{"Id", "Name", "Type", "Category Path"})
@@ -56,7 +56,7 @@ var getCategoryCmd = &cobra.Command{
 					table.Append([]string{c.ID, c.Name, c.Type, c.Path})
 				}
 				table.Render()
-			} else if output == "export" {
+			} else if APIClient.Output == "export" {
 				// Export the Worfklow
 				// for _, workflow := range categories {
 				// 	// err := orchestrator.ExportWorkflow(APIClient, workflow.ID, workflow.Name, category)
@@ -90,8 +90,7 @@ var delCategoryCmd = &cobra.Command{
 		}
 
 		if id != "" {
-
-			err := orchestrator.DeleteCategory(APIClient, id, force)
+			err := orchestrator.DeleteCategory(APIClient, id)
 			if err != nil {
 				log.Errorln("Unable to delete Category: ", err)
 			} else {
@@ -113,12 +112,12 @@ var createCategoryCmd = &cobra.Command{
 		if err != nil {
 			log.Errorln("Unable to create category: ", err)
 		}
-		if output == "table" {
+		if APIClient.Output == "table" {
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Id", "Name", "Type", "Category Path"})
 			table.Append([]string{newCategory.ID, newCategory.Name, newCategory.Type, newCategory.Path})
 			table.Render()
-		} else if output == "json" {
+		} else if APIClient.Output == "json" {
 			helpers.PrettyPrint(newCategory)
 		} else {
 			helpers.PrettyPrint(newCategory)
@@ -136,12 +135,12 @@ var updateCategoryCmd = &cobra.Command{
 		if err != nil {
 			log.Errorln("Unable to update Category: ", err)
 		} else {
-			if output == "table" {
+			if APIClient.Output == "table" {
 				table := tablewriter.NewWriter(os.Stdout)
 				table.SetHeader([]string{"Id", "Name", "Type", "Category Path"})
 				table.Append([]string{updatedCategory.ID, updatedCategory.Name, updatedCategory.Type, updatedCategory.Path})
 				table.Render()
-			} else if output == "json" {
+			} else if APIClient.Output == "json" {
 				helpers.PrettyPrint(updatedCategory)
 			} else {
 				helpers.PrettyPrint(updatedCategory)

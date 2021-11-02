@@ -149,7 +149,7 @@ vra-cli delete variable --project "My Project"
 				log.Infoln("Variable " + id + " deleted")
 			}
 		} else if projectName != "" {
-			response, err := codestream.DeleteVariableByProject(APIClient, confirm, projectName)
+			response, err := codestream.DeleteVariableByProject(APIClient, projectName)
 			if err != nil {
 				log.Errorln("Delete Variables in "+projectName+" failed:", err)
 			} else {

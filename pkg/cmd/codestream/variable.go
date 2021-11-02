@@ -137,7 +137,7 @@ func DeleteVariable(APIClient *types.APIClientOptions, id string) (bool, error) 
 }
 
 // DeleteVariableByProject - Delete all Variables in a Project
-func DeleteVariableByProject(APIClient *types.APIClientOptions, confirm bool, project string) ([]*types.VariableResponse, error) {
+func DeleteVariableByProject(APIClient *types.APIClientOptions, project string) ([]*types.VariableResponse, error) {
 	var deletedVariables []*types.VariableResponse
 	Variables, err := GetVariable(APIClient, "", "", project, "")
 	if err != nil {
@@ -147,10 +147,10 @@ func DeleteVariableByProject(APIClient *types.APIClientOptions, confirm bool, pr
 		log.Infoln("No variables found for project:", project)
 		return deletedVariables, nil
 	}
-	if !confirm {
-		confirm = helpers.AskForConfirmation("This will attempt to delete " + fmt.Sprint(len(Variables)) + " variables in " + project + ", are you sure?")
+	if !APIClient.Confirm {
+		APIClient.Confirm = helpers.AskForConfirmation("This will attempt to delete " + fmt.Sprint(len(Variables)) + " variables in " + project + ", are you sure?")
 	}
-	if confirm {
+	if APIClient.Confirm {
 		for _, Variable := range Variables {
 			_, err := DeleteVariable(APIClient, Variable.ID)
 			if err != nil {

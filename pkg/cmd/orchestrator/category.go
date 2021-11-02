@@ -44,6 +44,7 @@ func GetCategoryByName(APIClient *types.APIClientOptions, categoryName string, c
 	if err != nil {
 		return nil, err
 	}
+	APIClient.RESTClient.QueryParam.Del("conditions")
 
 	for _, value := range queryResponse.Result().(*types.InventoryItemsList).Link {
 		for _, attribute := range value.Attributes {
@@ -54,7 +55,6 @@ func GetCategoryByName(APIClient *types.APIClientOptions, categoryName string, c
 
 		}
 	}
-	APIClient.RESTClient.QueryParam.Del("conditions")
 
 	return Categories, nil
 }
@@ -162,8 +162,8 @@ func UpdateCategory(APIClient *types.APIClientOptions, categoryID string, catego
 }
 
 // DeleteCategory - deletes a category
-func DeleteCategory(APIClient *types.APIClientOptions, categoryID string, force bool) error {
-	if force {
+func DeleteCategory(APIClient *types.APIClientOptions, categoryID string) error {
+	if APIClient.Force {
 		APIClient.RESTClient.QueryParam.Set("deleteNonEmptyContent", "true")
 	}
 	queryResponse, err := APIClient.RESTClient.R().

@@ -85,16 +85,16 @@ func DeleteExecution(APIClient *types.APIClientOptions, id string) (bool, error)
 }
 
 // DeleteExecutions - deletes an execution by project, status, or pipeline name
-func DeleteExecutions(APIClient *types.APIClientOptions, confirm bool, project string, status string, name string, nested bool) ([]*types.Executions, error) {
+func DeleteExecutions(APIClient *types.APIClientOptions, project string, status string, name string, nested bool) ([]*types.Executions, error) {
 	var deletedExecutions []*types.Executions
 	Executions, err := GetExecution(APIClient, "", project, status, name, nested)
 	if err != nil {
 		return nil, err
 	}
-	if !confirm {
-		confirm = helpers.AskForConfirmation("This will attempt to delete " + fmt.Sprint(len(Executions)) + " Executions in " + project + ", are you sure?")
+	if !APIClient.Confirm {
+		APIClient.Confirm = helpers.AskForConfirmation("This will attempt to delete " + fmt.Sprint(len(Executions)) + " Executions in " + project + ", are you sure?")
 	}
-	if confirm {
+	if APIClient.Confirm {
 		for _, Execution := range Executions {
 			_, err := DeleteExecution(APIClient, Execution.ID)
 			if err != nil {

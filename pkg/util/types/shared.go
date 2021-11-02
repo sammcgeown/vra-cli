@@ -25,13 +25,17 @@ type APIClientOptions struct {
 	Version    string
 	Debug      bool
 	VerifySSL  bool
+	Confirm    bool
+	Force      bool
 	RESTClient *resty.Client
 	SDKClient  *client.MulticloudIaaS
 	Pagination struct {
 		PageSize int
 		Page     int
+		Skip     int
 	}
 	Config *Config
+	Output string
 }
 
 // Exception - Generic exception struct

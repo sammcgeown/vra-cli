@@ -70,7 +70,8 @@ func CleanUp() {
 	// Delete Variables
 	variables, _ := GetVariable(APIClient, "", "", project.Name, "")
 	if len(variables) > 0 {
-		_, vErr := DeleteVariableByProject(APIClient, true, project.Name)
+		APIClient.Confirm = true
+		_, vErr := DeleteVariableByProject(APIClient, project.Name)
 		if vErr != nil {
 			log.Warnln(vErr)
 		}
@@ -174,7 +175,8 @@ func TestDeleteVariable(t *testing.T) {
 
 func TestDeleteVariableByProject(t *testing.T) {
 	log.Debugln("Deleting Variables in", project.Name)
-	deletedVariables, vErr := DeleteVariableByProject(APIClient, true, project.Name)
+	APIClient.Confirm = true
+	deletedVariables, vErr := DeleteVariableByProject(APIClient, project.Name)
 	if vErr != nil {
 		log.Warnln(vErr)
 	}
