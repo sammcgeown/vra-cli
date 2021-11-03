@@ -5,7 +5,7 @@
 
 |                | Get | Create | Update | Delete | Import | Export | Testing |
 |----------------|-----|--------|--------|--------|--------|--------|---------|
-| Cloud Account  | - [x] | - [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
+| Cloud Account  | <ul><li>- [x]</li><li>- | - [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
 | Cloud Template | [x] | [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
 | Data Collector |     | [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
 | Deployment     |     | [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
