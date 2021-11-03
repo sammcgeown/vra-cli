@@ -1,52 +1,25 @@
 
-# Object and Command Coverage
+# Object, Command and Test Coverage
 
-* Cloud Assembly
-  * Cloud Account
+## Cloud Assembly
 
 |                | Get | Create | Update | Delete | Import | Export | Testing |
 |----------------|-----|--------|--------|--------|--------|--------|---------|
-| Cloud Template |     |        |        |        |        |        |         |
-| Data Collector |     |        |        |        |        |        |         |
-| Deployment     |     |        |        |        |        |        |         |
-| Project        |     |        |        |        |        |        |         |
+| Cloud Account  | [x] | [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
+| Cloud Template | [x] | [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
+| Data Collector |     | [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
+| Deployment     |     | [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
+| Project        |     | [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
 
-* Code Stream
-  * Endpoint
-    - [ ] Create
-    - [ ] Get
-    - [ ] Update
-    - [ ] Delete
-    - [ ] Export
-    - [ ] Import
-  * Variable
-    - [ ] Create
-    - [ ] Get
-    - [ ] Update
-    - [ ] Delete
-    - [ ] Export
-    - [ ] Import
-  * Pipeline
-    - [ ] Create
-    - [ ] Get
-    - [ ] Update
-    - [ ] Delete
-    - [ ] Export
-    - [ ] Import
-  * Execution
-    - [ ] Create
-    - [ ] Get
-    - [ ] Update
-    - [ ] Delete
-    - [ ] Export
-    - [ ] Import
-  * Custom Integration
-    - [ ] Create
-    - [ ] Get
-    - [ ] Update
-    - [ ] Delete
-    - [ ] Export
-    - [ ] Import
+## Code Stream
 
-* Service Broker
-* Orchestrator
+|                    | Get | Create | Update | Delete | Import | Export | Testing |
+|--------------------|-----|--------|--------|--------|--------|--------|---------|
+| Endpoint           |     |        |        |        |        |        |         |
+| Variable           |     |        |        |        |        |        |         |
+| Pipeline           |     |        |        |        |        |        |         |
+| Execution          |     |        |        |        |        |        |         |
+| Custom Integration |     |        |        |        |        |        |         |
+
+##Service Broker
+##Orchestrator
