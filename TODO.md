@@ -3,12 +3,11 @@
 
 * Cloud Assembly
   * Cloud Account
-    - [x] Create
-    - [ ] Get
-    - [ ] Update
-    - [ ] Delete
-    - [ ] Export
-    - [ ] Import
+        |          | Get | Create | Update | Delete | Import | Export |
+        |----------|-----|--------|--------|--------|--------|--------|
+        | Function |     |        |        |        |        |        |
+        | CLI      |     |        |        |        |        |        |
+        | Tests    |     |        |        |        |        |        |
   * Cloud Template
     - [ ] Create
     - [ ] Get
