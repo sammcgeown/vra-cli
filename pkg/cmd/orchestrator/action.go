@@ -64,43 +64,10 @@ func GetAction(APIClient *types.APIClientOptions, id string, category string, na
 
 		}
 	}
-
-	// Configure query string
-	// var conditions []string
-	// if name != "" {
-	// 	conditions = append(conditions, "name~"+name)
-	// }
-	// if category != "" {
-	// 	conditions = append(conditions, "categoryName~"+url.QueryEscape(category))
-	// }
-	// APIClient.RESTClient.QueryParam.Set("conditions", strings.Join(conditions, ","))
-	// log.Debugln("query params:", APIClient.RESTClient.QueryParam)
-
-	// queryResponse, err := APIClient.RESTClient.R().
-	// 	SetResult(&types.InventoryItemsList{}).
-	// 	SetError(&types.Exception{}).
-	// 	Get("/vco/api/actions")
-
-	// log.Debugln("Query", queryResponse.Request.URL)
-
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// for _, value := range queryResponse.Result().(*types.InventoryItemsList).Link {
-	// 	for _, attribute := range value.Attributes {
-	// 		if attribute.Name == "id" {
-
-	// 			Action, _ := GetAction(APIClient, attribute.Value, "", "")
-	// 			Actions = append(Actions, Action...)
-	// 		}
-
-	// 	}
-	// }
 	return Actions, err
 }
 
-// ExportAction - exports a workflow
+// ExportAction - exports a action
 func ExportAction(APIClient *types.APIClientOptions, id string, name string, path string) error {
 	log.Debugln("ID:", id, "Name:", name, "Path:", path)
 	var exportPath string
@@ -112,9 +79,9 @@ func ExportAction(APIClient *types.APIClientOptions, id string, name string, pat
 
 	queryResponse, err := APIClient.RESTClient.R().
 		SetError(&types.Exception{}).
-		SetOutput(filepath.Join(exportPath, name+".zip")).
+		SetOutput(filepath.Join(exportPath, name+".action")).
 		SetHeader("Accept", "application/zip").
-		Get("/vco/api/workflows/" + id)
+		Get("/vco/api/actions/" + id)
 
 	if err != nil {
 		return err
@@ -126,17 +93,17 @@ func ExportAction(APIClient *types.APIClientOptions, id string, name string, pat
 	return nil
 }
 
-// ImportAction - imports a workflow
-func ImportAction(APIClient *types.APIClientOptions, path string, categoryID string) error {
-	log.Debugln("Path:", path, "CategoryID:", categoryID, "Overwrite:", APIClient.Force)
+// ImportAction - imports a action
+func ImportAction(APIClient *types.APIClientOptions, path string, categoryName string) error {
+	log.Debugln("Path:", path, "categoryName:", categoryName, "Overwrite:", APIClient.Force)
 	zipFileBytes, _ := ioutil.ReadFile(path)
-	APIClient.RESTClient.QueryParam.Set("categoryId", categoryID)
+	APIClient.RESTClient.QueryParam.Set("categoryName", categoryName)
 	APIClient.RESTClient.QueryParam.Set("overwrite", strconv.FormatBool(APIClient.Force))
 	queryResponse, err := APIClient.RESTClient.R().
 		SetError(&types.Exception{}).
 		SetFileReader("file", "upload.zip", bytes.NewReader(zipFileBytes)).
-		Post("/vco/api/workflows")
-	APIClient.RESTClient.QueryParam.Del("categoryId")
+		Post("/vco/api/actions")
+	APIClient.RESTClient.QueryParam.Del("categoryName")
 	APIClient.RESTClient.QueryParam.Del("overwrite")
 	if err != nil {
 		return errors.New(queryResponse.Error().(*types.Exception).Message)
@@ -153,7 +120,7 @@ func DeleteAction(APIClient *types.APIClientOptions, id string) (bool, error) {
 	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.Executions{}).
 		SetError(&types.Exception{}).
-		Delete("/vco/api/workflows/" + id)
+		Delete("/vco/api/actions/" + id)
 
 	if queryResponse.IsError() {
 		return false, errors.New(queryResponse.Error().(*types.Exception).Message)

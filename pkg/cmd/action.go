@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"os"
-	"strings"
 
 	"github.com/sammcgeown/vra-cli/pkg/cmd/orchestrator"
 
@@ -52,7 +51,7 @@ vra-cli get action --id bb3f6aff-311a-45fe-8081-5845a529068d`,
 			} else if APIClient.Output == "export" {
 				// Export the Worfklow
 				for _, action := range response {
-					err := orchestrator.ExportAction(APIClient, action.ID, action.Name, category)
+					err := orchestrator.ExportAction(APIClient, action.ID, action.Name, exportPath)
 					if err != nil {
 						log.Warnln("Unable to export action: ", err)
 					} else {
@@ -90,35 +89,13 @@ var createActionCmd = &cobra.Command{
 	Short: "Create a Action",
 	Long:  `Create a Action`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Get the category ID
-		var CategoryID string
-		categoryName := (strings.Split(category, "/"))[len(strings.Split(category, "/"))-1]
-		categories, _ := orchestrator.GetCategoryByName(APIClient, categoryName, "ActionCategory")
-		if len(categories) == 0 {
-			log.Fatalln("Unable to find category:", categoryName)
-		} else if len(categories) == 1 {
-			// Only one category found
-			log.Debugln("Category found:", categories[0].Name, categories[0].ID)
-			CategoryID = categories[0].ID
-		} else {
-			for _, matchedCategory := range categories {
-				if matchedCategory.Path == category {
-					log.Debugln("Category ID:", matchedCategory.ID)
-					CategoryID = matchedCategory.ID
-					break
-				}
-			}
-			if CategoryID == "" {
-				log.Fatalln("Multiple categories found, try using a more specific category - e.g.: path/to/category")
-			}
-		}
-		for _, path := range helpers.GetFilePaths(importPath, ".zip") {
+		for _, path := range helpers.GetFilePaths(importPath, ".action") {
 			log.Infoln("Importing action:", path)
-			err := orchestrator.ImportAction(APIClient, path, CategoryID)
+			err := orchestrator.ImportAction(APIClient, path, category)
 			if err != nil {
 				log.Errorln("Unable to import action: ", err)
 			} else {
-				action, err := orchestrator.GetAction(APIClient, "", categoryName, name)
+				action, err := orchestrator.GetAction(APIClient, "", category, name)
 				if err != nil {
 					log.Errorln("Action imported OK, but I'm unable to get imported action details: ", err)
 				}
@@ -135,6 +112,8 @@ func init() {
 	getActionCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Action")
 	getActionCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Actions to list")
 	getActionCmd.Flags().StringVarP(&category, "category", "c", "", "Filter Actions by Category")
+	getActionCmd.Flags().StringVar(&exportPath, "exportPath", "", "Path to export the file")
+
 	// Delete
 	deleteCmd.AddCommand(delActionCmd)
 	delActionCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Action to delete")
