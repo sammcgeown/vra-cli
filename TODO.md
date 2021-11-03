@@ -5,8 +5,8 @@
 
 |                | Get | Create | Update | Delete | Import | Export | Testing |
 |----------------|-----|--------|--------|--------|--------|--------|---------|
-| Cloud Account  | <ul><li>- [x]</li></ul> | - [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
-| Cloud Template | [x] | [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
+| Cloud Account  | :white_check_mark: | - [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
+| Cloud Template | :white_check_mark: | [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
 | Data Collector |     | [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
 | Deployment     |     | [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
 | Project        |     | [ ]    | [ ]    | [ ]    | [ ]    | [ ]    | [ ]     |
@@ -21,5 +21,5 @@
 | Execution          |     |        |        |        |        |        |         |
 | Custom Integration |     |        |        |        |        |        |         |
 
-##Service Broker
-##Orchestrator
+## Service Broker
+## Orchestrator
