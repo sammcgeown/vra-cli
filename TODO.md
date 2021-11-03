@@ -3,39 +3,13 @@
 
 * Cloud Assembly
   * Cloud Account
-        |          | Get | Create | Update | Delete | Import | Export |
-        |----------|-----|--------|--------|--------|--------|--------|
-        | Function |     |        |        |        |        |        |
-        | CLI      |     |        |        |        |        |        |
-        | Tests    |     |        |        |        |        |        |
-  * Cloud Template
-    - [ ] Create
-    - [ ] Get
-    - [ ] Update
-    - [ ] Delete
-    - [ ] Export
-    - [ ] Import
-  * Data Collector
-    - [ ] Create
-    - [ ] Get
-    - [ ] Update
-    - [ ] Delete
-    - [ ] Export
-    - [ ] Import
-  * Deployment
-    - [ ] Create
-    - [ ] Get
-    - [ ] Update
-    - [ ] Delete
-    - [ ] Export
-    - [ ] Import
-  * Project
-    - [ ] Create
-    - [ ] Get
-    - [ ] Update
-    - [ ] Delete
-    - [ ] Export
-    - [ ] Import
+|                | Get | Create | Update | Delete | Import | Export | Testing |
+|----------------|-----|--------|--------|--------|--------|--------|---------|
+| Cloud Template |     |        |        |        |        |        |         |
+| Data Collector |     |        |        |        |        |        |         |
+| Deployment     |     |        |        |        |        |        |         |
+| Project        |     |        |        |        |        |        |         |
+
 * Code Stream
   * Endpoint
     - [ ] Create
