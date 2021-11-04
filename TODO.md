@@ -17,7 +17,7 @@
 | Cloud Template   |:white_check_mark:|:white_check_mark:|                  |:white_check_mark:|                  |                  |                  |
 | Data Collector*  |:white_check_mark:|                  |                  |                  |                  |                  |                  |
 | Deployment       |:white_check_mark:|                  |                  |:white_check_mark:|                  |                  |                  |
-| Project          |                  |                  |                  |                  |                  |                  |                  |
+| Project          |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |                  |                  |
 | Property Groups  |                  |                  |                  |                  |                  |                  |                  |
 | Custom Resources |                  |                  |                  |                  |                  |                  |                  |
 | Resource Actions |                  |                  |                  |                  |                  |                  |                  |
@@ -25,9 +25,9 @@
 * vRA Cloud Only
 ## Code Stream
 
-|                    | Get | Create | Update | Delete | Import | Export | Testing |
-|--------------------|-----|--------|--------|--------|--------|--------|---------|
-| Endpoint           |                  |                  |                  |                  |                  |                  |                  |
+|                    | Get              | Create           | Update           | Delete           | Import           | Export           | Testing          |
+|--------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|
+| Endpoint           |:white_check_mark:|                  |                  |:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |
 | Variable           |                  |                  |                  |                  |                  |                  |                  |
 | Pipeline           |                  |                  |                  |                  |                  |                  |                  |
 | Execution          |                  |                  |                  |                  |                  |                  |                  |
@@ -37,7 +37,7 @@
 
 |                    | Get | Create | Update | Delete | Import | Export | Testing |
 |--------------------|-----|--------|--------|--------|--------|--------|---------|
-| Catalog Item |                  |                  |                  |                  |                  |                  |                  |
+| Catalog Item       |                  |                  |                  |                  |                  |                  |                  |
 
 ## Orchestrator
 
