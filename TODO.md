@@ -1,43 +1,52 @@
 
 # Object, Command and Test Coverage
 
+## Configuration
+
+<!-- |                  | Get | Create | Update | Delete | Import | Export | Testing |
+|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|
+| Cloud Account    |:white_check_mark:|                  |                  |:white_check_mark:|                  |                  |                  | -->
+
+
+
 ## Cloud Assembly
 
-|                | Get | Create | Update | Delete | Import | Export | Testing |
-|----------------|-----|--------|--------|--------|--------|--------|---------|
-| Cloud Account  | :white_check_mark: |        |        | :white_check_mark: |        |        |         |
-| Cloud Template | :white_check_mark: |:white_check_mark:|        |:white_check_mark:|        |        |         |
-| Data Collector |     |        |        |        |        |        |         |
-| Deployment     |     |        |        |        |        |        |         |
-| Project        |     |        |        |        |        |        |         |
-| Property Groups        |     |        |        |        |        |        |         |
-| Custom Resources        |     |        |        |        |        |        |         |
-| Resource Actions       |     |        |        |        |        |        |         |
+|                  | Get | Create | Update | Delete | Import | Export | Testing |
+|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|
+| Cloud Account    |:white_check_mark:|                  |                  |:white_check_mark:|                  |                  |                  |
+| Cloud Template   |:white_check_mark:|:white_check_mark:|                  |:white_check_mark:|                  |                  |                  |
+| Data Collector*  |:white_check_mark:|                  |                  |                  |                  |                  |                  |
+| Deployment       |:white_check_mark:|                  |                  |                  |                  |                  |                  |
+| Project          |                  |                  |                  |                  |                  |                  |                  |
+| Property Groups  |                  |                  |                  |                  |                  |                  |                  |
+| Custom Resources |                  |                  |                  |                  |                  |                  |                  |
+| Resource Actions |                  |                  |                  |                  |                  |                  |                  |
 
+* vRA Cloud Only
 ## Code Stream
 
 |                    | Get | Create | Update | Delete | Import | Export | Testing |
 |--------------------|-----|--------|--------|--------|--------|--------|---------|
-| Endpoint           |     |        |        |        |        |        |         |
-| Variable           |     |        |        |        |        |        |         |
-| Pipeline           |     |        |        |        |        |        |         |
-| Execution          |     |        |        |        |        |        |         |
-| Custom Integration |     |        |        |        |        |        |         |
+| Endpoint           |                  |                  |                  |                  |                  |                  |                  |
+| Variable           |                  |                  |                  |                  |                  |                  |                  |
+| Pipeline           |                  |                  |                  |                  |                  |                  |                  |
+| Execution          |                  |                  |                  |                  |                  |                  |                  |
+| Custom Integration |                  |                  |                  |                  |                  |                  |                  |
 
 ## Service Broker
 
 |                    | Get | Create | Update | Delete | Import | Export | Testing |
 |--------------------|-----|--------|--------|--------|--------|--------|---------|
-| Catalog Item |     |        |        |        |        |        |         |
+| Catalog Item |                  |                  |                  |                  |                  |                  |                  |
 
 ## Orchestrator
 
 |           | Get | Create | Update | Delete | Import | Export | Testing |
 |-----------|-----|--------|--------|--------|--------|--------|---------|
-| Category  | |        |        |        |        |        |         |
-| Workflow  |  |        |        |        |        |        |         |
-| Action    |  |        |        |        |        |        |         |
-| Package   |  |        |        |        |        |        |         |
+| Category  |                  |                  |                  |                  |                  |                  |                  |
+| Workflow  |                  |                  |                  |                  |                  |                  |                  |
+| Action    |                  |                  |                  |                  |                  |                  |                  |
+| Package   |                  |                  |                  |                  |                  |                  |                  |
 
 
 :no_entry_sign:
