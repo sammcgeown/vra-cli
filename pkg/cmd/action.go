@@ -27,9 +27,6 @@ vra-cli get action
 # Get an action by ID:
 vra-cli get action --id bb3f6aff-311a-45fe-8081-5845a529068d`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 
 		response, err := orchestrator.GetAction(APIClient, id, category, name)
 		if err != nil {

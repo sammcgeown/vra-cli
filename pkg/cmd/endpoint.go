@@ -23,9 +23,6 @@ var getEndpointCmd = &cobra.Command{
 	Short: "Get Endpoint Configurations",
 	Long:  `Get Code Stream Endpoint Configurations`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 
 		response, err := codestream.GetEndpoint(APIClient, id, name, projectName, typename, exportPath)
 		if err != nil {
@@ -63,9 +60,6 @@ var createEndpointCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 
 		if importPath != "" {
 			yamlFilePaths := helpers.GetFilePaths(importPath, "yaml")
@@ -97,9 +91,6 @@ var updateEndpointCmd = &cobra.Command{
 	vra-cli update endpoint --importPath "/Users/sammcgeown/vra-cli/endpoints"
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 
 		if importPath != "" {
 			yamlFilePaths := helpers.GetFilePaths(importPath, ".yaml")
@@ -148,9 +139,6 @@ vra-cli delete endpoint --project "My Project"
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 		if name != "" {
 			response, err := codestream.GetEndpoint(APIClient, id, name, projectName, typename, exportPath)
 			if err != nil {

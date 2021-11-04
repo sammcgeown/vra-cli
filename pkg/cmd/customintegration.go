@@ -30,9 +30,6 @@ Get by Name
 Get by Project
 	vra-cli get customintegration --project production`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 		response, err := codestream.GetCustomIntegration(APIClient, id, name)
 		if err != nil {
 			log.Errorln("Unable to get Code Stream CustomIntegrations: ", err)

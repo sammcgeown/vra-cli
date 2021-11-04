@@ -36,58 +36,56 @@ Get Projects by ID:
 Get Project by Name (case sensitive):
   vra-cli get project --name <project name>`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
-
-		response, err := cloudassembly.GetProject(APIClient, id, projectName)
+		response, err := cloudassembly.GetProject(APIClient, projectName, id)
 		if err != nil {
 			log.Errorln("Unable to get Code Stream Projects: ", err)
 		}
 		var resultCount = len(response)
 		if resultCount == 0 {
 			// No results
-			log.Warnln("No results found")
-		} else if resultCount == 1 {
-			helpers.PrettyPrint(response[0])
+			log.Fatalln("No results found")
+		}
+		if APIClient.Output == "json" {
+			helpers.PrettyPrint(response)
+		} else if APIClient.Output == "export" {
+			// Export the Project
+			// if exportPath != "" {
+			// 	tmpDir, err := ioutil.TempDir(os.TempDir(), "vra-cli-*")
+			// 	if err != nil {
+			// 		log.Fatalln(err)
+			// 	}
+			// 	zipFile := filepath.Join(exportPath, p.Name+".zip")
+			// 	var zipFiles []string
+			// 	log.Debugln(zipFile)
+			// 	pipelines, _ := getPipelines("", "", p.Name, filepath.Join(tmpDir, p.Name, "pipelines"))
+			// 	//pipelineTable.SetHeader([]string{"Id", "Name", "Project", "Description"})
+			// 	for _, c := range pipelines {
+			// 		zipFiles = append(zipFiles, filepath.Join(tmpDir, p.Name, "pipelines", c.Name+".yaml"))
+			// 		//pipelineTable.Append([]string{c.ID, c.Name, c.Project, c.Description})
+			// 	}
+			// 	variables, _ := getVariable("", "", p.Name, filepath.Join(tmpDir, p.Name))
+			// 	//variableTable.SetHeader([]string{"Id", "Name", "Project", "Description"})
+			// 	if len(variables) > 0 {
+			// 		zipFiles = append(zipFiles, filepath.Join(tmpDir, p.Name, "variables.yaml"))
+			// 	}
+			// 	// for _, c := range variables {
+			// 	// 	//variableTable.Append([]string{c.ID, c.Name, c.Project, c.Description})
+			// 	// }
+			// 	endpoints, _ := getEndpoint("", "", p.Name, "", filepath.Join(tmpDir, p.Name, "endpoints"))
+			// 	//endpointTable.SetHeader([]string{"ID", "Name", "Project", "Type", "Description"})
+			// 	for _, c := range endpoints {
+			// 		zipFiles = append(zipFiles, filepath.Join(tmpDir, p.Name, c.Name+".yaml"))
+			// 		//endpointTable.Append([]string{c.ID, c.Name, c.Project, c.Type, c.Description})
+			// 	}
+			// 	if err := ZipFiles(zipFile, zipFiles, tmpDir); err != nil {
+			// 		log.Fatalln(err)
+			// 	}
+			// }
 		} else {
-
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Id", "Name", "Description"})
 			for _, p := range response {
 				table.Append([]string{*p.ID, p.Name, p.Description})
-				// if exportPath != "" {
-				// 	tmpDir, err := ioutil.TempDir(os.TempDir(), "vra-cli-*")
-				// 	if err != nil {
-				// 		log.Fatalln(err)
-				// 	}
-				// 	zipFile := filepath.Join(exportPath, p.Name+".zip")
-				// 	var zipFiles []string
-				// 	log.Debugln(zipFile)
-				// 	pipelines, _ := getPipelines("", "", p.Name, filepath.Join(tmpDir, p.Name, "pipelines"))
-				// 	//pipelineTable.SetHeader([]string{"Id", "Name", "Project", "Description"})
-				// 	for _, c := range pipelines {
-				// 		zipFiles = append(zipFiles, filepath.Join(tmpDir, p.Name, "pipelines", c.Name+".yaml"))
-				// 		//pipelineTable.Append([]string{c.ID, c.Name, c.Project, c.Description})
-				// 	}
-				// 	variables, _ := getVariable("", "", p.Name, filepath.Join(tmpDir, p.Name))
-				// 	//variableTable.SetHeader([]string{"Id", "Name", "Project", "Description"})
-				// 	if len(variables) > 0 {
-				// 		zipFiles = append(zipFiles, filepath.Join(tmpDir, p.Name, "variables.yaml"))
-				// 	}
-				// 	// for _, c := range variables {
-				// 	// 	//variableTable.Append([]string{c.ID, c.Name, c.Project, c.Description})
-				// 	// }
-				// 	endpoints, _ := getEndpoint("", "", p.Name, "", filepath.Join(tmpDir, p.Name, "endpoints"))
-				// 	//endpointTable.SetHeader([]string{"ID", "Name", "Project", "Type", "Description"})
-				// 	for _, c := range endpoints {
-				// 		zipFiles = append(zipFiles, filepath.Join(tmpDir, p.Name, c.Name+".yaml"))
-				// 		//endpointTable.Append([]string{c.ID, c.Name, c.Project, c.Type, c.Description})
-				// 	}
-				// 	if err := ZipFiles(zipFile, zipFiles, tmpDir); err != nil {
-				// 		log.Fatalln(err)
-				// 	}
-				// }
 			}
 			table.Render()
 		}
@@ -103,9 +101,6 @@ var createProjectCommand = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 
 		adminUsers := helpers.CreateUserArray(strings.Split(admins, ","))
 		memberUsers := helpers.CreateUserArray(strings.Split(members, ","))
@@ -130,9 +125,6 @@ var updateProjectCommand = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 
 		adminUsers := helpers.CreateUserArray(strings.Split(admins, ","))
 		memberUsers := helpers.CreateUserArray(strings.Split(members, ","))
@@ -157,9 +149,6 @@ var deleteProjectCommand = &cobra.Command{
 Delete by ID:
   vra-cli delete project --id <project ID>`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 		if id != "" {
 			err := cloudassembly.DeleteProject(APIClient, id)
 			if err != nil {

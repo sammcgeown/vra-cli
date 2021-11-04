@@ -21,9 +21,6 @@ var getDeploymentCmd = &cobra.Command{
 	Short: "Get Deployments",
 	Long:  `Get Deployments`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 
 		response, err := cloudassembly.GetDeployments(APIClient, id, name, projectName, status)
 		if err != nil {
@@ -33,14 +30,13 @@ var getDeploymentCmd = &cobra.Command{
 		if resultCount == 0 {
 			// No results
 			log.Warnln("No results found")
-		} else if resultCount == 1 {
-			// Print the single result
-			if exportPath != "" {
-				//variable.ExportVariable(response[0], exportPath)
-			}
-			helpers.PrettyPrint(response[0])
+			return
+		}
+		if APIClient.Output == "json" {
+			helpers.PrettyPrint(response)
+		} else if APIClient.Output == "export" {
+			// ToDo: Export
 		} else {
-			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Id", "Name", "Project", "Description", "Owner", "Status"})
 			for _, c := range response {
@@ -60,9 +56,6 @@ var deleteDeploymentCmd = &cobra.Command{
 Delete a Deployment by ID:
   vra-cli delete deployment --id <Deployment ID>`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 		deployment, err := cloudassembly.GetDeployments(APIClient, id, "", "", "")
 		if err != nil {
 			log.Debug(err) // There was an error getting the Deployment
@@ -76,7 +69,8 @@ Delete a Deployment by ID:
 			log.Fatalln("More than one Deployment matching the request was found")
 		} else {
 			// There was only one Deployment
-			if err := cloudassembly.DeleteDeployment(APIClient, (deployment[0].ID).String()); err != nil {
+			err := cloudassembly.DeleteDeployment(APIClient, (deployment[0].ID).String())
+			if err != nil {
 				log.Fatalln(err) // There was an error deleting the Deployment
 			} else {
 				log.Infoln("Deployment deleted successfully")

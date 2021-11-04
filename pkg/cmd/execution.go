@@ -34,9 +34,6 @@ vra-cli get execution --id bb3f6aff-311a-45fe-8081-5845a529068d
 # Get Failed executions in Project "Field Demo" with the name "Learn Code Stream"
 vra-cli get execution --status FAILED --project "Field Demo" --name "Learn Code Stream"`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 
 		response, err := codestream.GetExecution(APIClient, id, projectName, status, name, nested)
 		if err != nil {
@@ -69,9 +66,6 @@ var delExecutionCmd = &cobra.Command{
 	
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 		if id != "" {
 			_, err := codestream.DeleteExecution(APIClient, id)
 			if err != nil {
@@ -98,9 +92,6 @@ var createExecutionCmd = &cobra.Command{
 	
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 
 		response, err := codestream.CreateExecution(APIClient, id, inputs, comments)
 		if err != nil {

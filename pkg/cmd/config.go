@@ -132,7 +132,7 @@ Examples:
 		viper.SetConfigType("yaml")
 		err := viper.SafeWriteConfig()
 		if err != nil {
-			log.Info(err)
+			log.Debugln(err)
 			viper.WriteConfig()
 		}
 	},

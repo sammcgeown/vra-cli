@@ -49,9 +49,6 @@ Get Cloud Account by Name:
 Get Cloud Accounts by Type:
   vra-cli get cloudaccount --type <cloudaccount-type>`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 		cloudAccounts, err := cloudassembly.GetCloudAccounts(APIClient, id, name, cloudaccounttype)
 		if err != nil {
 			log.Fatalln(err)
@@ -62,12 +59,18 @@ Get Cloud Accounts by Type:
 		} else if len(cloudAccounts) == 1 {
 			helpers.PrettyPrint(cloudAccounts[0])
 		} else {
-			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Id", "Name", "Description", "Type"})
-			for _, c := range cloudAccounts {
-				table.Append([]string{*c.ID, c.Name, c.Description, *c.CloudAccountType})
+			if APIClient.Output == "json" {
+				helpers.PrettyPrint(cloudAccounts)
+			} else if APIClient.Output == "export" {
+				log.Warnln("Exporting Cloud Accounts is not supported yet")
+			} else {
+				table := tablewriter.NewWriter(os.Stdout)
+				table.SetHeader([]string{"Id", "Name", "Description", "Type"})
+				for _, c := range cloudAccounts {
+					table.Append([]string{*c.ID, c.Name, c.Description, *c.CloudAccountType})
+				}
+				table.Render()
 			}
-			table.Render()
 		}
 	},
 }
@@ -115,9 +118,6 @@ Create a new AWS Cloud Account:
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 
 		// if helpers.IsInputFromPipe() { // If it's a pipe, then read from stdin
 		// 	// Decode JSON to struct
@@ -160,9 +160,6 @@ Delete a Cloud Account by Name:
 Delete a Cloud Account by ID:
   vra-cli delete cloudaccount --id <Cloud Account ID>`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 		if account, err := cloudassembly.GetCloudAccounts(APIClient, id, name, ""); err != nil {
 			log.Fatalln(err) // There was an error getting the cloud account
 		} else {

@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 package cloudassembly
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -29,6 +30,8 @@ func GetCloudTemplate(APIClient *types.APIClientOptions, id string, name string,
 			p, perr := GetProject(APIClient, project, "")
 			if perr != nil {
 				return nil, perr
+			} else if len(p) == 0 {
+				return nil, errors.New("Project not found")
 			}
 			CloudTemplateParams.Projects = []string{*(p[0]).ID}
 		}

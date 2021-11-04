@@ -26,6 +26,7 @@ func GetConfigFromEnv() *types.Config {
 		Password:    viper.GetString("password"),
 		APIToken:    viper.GetString("apitoken"),
 		AccessToken: viper.GetString("accesstoken"),
+		Name:        "Environment",
 	}
 	log.Debugln("Config:", config)
 	return &config

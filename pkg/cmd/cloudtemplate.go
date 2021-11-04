@@ -30,12 +30,9 @@ var getCloudTemplateCmd = &cobra.Command{
 	Short: "Get Cloud Templates",
 	Long:  `Get Cloud Templates by ID, name or status`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 		response, err := cloudassembly.GetCloudTemplate(APIClient, id, name, projectName)
 		if err != nil {
-			log.Warnln("Unable to get Cloud Template(s): ", err)
+			log.Fatalln("Unable to get Cloud Template(s): ", err)
 		}
 		var resultCount = len(response)
 		if resultCount == 0 {
@@ -147,10 +144,6 @@ var createCloudTemplateCmd = &cobra.Command{
 		var cloudTemplateReq types.CloudTemplate
 		var projectID string
 
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
-
 		// Check if input is piped JSON
 		if helpers.IsInputFromPipe() {
 			if err := json.NewDecoder(os.Stdin).Decode(&cloudTemplateReq); err != nil {
@@ -195,7 +188,15 @@ var createCloudTemplateCmd = &cobra.Command{
 		if err != nil {
 			log.Errorln("Unable to create Cloud Template(s): ", err)
 		}
-		helpers.PrettyPrint(cloudTemplate)
+		if APIClient.Output == "json" {
+			helpers.PrettyPrint(cloudTemplate)
+		} else {
+			// Print result table
+			table := tablewriter.NewWriter(os.Stdout)
+			table.SetHeader([]string{"Id", "Name", "Project", "Status", "Valid"})
+			table.Append([]string{cloudTemplate.ID, cloudTemplate.Name, cloudTemplate.ProjectName, cloudTemplate.Status, strconv.FormatBool(*cloudTemplate.Valid)})
+			table.Render()
+		}
 	},
 }
 
@@ -206,9 +207,6 @@ var deleteCloudTemplateCmd = &cobra.Command{
 	Long: `Delete a Blueprint with a specific ID
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 
 		if name != "" {
 			response, err := cloudassembly.GetCloudTemplate(APIClient, id, name, projectName)

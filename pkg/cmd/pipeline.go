@@ -41,9 +41,6 @@ get execution --name vra-authenticateUser
 # View executions by status
 vra-cli get execution --status Failed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 
 		response, err := codestream.GetPipeline(APIClient, id, name, projectName, exportPath)
 		if err != nil {
@@ -169,9 +166,6 @@ vra-cli update pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 
 		if state != "" {
 			response, err := codestream.PatchPipeline(APIClient, id, `{"state":"`+state+`"}`)
@@ -209,9 +203,6 @@ vra-cli create pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 		yamlFilePaths := helpers.GetFilePaths(importPath, ".yaml")
 		if len(yamlFilePaths) == 0 {
 			log.Warnln("No YAML files were found in", importPath)
@@ -247,9 +238,6 @@ vra-cli delete pipeline --name "My Pipeline" --project "My Project"
 vra-cli delete pipeline --project "My Project"
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 		if id != "" {
 			response, err := codestream.DeletePipeline(APIClient, id)
 			if err != nil {

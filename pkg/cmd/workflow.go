@@ -30,9 +30,6 @@ vra-cli get workflow --id bb3f6aff-311a-45fe-8081-5845a529068d
 # Get Failed workflows in Project "Field Demo" with the name "Learn Code Stream"
 vra-cli get workflow --status FAILED --project "Field Demo" --name "Learn Code Stream"`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// if err := auth.GetConnection(&targetConfig, debug); err != nil {
-		// 	log.Fatalln(err)
-		// }
 
 		response, err := orchestrator.GetWorkflow(APIClient, id, category, name)
 		if err != nil {

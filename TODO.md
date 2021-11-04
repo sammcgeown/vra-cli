@@ -11,12 +11,12 @@
 
 ## Cloud Assembly
 
-|                  | Get | Create | Update | Delete | Import | Export | Testing |
+|                  | Get              | Create           | Update           | Delete           | Import           | Export           | Testing          |
 |------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|
 | Cloud Account    |:white_check_mark:|                  |                  |:white_check_mark:|                  |                  |                  |
 | Cloud Template   |:white_check_mark:|:white_check_mark:|                  |:white_check_mark:|                  |                  |                  |
 | Data Collector*  |:white_check_mark:|                  |                  |                  |                  |                  |                  |
-| Deployment       |:white_check_mark:|                  |                  |                  |                  |                  |                  |
+| Deployment       |:white_check_mark:|                  |                  |:white_check_mark:|                  |                  |                  |
 | Project          |                  |                  |                  |                  |                  |                  |                  |
 | Property Groups  |                  |                  |                  |                  |                  |                  |                  |
 | Custom Resources |                  |                  |                  |                  |                  |                  |                  |

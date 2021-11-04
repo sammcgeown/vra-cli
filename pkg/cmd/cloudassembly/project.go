@@ -42,6 +42,7 @@ func GetProject(APIClient *types.APIClientOptions, name string, id string) ([]*m
 		}
 		return nil, err
 	}
+	log.Debugln(ret.Payload.NumberOfElements, "Projects found")
 	return ret.Payload.Content, nil
 }
 
