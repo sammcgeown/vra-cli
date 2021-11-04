@@ -23,7 +23,6 @@ var getEndpointCmd = &cobra.Command{
 	Short: "Get Endpoint Configurations",
 	Long:  `Get Code Stream Endpoint Configurations`,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		response, err := codestream.GetEndpoint(APIClient, id, name, projectName, typename, exportPath)
 		if err != nil {
 			log.Infoln("Unable to get endpoints: ", err)
@@ -31,11 +30,21 @@ var getEndpointCmd = &cobra.Command{
 		var resultCount = len(response)
 		if resultCount == 0 {
 			// No results
-			log.Infoln("No results found")
-		} else if resultCount == 1 {
+			log.Warnln("No results found")
+			return
+		}
+		if APIClient.Output == "json" {
 			helpers.PrettyPrint(response)
+		} else if APIClient.Output == "export" {
+			for _, c := range response {
+				err := codestream.ExportYaml(APIClient, c.ID, c.Name, c.Project, exportPath, "endpoints")
+				if err != nil {
+					log.Infoln("Endpoint", c.Name, "export failed: ", err)
+				} else {
+					log.Infoln("Endpoint", c.Name, "exported successfully")
+				}
+			}
 		} else {
-			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"ID", "Name", "Project", "Type", "Description"})
 			for _, c := range response {
@@ -43,7 +52,6 @@ var getEndpointCmd = &cobra.Command{
 			}
 			table.Render()
 		}
-
 	},
 }
 

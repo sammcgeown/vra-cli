@@ -29,7 +29,7 @@ func ExportYaml(APIClient *types.APIClientOptions, id, name, project, path, obje
 		SetError(&types.Exception{}).
 		SetOutput(filepath.Join(exportPath, name+".yaml")).
 		SetHeader("Accept", "application/x-yaml;charset=UTF-8").
-		Get("/pipeline/api/export")
+		Get("/codestream/api/export")
 
 	if err != nil {
 		return err
@@ -76,14 +76,15 @@ func ImportYaml(APIClient *types.APIClientOptions, yamlPath, action, project, im
 		SetError(&types.Exception{}).
 		SetBody(yamlPayload).
 		SetHeader("Content-Type", "application/x-yaml").
-		Post("/pipeline/api/import")
+		SetHeader("Accept", "application/x-yaml").
+		Post("/codestream/api/import")
 
 	if err != nil {
 		return err
 	}
 
 	if queryResponse.IsError() {
-		return queryResponse.Error().(error)
+		return errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
 
 	var importResponse types.PipelineImportResponse

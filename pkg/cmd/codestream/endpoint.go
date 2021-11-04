@@ -42,6 +42,9 @@ func GetEndpoint(APIClient *types.APIClientOptions, id, name, project, endpointt
 		SetError(&types.Exception{}).
 		Get("/pipeline/api/endpoints")
 
+	APIClient.RESTClient.QueryParam.Del("$filter")
+	APIClient.RESTClient.QueryParam.Del("expand")
+
 	if queryResponse.IsError() {
 		return nil, queryResponse.Error().(error)
 	}
@@ -49,13 +52,7 @@ func GetEndpoint(APIClient *types.APIClientOptions, id, name, project, endpointt
 	for _, value := range queryResponse.Result().(*types.DocumentsList).Documents {
 		c := types.Endpoint{}
 		mapstructure.Decode(value, &c)
-		if exportPath != "" {
-			//helpers.ExportYaml(c.Name, c.Project, exportPath, "endpoints")
-			endpoints = append(endpoints, &c)
-		} else {
-			endpoints = append(endpoints, &c)
-		}
-
+		endpoints = append(endpoints, &c)
 	}
 	return endpoints, err
 }

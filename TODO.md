@@ -27,8 +27,8 @@
 
 |                    | Get              | Create           | Update           | Delete           | Import           | Export           | Testing          |
 |--------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|
-| Endpoint           |:white_check_mark:|                  |                  |:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |
-| Variable           |                  |                  |                  |                  |                  |                  |                  |
+| Endpoint           |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |
+| Variable           |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |
 | Pipeline           |                  |                  |                  |                  |                  |                  |                  |
 | Execution          |                  |                  |                  |                  |                  |                  |                  |
 | Custom Integration |                  |                  |                  |                  |                  |                  |                  |

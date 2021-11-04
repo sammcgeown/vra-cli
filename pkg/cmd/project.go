@@ -13,6 +13,7 @@ import (
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/vmware/vra-sdk-go/pkg/models"
 )
 
 var (
@@ -83,9 +84,9 @@ Get Project by Name (case sensitive):
 			// }
 		} else {
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Id", "Name", "Description"})
+			table.SetHeader([]string{"Id", "Name", "Description", "Admins", "Members", "Viewers"})
 			for _, p := range response {
-				table.Append([]string{*p.ID, p.Name, p.Description})
+				table.Append([]string{*p.ID, p.Name, p.Description, helpers.UserArrayToString(p.Administrators), helpers.UserArrayToString(p.Members), helpers.UserArrayToString(p.Viewers)})
 			}
 			table.Render()
 		}
@@ -96,7 +97,8 @@ Get Project by Name (case sensitive):
 var createProjectCommand = &cobra.Command{
 	Use:   "project",
 	Short: "Create a Project",
-	Long:  `Create a Project`,
+	Long: `Create a Project:
+  vra-cli create project --name "vra-cli-test" --description "Test from vRA CLI" --admins smcgeown@vmware.com --members cas-user1@definit.co.uk,cas-user2@definit.co.uk --viewers cas-user3@definit.co.uk,cas-user1@definit.co.uk --machineNamingTemplate 'bob-${###}'	`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		return nil
 	},
@@ -108,9 +110,17 @@ var createProjectCommand = &cobra.Command{
 
 		newProject, err := cloudassembly.CreateProject(APIClient, projectName, description, adminUsers, memberUsers, viewerUsers, nil, nil, operationTimeout, machineNamingTemplate, &sharedResources)
 		if err != nil {
-			log.Fatal("Unable to create Project", err)
-		} else {
+			log.Fatalln("Unable to create Project", err)
+		}
+		if APIClient.Output == "json" {
 			helpers.PrettyPrint(newProject)
+		} else if APIClient.Output == "export" {
+
+		} else {
+			table := tablewriter.NewWriter(os.Stdout)
+			table.SetHeader([]string{"Id", "Name", "Description", "Admins", "Members", "Viewers"})
+			table.Append([]string{*newProject.ID, newProject.Name, newProject.Description, helpers.UserArrayToString(adminUsers), helpers.UserArrayToString(memberUsers), helpers.UserArrayToString(viewerUsers)})
+			table.Render()
 		}
 
 	},
@@ -125,16 +135,40 @@ var updateProjectCommand = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-
-		adminUsers := helpers.CreateUserArray(strings.Split(admins, ","))
-		memberUsers := helpers.CreateUserArray(strings.Split(members, ","))
-		viewerUsers := helpers.CreateUserArray(strings.Split(viewers, ","))
+		currentProject, err := cloudassembly.GetProject(APIClient, "", id)
+		if err != nil || len(currentProject) == 0 {
+			log.Fatalln("Unable to get Project", err)
+		}
+		var adminUsers, memberUsers, viewerUsers []*models.User
+		if admins != "" {
+			adminUsers = helpers.CreateUserArray(strings.Split(admins, ","))
+		} else {
+			adminUsers = currentProject[0].Administrators
+		}
+		if members != "" {
+			memberUsers = helpers.CreateUserArray(strings.Split(members, ","))
+		} else {
+			memberUsers = currentProject[0].Members
+		}
+		if viewers != "" {
+			viewerUsers = helpers.CreateUserArray(strings.Split(viewers, ","))
+		} else {
+			viewerUsers = currentProject[0].Viewers
+		}
 
 		newProject, err := cloudassembly.UpdateProject(APIClient, id, projectName, description, adminUsers, memberUsers, viewerUsers, nil, nil, operationTimeout, machineNamingTemplate, &sharedResources)
 		if err != nil {
 			log.Fatal("Unable to update Project", err)
-		} else {
+		}
+		if APIClient.Output == "json" {
 			helpers.PrettyPrint(newProject)
+		} else if APIClient.Output == "export" {
+
+		} else {
+			table := tablewriter.NewWriter(os.Stdout)
+			table.SetHeader([]string{"Id", "Name", "Description", "Admins", "Members", "Viewers"})
+			table.Append([]string{*newProject.ID, newProject.Name, newProject.Description, helpers.UserArrayToString(adminUsers), helpers.UserArrayToString(memberUsers), helpers.UserArrayToString(viewerUsers)})
+			table.Render()
 		}
 
 	},
@@ -175,6 +209,7 @@ func init() {
 	createProjectCommand.Flags().Int64Var(&operationTimeout, "timeout", 0, "Operation Timeout setting for this project")
 	createProjectCommand.Flags().StringVar(&machineNamingTemplate, "machineNamingTemplate", "", "Machine naming template for this project")
 	createProjectCommand.Flags().BoolVar(&sharedResources, "sharedResources", false, "If true, Deployments are shared between all users in the project")
+	createProjectCommand.MarkFlagRequired("name")
 
 	// Update
 	updateCmd.AddCommand(updateProjectCommand)

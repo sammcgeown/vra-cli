@@ -53,7 +53,7 @@ import (
 // ValidateConfiguration - returns a connection to vRA
 func ValidateConfiguration(APIClient *types.APIClientOptions) error {
 	// Get a Resty client
-	APIClient.RESTClient = GetRESTClient(APIClient.Config, APIClient.VerifySSL, APIClient.Debug)
+	APIClient.RESTClient = GetRESTClient(APIClient.Config, APIClient.Version, APIClient.VerifySSL, APIClient.Debug)
 	// Query the API to see if we're authenticated
 	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.UserPreferences{}).
@@ -136,7 +136,7 @@ func ValidateConfiguration(APIClient *types.APIClientOptions) error {
 		log.Debugln("Access Token OK (Username:", queryResponse.Result().(*types.UserPreferences).UserName, ")")
 	}
 
-	APIClient.RESTClient = GetRESTClient(APIClient.Config, APIClient.VerifySSL, APIClient.Debug)
+	APIClient.RESTClient = GetRESTClient(APIClient.Config, APIClient.Version, APIClient.VerifySSL, APIClient.Debug)
 	APIClient.SDKClient = GetAPIClient(APIClient.Config, APIClient.Debug)
 
 	return nil
@@ -224,7 +224,7 @@ func GetAPIClient(config *types.Config, debug bool) *client.MulticloudIaaS {
 }
 
 // GetRESTClient - returns a vRA REST client
-func GetRESTClient(config *types.Config, insecure bool, debug bool) *resty.Client {
+func GetRESTClient(config *types.Config, apiVersion string, insecure bool, debug bool) *resty.Client {
 	// Configure the Resty Client
 	client := resty.New().
 		SetDebug(debug).
@@ -232,6 +232,7 @@ func GetRESTClient(config *types.Config, insecure bool, debug bool) *resty.Clien
 		SetAuthToken(config.AccessToken).
 		SetHostURL("https://"+config.Server).
 		SetHeader("Accept", "application/json").
-		SetError(&types.Exception{})
+		SetError(&types.Exception{}).
+		SetQueryParam("apiVersion", apiVersion)
 	return client
 }

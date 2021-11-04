@@ -245,3 +245,13 @@ func CreateUserArray(emails []string) []*models.User {
 	}
 	return users
 }
+
+// UserArrayToString - Create an comma separated list of users from an array of users
+func UserArrayToString(users []*models.User) string {
+	var userList []string
+	for user := range users {
+		userList = append(userList, *users[user].Email)
+	}
+	return strings.Join(userList, ",")
+
+}

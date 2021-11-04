@@ -31,7 +31,6 @@ vra-cli get variable --name my-variable
 # Get Variable by Project
 vra-cli get variable --project production`,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		response, err := codestream.GetVariable(APIClient, id, name, projectName, exportPath)
 		if err != nil {
 			log.Fatalln("Unable to get Code Stream Variables: ", err)
@@ -39,19 +38,20 @@ vra-cli get variable --project production`,
 		var resultCount = len(response)
 		if resultCount == 0 {
 			// No results
-			log.Warnln("No results found")
-		} else if resultCount == 1 {
-			// Print the single result
-			if exportPath != "" {
-				codestream.ExportVariable(response[0], exportPath)
-			}
+			log.Fatalln("No results found")
+		}
+		if APIClient.Output == "json" {
 			helpers.PrettyPrint(response[0])
+		} else if APIClient.Output == "export" {
+			for _, c := range response {
+				codestream.ExportVariable(c, exportPath)
+			}
 		} else {
 			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Id", "Name", "Project", "Type", "Description"})
+			table.SetHeader([]string{"Id", "Name", "Project", "Type", "Description", "Value"})
 			for _, c := range response {
-				table.Append([]string{c.ID, c.Name, c.Project, c.Type, c.Description})
+				table.Append([]string{c.ID, c.Name, c.Project, c.Type, c.Description, c.Value})
 			}
 			table.Render()
 		}
@@ -83,7 +83,15 @@ var createVariableCmd = &cobra.Command{
 			if err != nil {
 				log.Errorln("Unable to create Code Stream Variable: ", err)
 			} else {
-				helpers.PrettyPrint(createResponse)
+				if APIClient.Output == "json" {
+					helpers.PrettyPrint(createResponse)
+				} else {
+					// Print result table
+					table := tablewriter.NewWriter(os.Stdout)
+					table.SetHeader([]string{"Id", "Name", "Project", "Type", "Description", "Value"})
+					table.Append([]string{createResponse.ID, createResponse.Name, createResponse.Project, createResponse.Type, createResponse.Description, createResponse.Value})
+					table.Render()
+				}
 			}
 		}
 	},
@@ -116,7 +124,16 @@ var updateVariableCmd = &cobra.Command{
 			if err != nil {
 				log.Errorln("Unable to update Code Stream Variable: ", err)
 			}
-			log.Infoln("Updated variable", updateResponse.Name)
+			log.Infoln("Variable updated")
+			if APIClient.Output == "json" {
+				helpers.PrettyPrint(updateResponse)
+			} else {
+				// Print result table
+				table := tablewriter.NewWriter(os.Stdout)
+				table.SetHeader([]string{"Id", "Name", "Project", "Type", "Description", "Value"})
+				table.Append([]string{updateResponse.ID, updateResponse.Name, updateResponse.Project, updateResponse.Type, updateResponse.Description, updateResponse.Value})
+				table.Render()
+			}
 		}
 	},
 }
@@ -171,18 +188,18 @@ func init() {
 	createVariableCmd.Flags().StringVarP(&name, "name", "n", "", "The name of the variable to create")
 	createVariableCmd.Flags().StringVarP(&typename, "type", "t", "", "The type of the variable to create REGULAR|SECRET|RESTRICTED")
 	createVariableCmd.Flags().StringVarP(&projectName, "project", "p", "", "The project in which to create the variable")
-	createVariableCmd.Flags().StringVarP(&value, "value", "v", "", "The value of the variable to create")
+	createVariableCmd.Flags().StringVar(&value, "value", "", "The value of the variable to create")
 	createVariableCmd.Flags().StringVarP(&description, "description", "d", "", "The description of the variable to create")
-	createVariableCmd.Flags().StringVarP(&importPath, "importpath", "i", "", "Path to a YAML file with the variables to import")
+	createVariableCmd.Flags().StringVarP(&importPath, "importPath", "", "", "Path to a YAML file with the variables to import")
 
 	// Update Variable
 	updateCmd.AddCommand(updateVariableCmd)
 	updateVariableCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the variable to update")
 	updateVariableCmd.Flags().StringVarP(&name, "name", "n", "", "Update the name of the variable")
 	updateVariableCmd.Flags().StringVarP(&typename, "type", "t", "", "Update the type of the variable REGULAR|SECRET|RESTRICTED")
-	updateVariableCmd.Flags().StringVarP(&value, "value", "v", "", "Update the value of the variable ")
+	updateVariableCmd.Flags().StringVar(&value, "value", "", "Update the value of the variable ")
 	updateVariableCmd.Flags().StringVarP(&description, "description", "d", "", "Update the description of the variable")
-	updateVariableCmd.Flags().StringVarP(&importPath, "importpath", "", "", "Path to a YAML file with the variables to import")
+	updateVariableCmd.Flags().StringVarP(&importPath, "importPath", "", "", "Path to a YAML file with the variables to import")
 	//updateVariableCmd.MarkFlagRequired("id")
 
 	// Delete Variable
