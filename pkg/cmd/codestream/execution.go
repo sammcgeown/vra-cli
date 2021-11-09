@@ -18,7 +18,7 @@ import (
 )
 
 // GetExecution - returns a list of executions
-func GetExecution(APIClient *types.APIClientOptions, id string, project string, status string, name string, nested bool) ([]*types.Executions, error) {
+func GetExecution(APIClient *types.APIClientOptions, id string, project string, status string, name string, nested bool, rollback bool) ([]*types.Executions, error) {
 	var arrExecutions []*types.Executions
 	if id != "" {
 		queryResponse, err := APIClient.RESTClient.R().
@@ -44,6 +44,9 @@ func GetExecution(APIClient *types.APIClientOptions, id string, project string, 
 	}
 	if nested {
 		filters = append(filters, "(_nested eq '"+strconv.FormatBool(nested)+"')")
+	}
+	if rollback {
+		filters = append(filters, "(_rollback eq '"+strconv.FormatBool(rollback)+"')")
 	}
 	if project != "" {
 		filters = append(filters, "(project eq '"+project+"')")
@@ -85,9 +88,9 @@ func DeleteExecution(APIClient *types.APIClientOptions, id string) (bool, error)
 }
 
 // DeleteExecutions - deletes an execution by project, status, or pipeline name
-func DeleteExecutions(APIClient *types.APIClientOptions, project string, status string, name string, nested bool) ([]*types.Executions, error) {
+func DeleteExecutions(APIClient *types.APIClientOptions, project string, status string, name string, nested bool, rollback bool) ([]*types.Executions, error) {
 	var deletedExecutions []*types.Executions
-	Executions, err := GetExecution(APIClient, "", project, status, name, nested)
+	Executions, err := GetExecution(APIClient, "", project, status, name, nested, rollback)
 	if err != nil {
 		return nil, err
 	}

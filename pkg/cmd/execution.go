@@ -16,10 +16,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var nested bool
-var inputs string
-var comments string
-var inputPath string
+var nested, rollback bool
+var inputs, comments string
 
 // getExecutionCmd represents the executions command
 var getExecutionCmd = &cobra.Command{
@@ -35,20 +33,22 @@ vra-cli get execution --id bb3f6aff-311a-45fe-8081-5845a529068d
 vra-cli get execution --status FAILED --project "Field Demo" --name "Learn Code Stream"`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		response, err := codestream.GetExecution(APIClient, id, projectName, status, name, nested)
+		response, err := codestream.GetExecution(APIClient, id, projectName, status, name, nested, rollback)
 		if err != nil {
 			log.Errorln("Unable to get executions: ", err)
 		}
 		var resultCount = len(response)
 		if resultCount == 0 {
 			// No results
-			log.Infoln("No results found")
-		} else if resultCount == 1 {
-			helpers.PrettyPrint(response[0])
+			log.Warnln("No results found")
+			return
+		}
+		if APIClient.Output == "json" {
+			helpers.PrettyPrint(response)
 		} else {
 			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Id", "Name", "Project", "Status", "Message"})
+			table.SetHeader([]string{"Id", "Execution", "Project", "Status", "Message"})
 			for _, c := range response {
 				table.Append([]string{c.ID, c.Name + "#" + fmt.Sprint(c.Index), c.Project, c.Status, c.StatusMessage})
 			}
@@ -74,7 +74,7 @@ var delExecutionCmd = &cobra.Command{
 				log.Infoln("Execution with id " + id + " deleted")
 			}
 		} else if projectName != "" {
-			response, err := codestream.DeleteExecutions(APIClient, projectName, status, name, nested)
+			response, err := codestream.DeleteExecutions(APIClient, projectName, status, name, nested, rollback)
 			if err != nil {
 				log.Errorln("Unable to delete executions: ", err)
 			} else {
@@ -110,6 +110,7 @@ func init() {
 	getExecutionCmd.Flags().StringVarP(&status, "status", "s", "", "Filter executions by status (Completed|Waiting|Pausing|Paused|Resuming|Running)")
 	getExecutionCmd.Flags().StringVarP(&projectName, "project", "p", "", "Filter executions by Project")
 	getExecutionCmd.Flags().BoolVarP(&nested, "nested", "", false, "Include nested executions")
+	getExecutionCmd.Flags().BoolVarP(&rollback, "rollback", "", false, "Include rollback executions")
 	// Delete
 	deleteCmd.AddCommand(delExecutionCmd)
 	delExecutionCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the pipeline to delete executions for")
@@ -117,11 +118,12 @@ func init() {
 	delExecutionCmd.Flags().StringVarP(&status, "status", "s", "", "Delete executions by status (Completed|Waiting|Pausing|Paused|Resuming|Running)")
 	delExecutionCmd.Flags().StringVarP(&projectName, "project", "p", "", "Delete executions by Project")
 	delExecutionCmd.Flags().BoolVarP(&nested, "nested", "", false, "Delete nested executions")
+	delExecutionCmd.Flags().BoolVarP(&rollback, "rollback", "", false, "Delete rollback executions")
 	// Create
 	createCmd.AddCommand(createExecutionCmd)
 	createExecutionCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the pipeline to execute")
 	createExecutionCmd.Flags().StringVarP(&inputs, "inputs", "", "", "JSON form inputs")
-	createExecutionCmd.Flags().StringVarP(&inputPath, "inputPath", "", "", "JSON input file")
+	createExecutionCmd.Flags().StringVarP(&importPath, "importPath", "", "", "JSON input file")
 	createExecutionCmd.Flags().StringVarP(&comments, "comments", "", "", "Execution comments")
 	createExecutionCmd.MarkFlagRequired("id")
 }
