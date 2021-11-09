@@ -49,14 +49,7 @@ func GetPipeline(APIClient *types.APIClientOptions, id string, name string, proj
 	for _, value := range queryResponse.Result().(*types.DocumentsList).Documents {
 		c := types.Pipeline{}
 		mapstructure.Decode(value, &c)
-		if exportPath != "" {
-			// if err := cmd.exportYaml(c.Name, c.Project, exportPath, "pipelines"); err != nil {
-			// 	log.Warnln(err)
-			// }
-			arrResults = append(arrResults, &c)
-		} else {
-			arrResults = append(arrResults, &c)
-		}
+		arrResults = append(arrResults, &c)
 	}
 	return arrResults, err
 }
@@ -65,6 +58,7 @@ func GetPipeline(APIClient *types.APIClientOptions, id string, name string, proj
 func PatchPipeline(APIClient *types.APIClientOptions, id string, payload string) (*types.Pipeline, error) {
 	queryResponse, err := APIClient.RESTClient.R().
 		SetBody(payload).
+		SetHeader("Content-Type", "application/json").
 		SetResult(&types.Pipeline{}).
 		SetError(&types.Exception{}).
 		Patch("/pipeline/api/pipelines/" + id)

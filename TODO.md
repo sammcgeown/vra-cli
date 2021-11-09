@@ -29,7 +29,7 @@
 |--------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|
 | Endpoint           |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |
 | Variable           |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |
-| Pipeline           |                  |                  |                  |                  |                  |                  |                  |
+| Pipeline           |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |
 | Execution          |                  |                  |                  |                  |                  |                  |                  |
 | Custom Integration |                  |                  |                  |                  |                  |                  |                  |
 

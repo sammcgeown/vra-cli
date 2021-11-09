@@ -1,0 +1,33 @@
+---
+project: Field Demo
+kind: PIPELINE
+name: Pipeline
+icon: organization,left, is-info is-solid
+enabled: false
+description: Pipeline for vRA CLI Testing
+concurrency: 10
+workspace:
+  endpoint: ''
+  image: ''
+  registry: ''
+  path: ''
+  autoCloneForTrigger: false
+  limits:
+    cpu: 1.0
+    memory: 512
+stageOrder:
+- Stage0
+stages:
+  Stage0:
+    taskOrder:
+    - Task0
+    tasks:
+      Task0:
+        type: REST
+        input:
+          action: get
+          url: https://api.publicapis.org/entries
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+          payload: ''

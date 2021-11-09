@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
@@ -31,15 +30,7 @@ var dependencies bool
 var getPipelineCmd = &cobra.Command{
 	Use:   "pipeline",
 	Short: "Get Pipelines",
-	Long: `Get Code Stream Pipelines by ID, name or status
-# List all executions
-vra-cli get execution
-# View an execution by ID
-vra-cli get execution --id 9cc5aedc-db48-4c02-a5e4-086de3160dc0
-# View executions of a specific pipeline
-get execution --name vra-authenticateUser
-# View executions by status
-vra-cli get execution --status Failed`,
+	Long:  `Get Code Stream Pipelines by ID, name or status`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		response, err := codestream.GetPipeline(APIClient, id, name, projectName, exportPath)
@@ -53,8 +44,15 @@ vra-cli get execution --status Failed`,
 		}
 
 		if APIClient.Output == "json" {
+			helpers.PrettyPrint(response)
+		} else if APIClient.Output == "export" {
 			for _, c := range response {
-				helpers.PrettyPrint(c)
+				err := codestream.ExportYaml(APIClient, c.ID, c.Name, c.Project, exportPath, "pipelines")
+				if err != nil {
+					log.Infoln("Pipeline", c.Name, "export failed: ", err)
+				} else {
+					log.Infoln("Pipeline", c.Name, "exported successfully")
+				}
 			}
 		} else if printForm {
 			// Get the input form
@@ -104,40 +102,40 @@ vra-cli get execution --status Failed`,
 						log.Debugln("-- [Task]", n, "(", task.Type, ")")
 					}
 				}
-				if dependencies {
-					variables = helpers.RemoveDuplicateStrings(variables)
-					sort.Strings(variables)
-					if len(variables) > 0 {
-						log.Infoln(c.Name, "depends on Variables:", strings.Join(variables, ", "))
-						for _, v := range variables {
-							codestream.GetVariable(APIClient, "", v, c.Project, exportPath)
-						}
-					}
-					pipelines = helpers.RemoveDuplicateStrings(pipelines)
-					sort.Strings(pipelines)
-					if len(pipelines) > 0 {
-						log.Infoln(c.Name, "depends on Pipelines:", strings.Join(pipelines, ", "))
-						for _, p := range pipelines {
-							codestream.GetPipeline(APIClient, "", p, c.Project, filepath.Join(exportPath, "pipelines"))
-						}
-					}
-					endpoints = helpers.RemoveDuplicateStrings(endpoints)
-					sort.Strings(endpoints)
-					if len(endpoints) > 0 {
-						log.Infoln(c.Name, "depends on Endpoints:", strings.Join(endpoints, ", "))
-						for _, e := range endpoints {
-							codestream.GetEndpoint(APIClient, "", e, c.Project, "", filepath.Join(exportPath, "endpoints"))
-						}
-					}
-					customintegrations = helpers.RemoveDuplicateStrings(customintegrations)
-					sort.Strings(customintegrations)
-					if len(customintegrations) > 0 {
-						log.Infoln(c.Name, "depends on Custom Integrations:", strings.Join(customintegrations, ", "))
-						for _, ci := range customintegrations {
-							codestream.GetCustomIntegration(APIClient, "", ci)
-						}
-					}
-				}
+				// if dependencies {
+				// 	variables = helpers.RemoveDuplicateStrings(variables)
+				// 	sort.Strings(variables)
+				// 	if len(variables) > 0 {
+				// 		log.Infoln(c.Name, "depends on Variables:", strings.Join(variables, ", "))
+				// 		for _, v := range variables {
+				// 			codestream.GetVariable(APIClient, "", v, c.Project, exportPath)
+				// 		}
+				// 	}
+				// 	pipelines = helpers.RemoveDuplicateStrings(pipelines)
+				// 	sort.Strings(pipelines)
+				// 	if len(pipelines) > 0 {
+				// 		log.Infoln(c.Name, "depends on Pipelines:", strings.Join(pipelines, ", "))
+				// 		for _, p := range pipelines {
+				// 			codestream.GetPipeline(APIClient, "", p, c.Project, filepath.Join(exportPath, "pipelines"))
+				// 		}
+				// 	}
+				// 	endpoints = helpers.RemoveDuplicateStrings(endpoints)
+				// 	sort.Strings(endpoints)
+				// 	if len(endpoints) > 0 {
+				// 		log.Infoln(c.Name, "depends on Endpoints:", strings.Join(endpoints, ", "))
+				// 		for _, e := range endpoints {
+				// 			codestream.GetEndpoint(APIClient, "", e, c.Project, "", filepath.Join(exportPath, "endpoints"))
+				// 		}
+				// 	}
+				// 	customintegrations = helpers.RemoveDuplicateStrings(customintegrations)
+				// 	sort.Strings(customintegrations)
+				// 	if len(customintegrations) > 0 {
+				// 		log.Infoln(c.Name, "depends on Custom Integrations:", strings.Join(customintegrations, ", "))
+				// 		for _, ci := range customintegrations {
+				// 			codestream.GetCustomIntegration(APIClient, "", ci)
+				// 		}
+				// 	}
+				// }
 			}
 			table.Render()
 		}
@@ -172,20 +170,22 @@ vra-cli update pipeline --importPath "/Users/sammcgeown/Desktop/pipelines/SSH Ex
 			if err != nil {
 				log.Errorln("Unable to update Code Stream Pipeline: ", err)
 			}
-			log.Infoln("Setting pipeline " + response.Name + " to " + state)
+			log.Infoln("Setting pipeline", response.Name, "to", state)
 		}
 
-		yamlFilePaths := helpers.GetFilePaths(importPath, ".yaml")
-		if len(yamlFilePaths) == 0 {
-			log.Warnln("No YAML files were found in", importPath)
-		}
-		for _, yamlFilePath := range yamlFilePaths {
-			yamlFileName := filepath.Base(yamlFilePath)
-			err := codestream.ImportYaml(APIClient, yamlFilePath, "apply", "", "endpoint")
-			if err != nil {
-				log.Warnln("Failed to import", yamlFilePath, "as Pipeline", err)
+		if importPath != "" {
+			yamlFilePaths := helpers.GetFilePaths(importPath, ".yaml")
+			if len(yamlFilePaths) == 0 {
+				log.Warnln("No YAML files were found in", importPath)
 			}
-			fmt.Println("Imported", yamlFileName, "successfully - Pipeline updated.")
+			for _, yamlFilePath := range yamlFilePaths {
+				yamlFileName := filepath.Base(yamlFilePath)
+				err := codestream.ImportYaml(APIClient, yamlFilePath, "apply", "", "endpoint")
+				if err != nil {
+					log.Warnln("Failed to import", yamlFilePath, "as Pipeline", err)
+				}
+				fmt.Println("Imported", yamlFileName, "successfully - Pipeline updated.")
+			}
 		}
 	},
 }

@@ -4,3 +4,4 @@ vra-cli
 export/
 dist/
 test/
+.DS_Store
