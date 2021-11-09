@@ -51,6 +51,9 @@ vra-cli get variable --project production`,
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Id", "Name", "Project", "Type", "Description", "Value"})
 			for _, c := range response {
+				if len(c.Value) > 25 {
+					c.Value = c.Value[:25] + "..."
+				}
 				table.Append([]string{c.ID, c.Name, c.Project, c.Type, c.Description, c.Value})
 			}
 			table.Render()
