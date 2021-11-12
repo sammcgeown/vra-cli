@@ -30,19 +30,19 @@
 | Endpoint           |:white_check_mark:| *Import*         |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |
 | Variable           |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |
 | Pipeline           |:white_check_mark:| *Import*         |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |
-| Execution          |                  |                  |                  |                  |                  |                  |                  |
+| Execution          |:white_check_mark:|:white_check_mark:| *N/A*            |:white_check_mark:| *N/A*            | *N/A*            |                  |
 | Custom Integration |                  |                  |                  |                  |                  |                  |                  |
 
 ## Service Broker
 
-|                    | Get | Create | Update | Delete | Import | Export | Testing |
-|--------------------|-----|--------|--------|--------|--------|--------|---------|
+|                    | Get              | Create           | Update           | Delete           | Import           | Export           | Testing          |
+|--------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|
 | Catalog Item       |                  |                  |                  |                  |                  |                  |                  |
 
 ## Orchestrator
 
-|           | Get | Create | Update | Delete | Import | Export | Testing |
-|-----------|-----|--------|--------|--------|--------|--------|---------|
+|           | Get              | Create           | Update           | Delete           | Import           | Export           | Testing          |
+|-----------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|
 | Category  |                  |                  |                  |                  |                  |                  |                  |
 | Workflow  |                  |                  |                  |                  |                  |                  |                  |
 | Action    |                  |                  |                  |                  |                  |                  |                  |

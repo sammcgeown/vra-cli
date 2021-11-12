@@ -161,6 +161,7 @@ type CreateExecutionResponse struct {
 	Source        string      `json:"source"`
 	Input         interface{} `json:"input"`
 	ExecutionLink string      `json:"executionLink"`
+	ExecutionID   string      `json:"executionId"`
 	Tags          []string    `json:"tags"`
 }
 

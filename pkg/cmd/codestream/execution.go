@@ -31,9 +31,10 @@ func GetExecution(APIClient *types.APIClientOptions, id string, project string, 
 		arrExecutions = append(arrExecutions, queryResponse.Result().(*types.Executions))
 		return arrExecutions, nil
 	}
-	// qParams["$orderby"] = "_requestTimeInMicros desc"
-	// qParams["$top"] = fmt.Sprint(count)
-	// qParams["$skip"] = fmt.Sprint(skip)
+
+	APIClient.RESTClient.QueryParam.Set("$top", strconv.Itoa(APIClient.Pagination.PageSize))
+	APIClient.RESTClient.QueryParam.Set("$page", strconv.Itoa(APIClient.Pagination.Page))
+	APIClient.RESTClient.QueryParam.Set("$skip", strconv.Itoa(APIClient.Pagination.Skip))
 
 	var filters []string
 	if status != "" {
@@ -95,7 +96,7 @@ func DeleteExecutions(APIClient *types.APIClientOptions, project string, status 
 		return nil, err
 	}
 	if !APIClient.Confirm {
-		APIClient.Confirm = helpers.AskForConfirmation("This will attempt to delete " + fmt.Sprint(len(Executions)) + " Executions in " + project + ", are you sure?")
+		APIClient.Confirm = helpers.AskForConfirmation("This will attempt to delete " + fmt.Sprint(len(Executions)) + ", are you sure?")
 	}
 	if APIClient.Confirm {
 		for _, Execution := range Executions {

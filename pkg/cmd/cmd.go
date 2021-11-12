@@ -68,7 +68,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&APIClient.Output, "out", "o", "table", "Output - default is table, can be json")
 	rootCmd.PersistentFlags().StringVarP(&APIClient.Version, "version", "v", "2019-10-17", "API Version")
 	// API Paging
-	rootCmd.PersistentFlags().IntVar(&APIClient.Pagination.PageSize, "count", 100, "API Paging - Count")
+	rootCmd.PersistentFlags().IntVar(&APIClient.Pagination.PageSize, "count", 100, "API Page Size - Count")
 	rootCmd.PersistentFlags().IntVar(&APIClient.Pagination.Skip, "skip", 0, "API Paging - Skip")
 
 	rootCmd.AddCommand(getCmd)

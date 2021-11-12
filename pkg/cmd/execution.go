@@ -69,14 +69,14 @@ var delExecutionCmd = &cobra.Command{
 		if id != "" {
 			_, err := codestream.DeleteExecution(APIClient, id)
 			if err != nil {
-				log.Errorln("Unable to delete execution: ", err)
+				log.Errorln("Unable to delete execution:", err)
 			} else {
-				log.Infoln("Execution with id " + id + " deleted")
+				log.Infoln("Execution with id", id, "deleted")
 			}
-		} else if projectName != "" {
+		} else {
 			response, err := codestream.DeleteExecutions(APIClient, projectName, status, name, nested, rollback)
 			if err != nil {
-				log.Errorln("Unable to delete executions: ", err)
+				log.Errorln("Unable to delete executions:", err)
 			} else {
 				log.Infoln(len(response), "Executions deleted")
 			}
@@ -95,9 +95,9 @@ var createExecutionCmd = &cobra.Command{
 
 		response, err := codestream.CreateExecution(APIClient, id, inputs, comments)
 		if err != nil {
-			log.Errorln("Unable to create execution: ", err)
+			log.Errorln("Unable to create execution:", err)
 		}
-		log.Infoln("Execution " + response.ExecutionLink + " created")
+		log.Infoln("Execution", response.ExecutionID, "created")
 
 	},
 }
