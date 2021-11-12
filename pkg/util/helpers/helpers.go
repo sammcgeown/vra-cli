@@ -231,6 +231,16 @@ func StringToTags(tags string) []*models.Tag {
 	return tagsArray
 }
 
+// StringArrayContains - check if a string array contains a string
+func StringArrayContains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+	return false
+}
+
 // CreateUserArray - Create an array of users from emails
 func CreateUserArray(emails []string) []*models.User {
 	if emails[0] == "" {

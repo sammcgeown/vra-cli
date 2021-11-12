@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"os"
+	"strings"
 
 	"github.com/sammcgeown/vra-cli/pkg/cmd/codestream"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
@@ -13,6 +14,12 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+)
+
+var (
+	yaml         string
+	versionState string
+	versionName  string
 )
 
 // getCustomIntegrationCmd represents the customintegration command
@@ -38,117 +45,76 @@ Get by Project
 		if resultCount == 0 {
 			// No results
 			log.Infoln("No results found")
-		} else if resultCount == 1 {
-			// Print the single result
-			//if export {
-			//exportCustomIntegration(response[0], exportFile)
-			//}
-			helpers.PrettyPrint(response[0])
+		}
+
+		if APIClient.Output == "json" {
+			helpers.PrettyPrint(response)
+		} else if APIClient.Output == "export" {
+			log.Warnln("Exporting Custom Integrations is not supported yet")
+			// for _, c := range response {
+			// 	exportCustomIntegration(c, exportFile)
+			// }
 		} else {
 			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Id", "Name", "Description", "Status", "Version"})
+			table.SetHeader([]string{"Id", "Name", "Description", "Status", "Current Version", "Versions"})
 			for _, c := range response {
-				//if export {
-				//exportCustomIntegration(c, exportFile)
-				//}
-				table.Append([]string{c.ID, c.Name, c.Description, c.Status, c.Version})
+				versions, err := codestream.GetCustomIntegrationVersions(APIClient, c.ID)
+				if err != nil {
+					log.Errorln("Unable to get Code Stream CustomIntegration Versions: ", err)
+				}
+				table.Append([]string{c.ID, c.Name, c.Description, c.Status, c.Version, strings.Join(versions, ", ")})
 			}
 			table.Render()
 		}
 	},
 }
 
-// // getCustomIntegrationCmd represents the customintegration command
-// var createCustomIntegrationCmd = &cobra.Command{
-// 	Use:   "customintegration",
-// 	Short: "A brief description of your command",
-// 	Long:  ``,
-// 	Run: func(cmd *cobra.Command, args []string) {
-// 				if err := auth.GetConnection(&targetConfig, debug); err != nil {
-// 	log.Fatalln(err)
-// }
+// createCustomIntegrationCmd represents the customintegration command
+var createCustomIntegrationCmd = &cobra.Command{
+	Use:   "customintegration",
+	Short: "Create a new Custom Integration",
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
 
-// 		if importFile != "" { // If we are importing a file
-// 			customintegrations := importCustomIntegrations(importFile)
-// 			for _, value := range customintegrations {
-// 				if project != "" { // If the project is specified update the object
-// 					value.Project = project
-// 				}
-// 				createResponse, err := createCustomIntegration(value.Name, value.Description, value.Type, value.Project, value.Value)
-// 				if err != nil {
-// 					log.Errorln("Unable to create Code Stream CustomIntegration: ", err)
-// 				} else {
-// 					log.Infoln("Created customintegration", createResponse.Name, "in", createResponse.Project)
-// 				}
-// 			}
-// 		} else {
-// 			createResponse, err := createCustomIntegration(name, description, typename, project, value)
-// 			if err != nil {
-// 				log.Errorln("Unable to create Code Stream CustomIntegration: ", err)
-// 			}
-// 			helpers.PrettyPrint(createResponse)
-// 		}
-// 	},
-// }
+		createResponse, err := codestream.CreateCustomIntegration(APIClient, name, description, yaml)
+		if err != nil {
+			log.Errorln("Unable to create Custom Integration:", err)
+		}
+		helpers.PrettyPrint(createResponse)
 
-// // updateCustomIntegrationCmd represents the customintegration command
-// var updateCustomIntegrationCmd = &cobra.Command{
-// 	Use:   "customintegration",
-// 	Short: "A brief description of your command",
-// 	Long:  ``,
-// 	Run: func(cmd *cobra.Command, args []string) {
-// 				if err := auth.GetConnection(&targetConfig, debug); err != nil {
-// 	log.Fatalln(err)
-// }
+	},
+}
 
-// 		if importFile != "" { // If we are importing a file
-// 			customintegrations := importCustomIntegrations(importFile)
-// 			for _, value := range customintegrations {
-// 				exisitingCustomIntegration, err := getCustomIntegration("", value.Name, value.Project)
-// 				if err != nil {
-// 					log.Infoln("Update failed - unable to find existing Code Stream CustomIntegration", value.Name, "in", value.Project)
-// 				} else {
-// 					_, err := updateCustomIntegration(exisitingCustomIntegration[0].ID, value.Name, value.Description, value.Type, value.Value)
-// 					if err != nil {
-// 						log.Infoln("Unable to update Code Stream CustomIntegration: ", err)
-// 					} else {
-// 						log.Infoln("Updated customintegration", value.Name)
-// 					}
-// 				}
-// 			}
-// 		} else { // Else we are updating using flags
-// 			updateResponse, err := updateCustomIntegration(id, name, description, typename, value)
-// 			if err != nil {
-// 				log.Infoln("Unable to update Code Stream CustomIntegration: ", err)
-// 			}
-// 			log.Infoln("Updated customintegration", updateResponse.Name)
-// 		}
-// 	},
-// }
+// updateCustomIntegrationCmd represents the customintegration command
+var updateCustomIntegrationCmd = &cobra.Command{
+	Use:   "customintegration",
+	Short: "A brief description of your command",
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
 
-// // deleteCustomIntegrationCmd represents the executions command
-// var deleteCustomIntegrationCmd = &cobra.Command{
-// 	Use:   "customintegration",
-// 	Short: "A brief description of your command",
-// 	Long: `A longer description that spans multiple lines and likely contains examples
-// and usage of using your command. For example:
+		_, err := codestream.UpdateCustomIntegration(APIClient, id, description, yaml, versionName, versionState)
+		if err != nil {
+			log.Infoln("Unable to update Custom Integration: ", err)
+		}
+		log.Infoln("Updated Custom Integration")
 
-// Cobra is a CLI library for Go that empowers applications.
-// This application is a tool to generate the needed files
-// to quickly create a Cobra application.`,
-// 	Run: func(cmd *cobra.Command, args []string) {
-// 				if err := auth.GetConnection(&targetConfig, debug); err != nil {
-// 	log.Fatalln(err)
-// }
+	},
+}
 
-// 		response, err := deleteCustomIntegration(id)
-// 		if err != nil {
-// 			log.Infoln("Unable to delete customintegration: ", err)
-// 		}
-// 		log.Infoln("CustomIntegration with id " + response.ID + " deleted")
-// 	},
-// }
+// deleteCustomIntegrationCmd represents the executions command
+var deleteCustomIntegrationCmd = &cobra.Command{
+	Use:   "customintegration",
+	Short: "Delete Custom Integration by ID",
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+		err := codestream.DeleteCustomIntegration(APIClient, id)
+		if err != nil {
+			log.Infoln("Unable to delete customintegration: ", err)
+		}
+		log.Infoln("CustomIntegration deleted")
+	},
+}
 
 func init() {
 	// Get CustomIntegration
@@ -156,26 +122,21 @@ func init() {
 	getCustomIntegrationCmd.Flags().StringVarP(&name, "name", "n", "", "List customintegration with name")
 	getCustomIntegrationCmd.Flags().StringVarP(&id, "id", "i", "", "List customintegrations by id")
 	getCustomIntegrationCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
-	// // Create CustomIntegration
-	// createCmd.AddCommand(createCustomIntegrationCmd)
-	// createCustomIntegrationCmd.Flags().StringVarP(&name, "name", "n", "", "The name of the customintegration to create")
-	// createCustomIntegrationCmd.Flags().StringVarP(&typename, "type", "t", "", "The type of the customintegration to create REGULAR|SECRET|RESTRICTED")
-	// createCustomIntegrationCmd.Flags().StringVarP(&project, "project", "p", "", "The project in which to create the customintegration")
-	// createCustomIntegrationCmd.Flags().StringVarP(&value, "value", "v", "", "The value of the customintegration to create")
-	// createCustomIntegrationCmd.Flags().StringVarP(&description, "description", "d", "", "The description of the customintegration to create")
-	// createCustomIntegrationCmd.Flags().StringVarP(&importFile, "importfile", "i", "", "Path to a YAML file with the customintegrations to import")
-
-	// // Update CustomIntegration
-	// updateCmd.AddCommand(updateCustomIntegrationCmd)
-	// updateCustomIntegrationCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the customintegration to update")
-	// updateCustomIntegrationCmd.Flags().StringVarP(&name, "name", "n", "", "Update the name of the customintegration")
-	// updateCustomIntegrationCmd.Flags().StringVarP(&typename, "type", "t", "", "Update the type of the customintegration REGULAR|SECRET|RESTRICTED")
-	// updateCustomIntegrationCmd.Flags().StringVarP(&value, "value", "v", "", "Update the value of the customintegration ")
-	// updateCustomIntegrationCmd.Flags().StringVarP(&description, "description", "d", "", "Update the description of the customintegration")
-	// updateCustomIntegrationCmd.Flags().StringVarP(&importFile, "importfile", "", "", "Path to a YAML file with the customintegrations to import")
-	// //updateCustomIntegrationCmd.MarkFlagRequired("id")
-	// // Delete CustomIntegration
-	// deleteCmd.AddCommand(deleteCustomIntegrationCmd)
-	// deleteCustomIntegrationCmd.Flags().StringVarP(&id, "id", "i", "", "Delete customintegration by id")
-	// deleteCustomIntegrationCmd.MarkFlagRequired("id")
+	// Create CustomIntegration
+	createCmd.AddCommand(createCustomIntegrationCmd)
+	createCustomIntegrationCmd.Flags().StringVarP(&name, "name", "n", "", "The name of the customintegration to create")
+	createCustomIntegrationCmd.Flags().StringVarP(&description, "description", "d", "", "The description of the customintegration to create")
+	createCustomIntegrationCmd.Flags().StringVar(&yaml, "yaml", "", "Custom Integration YAML")
+	// Update CustomIntegration
+	updateCmd.AddCommand(updateCustomIntegrationCmd)
+	updateCustomIntegrationCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the customintegration to update")
+	updateCustomIntegrationCmd.Flags().StringVarP(&description, "description", "d", "", "Update the description of the customintegration")
+	updateCustomIntegrationCmd.Flags().StringVar(&yaml, "yaml", "", "Custom Integration YAML")
+	updateCustomIntegrationCmd.Flags().StringVar(&versionName, "versionName", "", "Create a new version using this name")
+	updateCustomIntegrationCmd.Flags().StringVar(&versionState, "versionState", "", "Update the version state (delete|release|deprecate|restore|withdraw)")
+	updateCustomIntegrationCmd.MarkFlagRequired("id")
+	// Delete CustomIntegration
+	deleteCmd.AddCommand(deleteCustomIntegrationCmd)
+	deleteCustomIntegrationCmd.Flags().StringVarP(&id, "id", "i", "", "Delete customintegration by id")
+	deleteCustomIntegrationCmd.MarkFlagRequired("id")
 }

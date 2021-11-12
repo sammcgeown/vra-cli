@@ -11,7 +11,7 @@
 
 ## Cloud Assembly
 
-|                  | Get              | Create           | Update           | Delete           | Import           | Export           | Testing          | Help             | Docs             |
+|                  | Get              | Create           | Update           | Delete           | Import           | Export           | Testing          | Help Message     | Docs             |
 |------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|
 | Cloud Account    |:white_check_mark:|                  |                  |:white_check_mark:|                  |                  |                  |                  |                  |
 | Cloud Template   |:white_check_mark:|:white_check_mark:|                  |:white_check_mark:|                  |                  |                  |                  |                  |
@@ -25,24 +25,24 @@
 * vRA Cloud Only
 ## Code Stream
 
-|                    | Get              | Create           | Update           | Delete           | Import           | Export           | Testing          | Help             | Docs             |
+|                    | Get              | Create           | Update           | Delete           | Import           | Export           | Testing          | Help Message     | Docs             |
 |--------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|
 | Endpoint           |:white_check_mark:| *Import*         |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |                  |                  |
 | Variable           |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |                  |                  |
 | Pipeline           |:white_check_mark:| *Import*         |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |                  |                  |
 | Execution          |:white_check_mark:|:white_check_mark:| *N/A*            |:white_check_mark:| *N/A*            | *N/A*            |                  |                  |                  |
-| Custom Integration |                  |                  |                  |                  |                  |                  |                  |                  |                  |
+| Custom Integration |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |                  |                  |                  |                  |
 | User Operations    |                  |                  |                  |                  |                  |                  |                  |                  |                  |
 
 ## Service Broker
 
-|                    | Get              | Create           | Update           | Delete           | Import           | Export           | Testing          | Help             | Docs             |
+|                    | Get              | Create           | Update           | Delete           | Import           | Export           | Testing          | Help Message     | Docs             |
 |--------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|
 | Catalog Item       |                  |                  |                  |                  |                  |                  |                  |                  |                  |
 
 ## Orchestrator
 
-|           | Get              | Create           | Update           | Delete           | Import           | Export           | Testing          | Help             | Docs             |
+|           | Get              | Create           | Update           | Delete           | Import           | Export           | Testing          | Help Message     | Docs             |
 |-----------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|
 | Category  |                  |                  |                  |                  |                  |                  |                  |                  |                  |
 | Workflow  |                  |                  |                  |                  |                  |                  |                  |                  |                  |

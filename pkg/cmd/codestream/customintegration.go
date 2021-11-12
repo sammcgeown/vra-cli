@@ -5,15 +5,22 @@ SPDX-License-Identifier: BSD-2-Clause
 package codestream
 
 import (
+	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
 )
 
 // GetCustomIntegration returns a custom integration
 func GetCustomIntegration(APIClient *types.APIClientOptions, id, name string) ([]*types.CustomIntegration, error) {
 	var arrCustomIntegrations []*types.CustomIntegration
+
+	APIClient.RESTClient.QueryParam.Set("$top", strconv.Itoa(APIClient.Pagination.PageSize))
+	APIClient.RESTClient.QueryParam.Set("$page", strconv.Itoa(APIClient.Pagination.Page))
+	APIClient.RESTClient.QueryParam.Set("$skip", strconv.Itoa(APIClient.Pagination.Skip))
 
 	var filters []string
 	if id != "" {
@@ -31,7 +38,7 @@ func GetCustomIntegration(APIClient *types.APIClientOptions, id, name string) ([
 		Get("/pipeline/api/custom-integrations")
 
 	if queryResponse.IsError() {
-		return nil, queryResponse.Error().(error)
+		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
 	}
 
 	for _, value := range queryResponse.Result().(*types.DocumentsList).Documents {
@@ -39,76 +46,138 @@ func GetCustomIntegration(APIClient *types.APIClientOptions, id, name string) ([
 		mapstructure.Decode(value, &c)
 		arrCustomIntegrations = append(arrCustomIntegrations, &c)
 	}
+	APIClient.RESTClient.QueryParam.Del("$top")
+	APIClient.RESTClient.QueryParam.Del("$page")
+	APIClient.RESTClient.QueryParam.Del("$skip")
+	APIClient.RESTClient.QueryParam.Del("$filter")
 	return arrCustomIntegrations, err
 }
 
-// // createCustomIntegration - Create a new Code Stream CustomIntegration
-// func createCustomIntegration(name string, description string, variableType string, project string, value string) (*types.CustomIntegrationResponse, error) {
-// 	client := resty.New()
-// 	response, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-// 		SetBody(
-// 			types.CustomIntegrationRequest{
-// 				Project:     project,
-// 				Kind:        "VARIABLE",
-// 				Name:        name,
-// 				Description: description,
-// 				Type:        variableType,
-// 				Value:       value,
-// 			}).
-// 		SetHeader("Accept", "application/json").
-// 		SetResult(&types.CustomIntegrationResponse{}).
-// 		SetError(&types.Exception{}).
-// 		SetAuthToken(targetConfig.AccessToken).
-// 		Post("https://" + targetConfig.Server + "/pipeline/api/variables")
-// 	if response.IsError() {
-// 		return nil, errors.New(response.Error().(*types.Exception).Message)
-// 	}
-// 	return response.Result().(*types.CustomIntegrationResponse), err
-// }
+// GetCustomIntegrationVersions returns all versions of a custom integration
+func GetCustomIntegrationVersions(APIClient *types.APIClientOptions, id string) ([]string, error) {
+	var versions []string
 
-// // updateCustomIntegration - Create a new Code Stream CustomIntegration
-// func updateCustomIntegration(id string, name string, description string, typename string, value string) (*types.CustomIntegrationResponse, error) {
-// 	variable, _ := getCustomIntegrationByID(id)
-// 	if name != "" {
-// 		variable.Name = name
-// 	}
-// 	if description != "" {
-// 		variable.Description = description
-// 	}
-// 	if typename != "" {
-// 		variable.Type = typename
-// 	}
-// 	if value != "" {
-// 		variable.Value = value
-// 	}
-// 	client := resty.New()
-// 	response, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-// 		SetBody(variable).
-// 		SetHeader("Accept", "application/json").
-// 		SetResult(&types.CustomIntegrationResponse{}).
-// 		SetError(&types.Exception{}).
-// 		SetAuthToken(targetConfig.AccessToken).
-// 		Put("https://" + targetConfig.Server + "/pipeline/api/variables/" + id)
-// 	if response.IsError() {
-// 		return nil, errors.New(response.Error().(*types.Exception).Message)
-// 	}
-// 	return response.Result().(*types.CustomIntegrationResponse), err
-// }
+	queryResponse, err := APIClient.RESTClient.R().
+		SetResult(&types.DocumentsList{}).
+		SetError(&types.Exception{}).
+		Get("/pipeline/api/custom-integrations/" + id + "/versions")
 
-// // deleteCustomIntegration - Delete a Code Stream CustomIntegration
-// func deleteCustomIntegration(id string) (*types.CustomIntegrationResponse, error) {
-// 	client := resty.New()
-// 	response, err := client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: ignoreCert}).R().
-// 		SetHeader("Accept", "application/json").
-// 		SetResult(&types.CustomIntegrationResponse{}).
-// 		SetAuthToken(targetConfig.AccessToken).
-// 		Delete("https://" + targetConfig.Server + "/pipeline/api/variables/" + id)
-// 	if response.IsError() {
-// 		log.Errorln("Create CustomIntegration failed", err)
-// 		os.Exit(1)
-// 	}
-// 	return response.Result().(*types.CustomIntegrationResponse), err
-// }
+	if queryResponse.IsError() {
+		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
+	}
+
+	for _, value := range queryResponse.Result().(*types.DocumentsList).Documents {
+		c := types.CustomIntegration{}
+		mapstructure.Decode(value, &c)
+		versions = append(versions, c.Version)
+	}
+	return versions, err
+}
+
+// CreateCustomIntegration - Create a new Code Stream CustomIntegration
+func CreateCustomIntegration(APIClient *types.APIClientOptions, name string, description string, yaml string) (*types.CustomIntegration, error) {
+	response, err := APIClient.RESTClient.R().
+		SetBody(
+			types.CustomIntegration{
+				Name:        name,
+				Description: description,
+				Yaml:        yaml,
+			}).
+		SetResult(&types.CustomIntegration{}).
+		SetError(&types.Exception{}).
+		Post("/pipeline/api/custom-integrations")
+	if response.IsError() {
+		return nil, errors.New(response.Error().(*types.Exception).Message)
+	}
+	return response.Result().(*types.CustomIntegration), err
+}
+
+// UpdateCustomIntegration - Create a new Code Stream CustomIntegration
+func UpdateCustomIntegration(APIClient *types.APIClientOptions, id string, description string, yaml string, version string, state string) (*types.CustomIntegration, error) {
+	var updatedCustomIntegration *types.CustomIntegration
+	CustomIntegration, _ := GetCustomIntegration(APIClient, id, "")
+	if len(CustomIntegration) == 0 {
+		return nil, errors.New("Custom Integration not found")
+	} else if len(CustomIntegration) > 1 {
+		return nil, errors.New("Multiple Custom Integrations found")
+	}
+
+	if description != "" || yaml != "" {
+		if description != "" {
+			CustomIntegration[0].Description = description
+		}
+		if yaml != "" {
+			CustomIntegration[0].Yaml = yaml
+		}
+
+		queryResponse, _ := APIClient.RESTClient.R().
+			SetBody(CustomIntegration[0]).
+			SetResult(&types.CustomIntegration{}).
+			SetError(&types.Exception{}).
+			Put("/pipeline/api/custom-integrations/" + CustomIntegration[0].ID)
+
+		if queryResponse.IsError() {
+			return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
+		}
+		updatedCustomIntegration = queryResponse.Result().(*types.CustomIntegration)
+	}
+	if version != "" {
+		currentVersions, err := GetCustomIntegrationVersions(APIClient, CustomIntegration[0].ID)
+		if err != nil {
+			return nil, err
+		}
+		if !helpers.StringArrayContains(currentVersions, version) {
+			// Version doesn't already exist
+			queryResponse, _ := APIClient.RESTClient.R().
+				SetBody(`{"changeLog":"Updated by vra-cli", "description":"Updated by vRealize Automation CLI", "version":"` + version + `"}`).
+				SetResult(&types.CustomIntegration{}).
+				SetError(&types.Exception{}).
+				Post("/pipeline/api/custom-integrations/" + CustomIntegration[0].ID + "/versions")
+
+			if queryResponse.IsError() {
+				return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
+			}
+			updatedCustomIntegration = queryResponse.Result().(*types.CustomIntegration)
+		}
+		if state == "delete" {
+			// Delete the version
+			queryResponse, _ := APIClient.RESTClient.R().
+				SetResult(&types.CustomIntegration{}).
+				SetError(&types.Exception{}).
+				Delete("/pipeline/api/custom-integrations/" + CustomIntegration[0].ID + "/versions/" + version)
+
+			if queryResponse.IsError() {
+				return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
+			}
+			updatedCustomIntegration = queryResponse.Result().(*types.CustomIntegration)
+		} else if state != "" {
+			// Update the version's state
+			queryResponse, _ := APIClient.RESTClient.R().
+				SetResult(&types.CustomIntegration{}).
+				SetError(&types.Exception{}).
+				Post("/pipeline/api/custom-integrations/" + CustomIntegration[0].ID + "/versions/" + version + "/" + state)
+
+			if queryResponse.IsError() {
+				return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
+			}
+			updatedCustomIntegration = queryResponse.Result().(*types.CustomIntegration)
+		}
+
+	}
+	return updatedCustomIntegration, nil
+}
+
+// DeleteCustomIntegration - Delete a Code Stream CustomIntegration
+func DeleteCustomIntegration(APIClient *types.APIClientOptions, id string) error {
+	queryResponse, err := APIClient.RESTClient.R().
+		SetResult(&types.CustomIntegration{}).
+		SetError(&types.Exception{}).
+		Delete("/pipeline/api/custom-integrations/" + id)
+	if queryResponse.IsError() {
+		return errors.New(queryResponse.Error().(*types.Exception).Message)
+	}
+	return err
+}
 
 // // exportCustomIntegration - Export a variable to YAML
 // func exportCustomIntegration(variable interface{}, exportFile string) {

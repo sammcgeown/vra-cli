@@ -1,0 +1,17 @@
+---
+runtime: "nodejs"
+code: |
+  var context = require("./context.js") var start = Date.now(); var message = context.getInput("message"); console.log("starting timer is good " + message); setTimeout(function() { var millis = Date.now() - start; console.log("seconds elapsed = " + Math.floor(millis/1000)); context.setOutput("time", millis); }, 2000);
+inputProperties: 
+- name: message 
+  type: text 
+  title: Message 
+  placeHolder: Time 
+  defaultValue: 
+  bindable: true 
+  labelInfo: true 
+  labelMessage: What is time 
+outputProperties:
+- name: time
+  type: label
+  title: Time
