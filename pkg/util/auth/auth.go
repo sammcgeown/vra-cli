@@ -232,6 +232,7 @@ func GetRESTClient(config *types.Config, apiVersion string, insecure bool, debug
 		SetAuthToken(config.AccessToken).
 		SetHostURL("https://"+config.Server).
 		SetHeader("Accept", "application/json").
+		SetHeader("Content-Type", "application/json").
 		SetError(&types.Exception{}).
 		SetQueryParam("apiVersion", apiVersion)
 	return client
