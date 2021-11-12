@@ -5,13 +5,17 @@ SPDX-License-Identifier: BSD-2-Clause
 package codestream
 
 import (
+	"encoding/json"
 	"errors"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/sammcgeown/vra-cli/pkg/util/helpers"
 	"github.com/sammcgeown/vra-cli/pkg/util/types"
+	log "github.com/sirupsen/logrus"
 )
 
 // GetCustomIntegration returns a custom integration
@@ -75,14 +79,21 @@ func GetCustomIntegrationVersions(APIClient *types.APIClientOptions, id string) 
 }
 
 // CreateCustomIntegration - Create a new Code Stream CustomIntegration
-func CreateCustomIntegration(APIClient *types.APIClientOptions, name string, description string, yaml string) (*types.CustomIntegration, error) {
+func CreateCustomIntegration(APIClient *types.APIClientOptions, name string, description string, yaml string, importPath string) (*types.CustomIntegration, error) {
+	var customIntegration *types.CustomIntegration
+	if importPath != "" {
+		var importErr error
+		customIntegration, importErr = ImportCustomIntegration(importPath)
+		if importErr != nil {
+			return nil, importErr
+		}
+	} else {
+		customIntegration.Name = name
+		customIntegration.Description = description
+		customIntegration.Yaml = yaml
+	}
 	response, err := APIClient.RESTClient.R().
-		SetBody(
-			types.CustomIntegration{
-				Name:        name,
-				Description: description,
-				Yaml:        yaml,
-			}).
+		SetBody(customIntegration).
 		SetResult(&types.CustomIntegration{}).
 		SetError(&types.Exception{}).
 		Post("/pipeline/api/custom-integrations")
@@ -168,7 +179,20 @@ func UpdateCustomIntegration(APIClient *types.APIClientOptions, id string, descr
 }
 
 // DeleteCustomIntegration - Delete a Code Stream CustomIntegration
-func DeleteCustomIntegration(APIClient *types.APIClientOptions, id string) error {
+func DeleteCustomIntegration(APIClient *types.APIClientOptions, id, name string) error {
+	if name != "" && id == "" {
+		customIntegration, err := GetCustomIntegration(APIClient, "", name)
+		if err != nil {
+			return err
+		}
+		if len(customIntegration) == 0 {
+			return errors.New("Custom Integration not found")
+		}
+		if len(customIntegration) > 1 {
+			return errors.New("Multiple Custom Integrations found")
+		}
+		id = customIntegration[0].ID
+	}
 	queryResponse, err := APIClient.RESTClient.R().
 		SetResult(&types.CustomIntegration{}).
 		SetError(&types.Exception{}).
@@ -179,40 +203,47 @@ func DeleteCustomIntegration(APIClient *types.APIClientOptions, id string) error
 	return err
 }
 
-// // exportCustomIntegration - Export a variable to YAML
-// func exportCustomIntegration(variable interface{}, exportFile string) {
-// 	// variable will be a types.CustomIntegrationResponse, so lets remap to types.CustomIntegrationRequest
-// 	c := types.CustomIntegrationRequest{}
-// 	mapstructure.Decode(variable, &c)
-// 	yaml, err := yaml.Marshal(c)
-// 	if err != nil {
-// 		log.Errorln("Unable to export variable ", c.Name)
-// 	}
-// 	if exportFile == "" {
-// 		exportFile = "variables.yaml"
-// 	}
-// 	file, err := os.OpenFile(exportFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+// ExportCustomIntegration - Export a custom integration
+func ExportCustomIntegration(customintegration types.CustomIntegration, exportPath string, overwrite bool) error {
+	_, pathError := os.Stat(exportPath) // Check if folder exists
+	if pathError != nil {
+		if os.IsNotExist(pathError) { // If it doesn't exist
+			os.MkdirAll(exportPath, 0755) // Create the folder
+		} else {
+			return pathError // Return the error
+		}
+	}
 
-// 	defer file.Close()
-// 	file.WriteString("---\n" + string(yaml))
-// }
+	// Create the absolute path, with file name
+	filePath, _ := filepath.Abs(filepath.Join(exportPath, customintegration.Name+".json"))
+	fileStat, fileErr := os.Stat(filePath)
+	if fileErr != nil {
+		if os.IsNotExist(fileErr) {
+			// Create the file
+		} else {
+			return fileErr
+		}
+	} else if fileStat.Mode().IsRegular() && !overwrite {
+		return errors.New(filePath + " exists, use --force to overwrite")
+	}
 
-// // importCustomIntegrations - Import variables from the filePath
-// func importCustomIntegrations(filePath string) []types.CustomIntegrationRequest {
-// 	var returnCustomIntegrations []types.CustomIntegrationRequest
-// 	filename, _ := filepath.Abs(filePath)
-// 	yamlFile, err := ioutil.ReadFile(filename)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	reader := bytes.NewReader(yamlFile)
-// 	decoder := yaml.NewDecoder(reader)
-// 	var request types.CustomIntegrationRequest
-// 	for decoder.Decode(&request) == nil {
-// 		returnCustomIntegrations = append(returnCustomIntegrations, request)
-// 	}
-// 	return returnCustomIntegrations
-// }
+	ci, _ := json.MarshalIndent(customintegration, "", "  ")
+	writeErr := os.WriteFile(filePath, ci, 0644)
+	if writeErr != nil {
+		return writeErr
+	}
+	return nil
+}
+
+// ImportCustomIntegration - Import Custom Integrations from the importPath
+func ImportCustomIntegration(importPath string) (*types.CustomIntegration, error) {
+	filename, _ := filepath.Abs(importPath)
+	log.Debugln("Importing Custom Integration from", filename)
+	customIntegration, readErr := os.ReadFile(filename)
+	if readErr != nil {
+		return nil, readErr
+	}
+	ci := &types.CustomIntegration{}
+	json.Unmarshal(customIntegration, ci)
+	return ci, nil
+}

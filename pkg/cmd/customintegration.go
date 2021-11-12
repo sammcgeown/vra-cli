@@ -50,10 +50,13 @@ Get by Project
 		if APIClient.Output == "json" {
 			helpers.PrettyPrint(response)
 		} else if APIClient.Output == "export" {
-			log.Warnln("Exporting Custom Integrations is not supported yet")
-			// for _, c := range response {
-			// 	exportCustomIntegration(c, exportFile)
-			// }
+			for _, c := range response {
+				if err := codestream.ExportCustomIntegration(*c, exportPath, APIClient.Force); err != nil {
+					log.Errorln("Unable to export Custom Integration: ", err)
+				} else {
+					log.Infoln("Exported Custom Integration:", c.Name)
+				}
+			}
 		} else {
 			// Print result table
 			table := tablewriter.NewWriter(os.Stdout)
@@ -77,12 +80,11 @@ var createCustomIntegrationCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		createResponse, err := codestream.CreateCustomIntegration(APIClient, name, description, yaml)
+		createResponse, err := codestream.CreateCustomIntegration(APIClient, name, description, yaml, importPath)
 		if err != nil {
-			log.Errorln("Unable to create Custom Integration:", err)
+			log.Fatalln("Unable to create Custom Integration:", err)
 		}
 		helpers.PrettyPrint(createResponse)
-
 	},
 }
 
@@ -95,7 +97,7 @@ var updateCustomIntegrationCmd = &cobra.Command{
 
 		_, err := codestream.UpdateCustomIntegration(APIClient, id, description, yaml, versionName, versionState)
 		if err != nil {
-			log.Infoln("Unable to update Custom Integration: ", err)
+			log.Fatalln("Unable to update Custom Integration: ", err)
 		}
 		log.Infoln("Updated Custom Integration")
 
@@ -108,11 +110,11 @@ var deleteCustomIntegrationCmd = &cobra.Command{
 	Short: "Delete Custom Integration by ID",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := codestream.DeleteCustomIntegration(APIClient, id)
+		err := codestream.DeleteCustomIntegration(APIClient, id, name)
 		if err != nil {
-			log.Infoln("Unable to delete customintegration: ", err)
+			log.Fatalln("Unable to delete Custom Integration: ", err)
 		}
-		log.Infoln("CustomIntegration deleted")
+		log.Infoln("Custom Integration deleted")
 	},
 }
 
@@ -127,6 +129,8 @@ func init() {
 	createCustomIntegrationCmd.Flags().StringVarP(&name, "name", "n", "", "The name of the customintegration to create")
 	createCustomIntegrationCmd.Flags().StringVarP(&description, "description", "d", "", "The description of the customintegration to create")
 	createCustomIntegrationCmd.Flags().StringVar(&yaml, "yaml", "", "Custom Integration YAML")
+	createCustomIntegrationCmd.Flags().StringVar(&importPath, "importPath", "", "Path to Custom Integration JSON to import")
+
 	// Update CustomIntegration
 	updateCmd.AddCommand(updateCustomIntegrationCmd)
 	updateCustomIntegrationCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the customintegration to update")
@@ -138,5 +142,5 @@ func init() {
 	// Delete CustomIntegration
 	deleteCmd.AddCommand(deleteCustomIntegrationCmd)
 	deleteCustomIntegrationCmd.Flags().StringVarP(&id, "id", "i", "", "Delete customintegration by id")
-	deleteCustomIntegrationCmd.MarkFlagRequired("id")
+	deleteCustomIntegrationCmd.Flags().StringVarP(&name, "name", "n", "", "Delete customintegration by name")
 }

@@ -31,7 +31,7 @@
 | Variable           |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |                  |                  |
 | Pipeline           |:white_check_mark:| *Import*         |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |                  |                  |
 | Execution          |:white_check_mark:|:white_check_mark:| *N/A*            |:white_check_mark:| *N/A*            | *N/A*            |                  |                  |                  |
-| Custom Integration |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |                  |                  |                  |                  |
+| Custom Integration |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |                  |                  |
 | User Operations    |                  |                  |                  |                  |                  |                  |                  |                  |                  |
 
 ## Service Broker
