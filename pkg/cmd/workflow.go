@@ -52,7 +52,7 @@ vra-cli get workflow --status FAILED --project "Field Demo" --name "Learn Code S
 			} else if APIClient.Output == "export" {
 				// Export the Worfklow
 				for _, workflow := range response {
-					err := orchestrator.ExportWorkflow(APIClient, workflow.ID, workflow.Name, category)
+					err := orchestrator.ExportWorkflow(APIClient, workflow.ID, workflow.Name, exportPath)
 					if err != nil {
 						log.Warnln("Unable to export workflow: ", err)
 					} else {
@@ -135,13 +135,14 @@ func init() {
 	getWorkflowCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Workflow")
 	getWorkflowCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Workflows to list")
 	getWorkflowCmd.Flags().StringVarP(&category, "category", "c", "", "Filter Workflows by Category")
+	getWorkflowCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
 	// Delete
 	deleteCmd.AddCommand(delWorkflowCmd)
 	delWorkflowCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Workflow to delete")
 	delWorkflowCmd.MarkFlagRequired("id")
-
 	// Create
 	createCmd.AddCommand(createWorkflowCmd)
 	createWorkflowCmd.Flags().StringVarP(&category, "category", "c", "", "Category to import")
 	createWorkflowCmd.Flags().StringVar(&importPath, "importPath", "", "Path to the zip file, or folder containing zip files, to import")
+	createWorkflowCmd.MarkFlagRequired("importPath")
 }
