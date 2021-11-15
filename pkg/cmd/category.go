@@ -57,14 +57,15 @@ var getCategoryCmd = &cobra.Command{
 				}
 				table.Render()
 			} else if APIClient.Output == "export" {
+				log.Warnln("Export mode is not supported for this command")
 				// Export the Worfklow
 				// for _, workflow := range categories {
-				// 	// err := orchestrator.ExportWorkflow(APIClient, workflow.ID, workflow.Name, category)
-				// 	// if err != nil {
-				// 	// 	log.Warnln("Unable to export workflow: ", err)
-				// 	// } else {
-				// 	// 	log.Infoln("Workflow", workflow.Name, "exported")
-				// 	// }
+				// 	err := orchestrator.ExportWorkflow(APIClient, workflow.ID, workflow.Name, category)
+				// 	if err != nil {
+				// 		log.Warnln("Unable to export workflow: ", err)
+				// 	} else {
+				// 		log.Infoln("Workflow", workflow.Name, "exported")
+				// 	}
 				// }
 
 			} else {
@@ -165,6 +166,8 @@ func init() {
 	createCategoryCmd.Flags().StringVarP(&name, "name", "n", "", "Category Name")
 	createCategoryCmd.Flags().StringVarP(&categoryType, "type", "t", "", "Category Type  ['ResourceElementCategory', 'ConfigurationElementCategory', 'WorkflowCategory', 'PolicyTemplateCategory', 'ScriptModuleCategory']")
 	createCategoryCmd.Flags().StringVar(&parentCategoryID, "parent", "", "Category Category ID")
+	createCategoryCmd.MarkFlagRequired("name")
+	createCategoryCmd.MarkFlagRequired("type")
 	// Update
 	updateCmd.AddCommand(updateCategoryCmd)
 	updateCategoryCmd.Flags().StringVarP(&id, "id", "i", "", "ID of the Category")
