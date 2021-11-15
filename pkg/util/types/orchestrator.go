@@ -107,3 +107,96 @@ type InputParameters struct {
 	Type        string `json:"type"`
 	Name        string `json:"name"`
 }
+
+// WsPackages is a list of references to packages
+type WsPackages struct {
+	Link  []PackageLink `json:"link"`
+	Start int           `json:"start"`
+	Total int           `json:"total"`
+}
+
+// PackageLink is a reference to a package
+type PackageLink struct {
+	Attribute []Attribute `json:"attributes"`
+	Href      string      `json:"href"`
+	Type      string      `json:"type"`
+	Rel       string      `json:"rel"`
+}
+
+// WsPackage is a package
+type WsPackage struct {
+	Workflows       []Workflows       `json:"workflows"`
+	Actions         []Actions         `json:"actions"`
+	Configurations  []Configurations  `json:"configurations"`
+	Resources       []Resources       `json:"resources"`
+	PolicyTemplates []PolicyTemplates `json:"policyTemplates"`
+	UsedPlugins     []UsedPlugins     `json:"usedPlugins"`
+	ID              string            `json:"id"`
+	Href            string            `json:"href"`
+	Name            string            `json:"name"`
+	Description     string            `json:"description"`
+}
+
+// ExportPackageOptions represents the options for exporting a package
+type ExportPackageOptions struct {
+	ExportConfigurationAttributeValues      bool
+	ExportConfigSecureStringAttributeValues bool
+	ExportGlobalTags                        bool
+	ViewContents                            bool
+	AddToPackage                            bool
+	EditContents                            bool
+}
+
+// Attribute is a name/value pair attribute
+type Attribute struct {
+	DisplayValue string `json:"displayValue"`
+	Value        string `json:"value"`
+	Name         string `json:"name"`
+}
+
+// Workflows is a list of workflows
+type Workflows struct {
+	Attribute []Attribute `json:"attribute"`
+	Href      string      `json:"href"`
+	Type      string      `json:"type"`
+	Rel       string      `json:"rel"`
+}
+
+// Actions is a list of actions
+type Actions struct {
+	Attribute []Attribute `json:"attribute"`
+	Href      string      `json:"href"`
+	Type      string      `json:"type"`
+	Rel       string      `json:"rel"`
+}
+
+// Configurations is a list of configurations
+type Configurations struct {
+	Attribute []Attribute `json:"attribute"`
+	Href      string      `json:"href"`
+	Type      string      `json:"type"`
+	Rel       string      `json:"rel"`
+}
+
+// Resources is a list of resources
+type Resources struct {
+	Attribute []Attribute `json:"attribute"`
+	Href      string      `json:"href"`
+	Type      string      `json:"type"`
+	Rel       string      `json:"rel"`
+}
+
+// PolicyTemplates is a list of policy templates
+type PolicyTemplates struct {
+	Attribute []Attribute `json:"attribute"`
+	Href      string      `json:"href"`
+	Type      string      `json:"type"`
+	Rel       string      `json:"rel"`
+}
+
+// UsedPlugins is a used plugin definition
+type UsedPlugins struct {
+	Name          string `json:"name"`
+	Version       string `json:"version"`
+	ServerVersion string `json:"server-version"`
+}
