@@ -63,7 +63,7 @@ func GetConfigFromFile(configFile string) *types.Config {
 
 	currentTargetName := viper.GetString("currentTargetName")
 	if currentTargetName != "" {
-		log.Infoln("Context:", currentTargetName)
+		log.Debugln("Context:", currentTargetName)
 		configuration := viper.Sub("target." + currentTargetName)
 		if configuration == nil { // Sub returns nil if the key cannot be found
 			log.Fatalln("Target configuration not found")
