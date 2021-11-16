@@ -4,6 +4,8 @@ SPDX-License-Identifier: BSD-2-Clause
 */
 package types
 
+import "time"
+
 // *** Orchestrator Types ***
 
 // InventoryItemsList is a list of InventoryItems
@@ -147,6 +149,13 @@ type ExportPackageOptions struct {
 	EditContents                            bool
 }
 
+// ImportPackageOptions represents the options for exporting a package
+type ImportPackageOptions struct {
+	ImportConfigurationAttributeValues      bool
+	ImportConfigSecureStringAttributeValues bool
+	TagImportMode                           string
+}
+
 // Attribute is a name/value pair attribute
 type Attribute struct {
 	DisplayValue string `json:"displayValue"`
@@ -199,4 +208,45 @@ type UsedPlugins struct {
 	Name          string `json:"name"`
 	Version       string `json:"version"`
 	ServerVersion string `json:"server-version"`
+}
+
+// ImportPackageDetails is the details of a package to import
+type ImportPackageDetails struct {
+	PackageName          string                 `json:"packageName"`
+	PackageAlreadyExists bool                   `json:"packageAlreadyExists"`
+	ContentVerified      bool                   `json:"contentVerified"`
+	CertificateInfo      CertificateInfo        `json:"certificateInfo"`
+	CertificateValid     bool                   `json:"certificateValid"`
+	CertificateTrusted   bool                   `json:"certificateTrusted"`
+	CertificateUnknown   bool                   `json:"certificateUnknown"`
+	ImportElementDetails []ImportElementDetails `json:"importElementDetails"`
+}
+
+// CertificateInfo is the certificate information of the imported package
+type CertificateInfo struct {
+	Organization       string    `json:"organization"`
+	OrganizationalUnit string    `json:"organizationalUnit"`
+	CommonName         string    `json:"commonName"`
+	ValidUntilDate     time.Time `json:"validUntilDate"`
+	ValidFromDate      time.Time `json:"validFromDate"`
+	PublicKeyAlgorithm string    `json:"publicKeyAlgorithm"`
+	FingerprintSHA1    string    `json:"fingerprintSHA1"`
+	SerialNumber       string    `json:"serialNumber"`
+}
+
+// ImportElementDetails is the details of a package element to import
+type ImportElementDetails struct {
+	ID                  string `json:"id"`
+	Type                string `json:"type"`
+	FileObjectName      string `json:"fileObjectName"`
+	FileCategory        string `json:"fileCategory"`
+	VersionComparison   string `json:"versionComparison"`
+	FileObjectVersion   string `json:"fileObjectVersion"`
+	ServerObjectName    string `json:"serverObjectName"`
+	ServerCategory      string `json:"serverCategory"`
+	ServerObjectVersion string `json:"serverObjectVersion"`
+	ImportIt            bool   `json:"importIt"`
+	HasTenantConflict   bool   `json:"hasTenantConflict"`
+	HasNameConflict     bool   `json:"hasNameConflict"`
+	IsRenamed           bool   `json:"isRenamed"`
 }

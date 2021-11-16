@@ -19,12 +19,8 @@ import (
 )
 
 var (
-	exportConfigurationAttributeValues      bool
-	exportConfigSecureStringAttributeValues bool
-	exportGlobalTags                        bool
-	viewContents                            bool
-	addToPackage                            bool
-	editContents                            bool
+	exportOptions types.ExportPackageOptions
+	importOptions types.ImportPackageOptions
 )
 
 // getPackageCmd represents the Packages command
@@ -54,15 +50,8 @@ var getPackageCmd = &cobra.Command{
 			} else if APIClient.Output == "export" {
 				// Export the Package
 				for _, Package := range response {
-					var options = types.ExportPackageOptions{
-						ExportConfigurationAttributeValues:      exportConfigurationAttributeValues,
-						ExportConfigSecureStringAttributeValues: exportConfigSecureStringAttributeValues,
-						ExportGlobalTags:                        exportGlobalTags,
-						ViewContents:                            viewContents,
-						AddToPackage:                            addToPackage,
-						EditContents:                            editContents,
-					}
-					err := orchestrator.ExportPackage(APIClient, Package.Name, options, exportPath)
+
+					err := orchestrator.ExportPackage(APIClient, Package.Name, exportOptions, exportPath)
 					if err != nil {
 						log.Warnln("Unable to export Package: ", err)
 					} else {
@@ -94,69 +83,86 @@ var getPackageCmd = &cobra.Command{
 // 	},
 // }
 
-// // createPackageCmd represents the Packages command
-// var createPackageCmd = &cobra.Command{
-// 	Use:   "package",
-// 	Short: "Create a Package",
-// 	Long:  `Create a Package`,
-// 	Run: func(cmd *cobra.Command, args []string) {
-// 		// Get the category ID
-// 		var CategoryID string
-// 		categoryName := (strings.Split(category, "/"))[len(strings.Split(category, "/"))-1]
-// 		categories, _ := orchestrator.GetCategoryByName(APIClient, categoryName, "PackageCategory")
-// 		if len(categories) == 0 {
-// 			log.Fatalln("Unable to find category:", categoryName)
-// 		} else if len(categories) == 1 {
-// 			// Only one category found
-// 			log.Debugln("Category found:", categories[0].Name, categories[0].ID)
-// 			CategoryID = categories[0].ID
-// 		} else {
-// 			for _, matchedCategory := range categories {
-// 				if matchedCategory.Path == category {
-// 					log.Debugln("Category ID:", matchedCategory.ID)
-// 					CategoryID = matchedCategory.ID
-// 					break
-// 				}
-// 			}
-// 			if CategoryID == "" {
-// 				log.Fatalln("Multiple categories found, try using a more specific category - e.g.: path/to/category")
-// 			}
-// 		}
-// 		for _, path := range helpers.GetFilePaths(importPath, ".zip") {
-// 			log.Infoln("Importing Package:", path)
-// 			err := orchestrator.ImportPackage(APIClient, path, CategoryID)
-// 			if err != nil {
-// 				log.Errorln("Unable to import Package: ", err)
-// 			} else {
-// 				Package, err := orchestrator.GetPackage(APIClient, "", categoryName, name)
-// 				if err != nil {
-// 					log.Errorln("Package imported OK, but I'm unable to get imported Package details: ", err)
-// 				}
-// 				log.Infoln("Package imported:", Package[0].Name, "with ID:", Package[0].ID)
-// 			}
-// 		}
+// createPackageCmd represents the Packages command
+var createPackageCmd = &cobra.Command{
+	Use:   "package",
+	Short: "Create a Package",
+	Long:  `Create a Package`,
+	Run: func(cmd *cobra.Command, args []string) {
 
-// 	},
-// }
+		for _, path := range helpers.GetFilePaths(importPath, ".package") {
+			log.Debugln("Importing Package:", path)
+			packageDetails, packageErr := orchestrator.GetPackageDetails(APIClient, path, importOptions)
+			if packageErr != nil {
+				log.Fatalln("Unable to get Package details: ", packageErr)
+			}
+
+			log.Infoln("Importing", packageDetails.PackageName)
+			if packageDetails.PackageAlreadyExists && !APIClient.Force {
+				log.Warnln("Package already exists, only new or newer content will be imported, use --force to override.")
+			}
+			if !packageDetails.CertificateValid {
+				helpers.PrettyPrint(packageDetails.CertificateInfo)
+				if !helpers.AskForConfirmation("Certificate is not valid") {
+					log.Fatalln("Certificate is not valid, user declined")
+				}
+
+			}
+			if !packageDetails.CertificateTrusted {
+				helpers.PrettyPrint(packageDetails.CertificateInfo)
+				if !helpers.AskForConfirmation("Certificate is not trusted, continue?") {
+					log.Fatalln("Certificate is not trusted, user declined")
+				}
+			}
+
+			if packageDetails.PackageAlreadyExists {
+				table := tablewriter.NewWriter(os.Stdout)
+				table.SetHeader([]string{"Name", "Type", "Version", "Imported"})
+				for _, value := range packageDetails.ImportElementDetails {
+					table.Append([]string{value.FileObjectName, value.Type, value.FileObjectVersion, strconv.FormatBool(value.ImportIt)})
+				}
+				table.Render()
+				if !helpers.AskForConfirmation("Package already exists, continue?") {
+					log.Fatalln("Package already exists, user declined")
+				}
+			}
+
+			importError := orchestrator.CreatePackage(APIClient, path, importOptions)
+			if importError != nil {
+				log.Errorln("Unable to import Package: ", importError)
+			} else {
+				Package, err := orchestrator.GetPackage(APIClient, packageDetails.PackageName)
+				if err != nil {
+					log.Errorln("Package imported OK, but I'm unable to get imported Package details: ", err)
+				}
+				log.Infoln("Package imported:", Package[0].Name, "with ID:", Package[0].ID)
+			}
+		}
+
+	},
+}
 
 func init() {
 	// Get
 	getCmd.AddCommand(getPackageCmd)
 	getPackageCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Package")
 	getPackageCmd.Flags().StringVarP(&exportPath, "exportPath", "", "", "Path to export objects - relative or absolute location")
-	getPackageCmd.Flags().BoolVar(&exportConfigurationAttributeValues, "exportConfigurationAttributeValues", false, "(Export) Add configuration attribute values to package")
-	getPackageCmd.Flags().BoolVar(&exportConfigSecureStringAttributeValues, "exportConfigSecureStringAttributeValues", false, "(Export) Add configuration SecureString attribute values to package")
-	getPackageCmd.Flags().BoolVar(&exportGlobalTags, "exportGlobalTags", false, "(Export) Add global tags to package")
-	getPackageCmd.Flags().BoolVar(&viewContents, "viewContents", false, "(Export) Set `View Contents` permission")
-	getPackageCmd.Flags().BoolVar(&addToPackage, "addToPackage", false, "(Export) Set `Add to package` permission")
-	getPackageCmd.Flags().BoolVar(&editContents, "editContents", false, "(Export) Set `Edit contents` permission")
+	getPackageCmd.Flags().BoolVar(&exportOptions.ExportConfigurationAttributeValues, "exportConfigurationAttributeValues", false, "(Export) Add configuration attribute values to package")
+	getPackageCmd.Flags().BoolVar(&exportOptions.ExportConfigSecureStringAttributeValues, "exportConfigSecureStringAttributeValues", false, "(Export) Add configuration SecureString attribute values to package")
+	getPackageCmd.Flags().BoolVar(&exportOptions.ExportGlobalTags, "exportGlobalTags", false, "(Export) Add global tags to package")
+	getPackageCmd.Flags().BoolVar(&exportOptions.ViewContents, "viewContents", true, "(Export) Set `View Contents` permission. Default: true")
+	getPackageCmd.Flags().BoolVar(&exportOptions.AddToPackage, "addToPackage", true, "(Export) Set `Add to package` permission. Default: true")
+	getPackageCmd.Flags().BoolVar(&exportOptions.EditContents, "editContents", true, "(Export) Set `Edit contents` permission. Default: true")
 	// // Delete
 	// deleteCmd.AddCommand(delPackageCmd)
 	// delPackageCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Package")
 	// delPackageCmd.MarkFlagRequired("id")
-	// // Create
-	// createCmd.AddCommand(createPackageCmd)
-	// createPackageCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Package")
-	// createPackageCmd.Flags().StringVar(&importPath, "importPath", "", "Path to the zip file, or folder containing zip files, to import")
-	// createPackageCmd.MarkFlagRequired("importPath")
+	// Create
+	createCmd.AddCommand(createPackageCmd)
+	createPackageCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Package")
+	createPackageCmd.Flags().BoolVar(&importOptions.ImportConfigurationAttributeValues, "importConfigurationAttributeValues", true, "Import configuration attribute values with the package. Default: true")
+	createPackageCmd.Flags().BoolVar(&importOptions.ImportConfigSecureStringAttributeValues, "importConfigSecureStringAttributeValues", true, "Import configuration SecureString attribute values with the package. Default: true")
+	createPackageCmd.Flags().StringVar(&importOptions.TagImportMode, "tagImportMode", "ImportButPreserveExistingValue", "Tag import mode. Available values : DoNotImport, ImportAndOverwriteExistingValue, ImportButPreserveExistingValue. Default: ImportButPreserveExistingValue")
+	createPackageCmd.Flags().StringVar(&importPath, "importPath", "", "Path to the zip file, or folder containing zip files, to import")
+	createPackageCmd.MarkFlagRequired("importPath")
 }

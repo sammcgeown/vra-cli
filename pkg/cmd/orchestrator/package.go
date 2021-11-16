@@ -5,7 +5,9 @@ SPDX-License-Identifier: BSD-2-Clause
 package orchestrator
 
 import (
+	"bytes"
 	"errors"
+	"io/ioutil"
 	"path/filepath"
 	"strconv"
 
@@ -127,31 +129,48 @@ func ExportPackage(APIClient *types.APIClientOptions, name string, options types
 	return nil
 }
 
-// // CreateCategory creates a category
-// func CreateCategory(APIClient *types.APIClientOptions, categoryName string, categoryType string, parentCategoryID string) (*types.WsCategory, error) {
-// 	var categoryURL string
+// CreatePackage imports a Package
+func CreatePackage(APIClient *types.APIClientOptions, importPath string, importOptions types.ImportPackageOptions) error {
 
-// 	if parentCategoryID != "" {
-// 		categoryURL = "/" + parentCategoryID
-// 	}
+	APIClient.RESTClient.QueryParam.Set("importValues", strconv.FormatBool(importOptions.ImportConfigurationAttributeValues))
+	APIClient.RESTClient.QueryParam.Set("importSecureValues", strconv.FormatBool(importOptions.ImportConfigSecureStringAttributeValues))
+	APIClient.RESTClient.QueryParam.Set("importTagMode", importOptions.TagImportMode)
+	APIClient.RESTClient.QueryParam.Set("force", strconv.FormatBool(APIClient.Force))
 
-// 	queryResponse, err := APIClient.RESTClient.R().
-// 		SetBody(types.WsCategoryRequest{
-// 			Name: categoryName,
-// 			Type: categoryType,
-// 		}).
-// 		SetResult(&types.WsCategory{}).
-// 		SetError(&types.Exception{}).
-// 		Post("/vco/api/categories" + categoryURL)
+	packageBytes, err := ioutil.ReadFile(importPath)
+	if err != nil {
+		return err
+	}
 
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	queryResponse, err := APIClient.RESTClient.R().
+		SetFileReader("file", "import.package", bytes.NewReader(packageBytes)).
+		SetError(&types.Exception{}).
+		Post("/vco/api/packages")
 
-// 	category := queryResponse.Result().(*types.WsCategory)
+	if err != nil {
+		return errors.New(queryResponse.Error().(*types.Exception).Message)
+	}
 
-// 	return category, nil
-// }
+	return nil
+}
+
+// GetPackageDetails imports a Package and returns the import details
+func GetPackageDetails(APIClient *types.APIClientOptions, importPath string, importOptions types.ImportPackageOptions) (*types.ImportPackageDetails, error) {
+	packageBytes, err := ioutil.ReadFile(importPath)
+	if err != nil {
+		return nil, err
+	}
+	queryResponse, err := APIClient.RESTClient.R().
+		SetFileReader("file", "import.package", bytes.NewReader(packageBytes)).
+		SetResult(&types.ImportPackageDetails{}).
+		SetError(&types.Exception{}).
+		Post("/vco/api/packages/import-details")
+
+	if err != nil {
+		return nil, errors.New(queryResponse.Error().(*types.Exception).Message)
+	}
+	return queryResponse.Result().(*types.ImportPackageDetails), nil
+}
 
 // // UpdateCategory updates a category
 // func UpdateCategory(APIClient *types.APIClientOptions, categoryID string, categoryName string, parentCategoryID string) (*types.WsCategory, error) {

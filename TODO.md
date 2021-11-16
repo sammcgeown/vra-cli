@@ -32,7 +32,7 @@
 | Pipeline           |:white_check_mark:| *Import*         |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |                  |                  |
 | Execution          |:white_check_mark:|:white_check_mark:| *N/A*            |:white_check_mark:| *N/A*            | *N/A*            |                  |                  |                  |
 | Custom Integration |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |                  |                  |
-| User Operations    |                  |                  |                  |                  |                  |                  |                  |                  |                  |
+| User Operations    |                  | *N/A*            |                  |                  | *N/A*            | *N/A*            |                  |                  |                  |
 
 ## Service Broker
 
@@ -47,7 +47,7 @@
 | Category  |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:| *N/A*            | *N/A*            |                  |                  |                  |
 | Workflow  |:white_check_mark:| *Import*         |                  |:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |                  |                  |
 | Action    |:white_check_mark:| *Import*         |                  |:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |                  |                  |
-| Package   |                  |                  |                  |                  |                  |                  |                  |                  |                  |
+| Package   |:white_check_mark:|                  |                  |                  |                  |:white_check_mark:|                  |                  |                  |
 
 
 :no_entry_sign:
