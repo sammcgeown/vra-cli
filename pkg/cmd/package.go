@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 package cmd
 
 import (
+	"errors"
 	"os"
 	"strconv"
 
@@ -21,6 +22,7 @@ import (
 var (
 	exportOptions types.ExportPackageOptions
 	importOptions types.ImportPackageOptions
+	deleteOption  string
 )
 
 // getPackageCmd represents the Packages command
@@ -67,21 +69,27 @@ var getPackageCmd = &cobra.Command{
 	},
 }
 
-// // delPackageCmd represents the delete Packages command
-// var delPackageCmd = &cobra.Command{
-// 	Use:   "package",
-// 	Short: "Delete an Package",
-// 	Long:  `Delete an Package with a specific Package ID`,
-// 	Run: func(cmd *cobra.Command, args []string) {
+// delPackageCmd represents the delete Packages command
+var delPackageCmd = &cobra.Command{
+	Use:   "package",
+	Short: "Delete an Package",
+	Long:  `Delete an Package with a specific Package ID`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if deleteOption != "deletePackage" && deleteOption != "deletePackageWithContent" && deleteOption != "deletePackageKeepingShared" {
+			return errors.New("Invalid delete option. Available values: deletePackage, deletePackageWithContent, deletePackageKeepingShared")
+		}
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
 
-// 		_, err := orchestrator.DeletePackage(APIClient, id)
-// 		if err != nil {
-// 			log.Errorln("Unable to delete Package: ", err)
-// 		} else {
-// 			log.Infoln("Package with ID " + id + " deleted")
-// 		}
-// 	},
-// }
+		err := orchestrator.DeletePackage(APIClient, name, deleteOption)
+		if err != nil {
+			log.Errorln("Unable to delete Package: ", err)
+		} else {
+			log.Infoln("Package deleted")
+		}
+	},
+}
 
 // createPackageCmd represents the Packages command
 var createPackageCmd = &cobra.Command{
@@ -153,10 +161,11 @@ func init() {
 	getPackageCmd.Flags().BoolVar(&exportOptions.ViewContents, "viewContents", true, "(Export) Set `View Contents` permission. Default: true")
 	getPackageCmd.Flags().BoolVar(&exportOptions.AddToPackage, "addToPackage", true, "(Export) Set `Add to package` permission. Default: true")
 	getPackageCmd.Flags().BoolVar(&exportOptions.EditContents, "editContents", true, "(Export) Set `Edit contents` permission. Default: true")
-	// // Delete
-	// deleteCmd.AddCommand(delPackageCmd)
-	// delPackageCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Package")
-	// delPackageCmd.MarkFlagRequired("id")
+	// Delete
+	deleteCmd.AddCommand(delPackageCmd)
+	delPackageCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Package")
+	delPackageCmd.Flags().StringVar(&deleteOption, "deleteOption", "deletePackage", "Package deletion options. Available values: deletePackage, deletePackageWithContent, deletePackageKeepingShared. Default: deletePackage")
+	delPackageCmd.MarkFlagRequired("name")
 	// Create
 	createCmd.AddCommand(createPackageCmd)
 	createPackageCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Package")

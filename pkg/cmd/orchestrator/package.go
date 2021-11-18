@@ -216,20 +216,16 @@ func GetPackageDetails(APIClient *types.APIClientOptions, importPath string, imp
 // 	return updatedCategory, nil
 // }
 
-// // DeleteCategory - deletes a category
-// func DeleteCategory(APIClient *types.APIClientOptions, categoryID string) error {
-// 	if APIClient.Force {
-// 		APIClient.RESTClient.QueryParam.Set("deleteNonEmptyContent", "true")
-// 	}
-// 	queryResponse, err := APIClient.RESTClient.R().
-// 		SetError(&types.Exception{}).
-// 		Delete("/vco/api/categories/" + categoryID)
-
-// 	if err != nil {
-// 		return err
-// 	}
-// 	if queryResponse.IsError() {
-// 		return errors.New(queryResponse.Error().(*types.Exception).Message)
-// 	}
-// 	return nil
-// }
+// DeletePackage - deletes a package
+func DeletePackage(APIClient *types.APIClientOptions, packageID string, packageDeleteOption string) error {
+	queryResponse, err := APIClient.RESTClient.R().
+		SetError(&types.Exception{}).
+		Delete("/vco/api/packages/" + packageID)
+	if err != nil {
+		return err
+	}
+	if queryResponse.IsError() {
+		return errors.New(queryResponse.Error().(*types.Exception).Message)
+	}
+	return nil
+}
