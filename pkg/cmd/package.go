@@ -29,7 +29,24 @@ var (
 var getPackageCmd = &cobra.Command{
 	Use:   "package",
 	Short: "Get Orchestrator Packages",
-	Long:  `Get Orchestrator Packages by Name`,
+	Long: `Get Orchestrator Packages
+
+# Get all Packages
+vra-cli get package
+
+# Get Package by Name
+vra-cli get package --name <name>
+
+# Export a Package by Name
+vra-cli get package --name <name> --out export --exportPath <path> --exportConfigurationAttributeValues <true/false> \
+	--exportConfigSecureStringAttributeValues <true/false> --exportGlobalTags <true/false> --viewContents <true/false> \
+	--addToPackage <true/false> --editContents <true/false>`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if APIClient.Output != "export" && exportPath != "" {
+			return errors.New("--exportPath is not required when not exporting")
+		}
+		return nil
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 
 		response, err := orchestrator.GetPackage(APIClient, name)
@@ -72,8 +89,17 @@ var getPackageCmd = &cobra.Command{
 // delPackageCmd represents the delete Packages command
 var delPackageCmd = &cobra.Command{
 	Use:   "package",
-	Short: "Delete an Package",
-	Long:  `Delete an Package with a specific Package ID`,
+	Short: "Delete a Package",
+	Long: `Delete a Package with a specific Package name
+
+# Delete a Package (package only):
+vra-cli delete package --name <name>
+
+# Delete a Package and content
+vra-cli delete package --name <name> --deleteOption deletePackageWithContent
+
+# Delete a Package but keep shared content
+vra-cli delete package --name <name> --deleteOption deletePackageKeepingShared`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if deleteOption != "deletePackage" && deleteOption != "deletePackageWithContent" && deleteOption != "deletePackageKeepingShared" {
 			return errors.New("Invalid delete option. Available values: deletePackage, deletePackageWithContent, deletePackageKeepingShared")
@@ -96,6 +122,9 @@ var createPackageCmd = &cobra.Command{
 	Use:   "package",
 	Short: "Create a Package",
 	Long:  `Create a Package`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		return nil
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 
 		for _, path := range helpers.GetFilePaths(importPath, ".package") {
@@ -168,10 +197,11 @@ func init() {
 	delPackageCmd.MarkFlagRequired("name")
 	// Create
 	createCmd.AddCommand(createPackageCmd)
-	createPackageCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Package")
 	createPackageCmd.Flags().BoolVar(&importOptions.ImportConfigurationAttributeValues, "importConfigurationAttributeValues", true, "Import configuration attribute values with the package. Default: true")
 	createPackageCmd.Flags().BoolVar(&importOptions.ImportConfigSecureStringAttributeValues, "importConfigSecureStringAttributeValues", true, "Import configuration SecureString attribute values with the package. Default: true")
 	createPackageCmd.Flags().StringVar(&importOptions.TagImportMode, "tagImportMode", "ImportButPreserveExistingValue", "Tag import mode. Available values : DoNotImport, ImportAndOverwriteExistingValue, ImportButPreserveExistingValue. Default: ImportButPreserveExistingValue")
 	createPackageCmd.Flags().StringVar(&importPath, "importPath", "", "Path to the zip file, or folder containing zip files, to import")
 	createPackageCmd.MarkFlagRequired("importPath")
+	// Update (alias of create for package import)
+	updateCmd.AddCommand(createPackageCmd)
 }
