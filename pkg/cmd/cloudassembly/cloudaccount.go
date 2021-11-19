@@ -17,12 +17,6 @@ import (
 
 // GetCloudAccounts returns a list of cloud accounts
 func GetCloudAccounts(APIClient *types.APIClientOptions, id string, name string, cloudaccounttype string) ([]*models.CloudAccount, error) {
-
-	// transport := httptransport.New(&targetConfig.Server, "", nil)
-	// // transport.SetDebug(debug)
-	// transport.DefaultAuthentication = httptransport.APIKeyAuth("Authorization", "header", "Bearer "+&targetConfig.AccessToken)
-	// apiclient := client.New(transport, strfmt.Default)
-
 	var filters []string
 	var filter string
 
@@ -61,6 +55,26 @@ func CreateCloudAccountAWS(APIClient *types.APIClientOptions, name, accesskey, s
 	AwsSpec.Tags = helpers.StringToTags(tags)
 
 	createResp, err := APIClient.SDKClient.CloudAccount.CreateAwsCloudAccount(cloud_account.NewCreateAwsCloudAccountParams().WithBody(&AwsSpec))
+	if err != nil {
+		return nil, err
+	}
+	return createResp.Payload, nil
+
+}
+
+// CreateCloudAccountAzure creates a new AWS cloud account
+func CreateCloudAccountAzure(APIClient *types.APIClientOptions, name, description, subscriptionID, tenantID, clientApplicationID, clientApplicationSecretKey, regions, tags string) (*models.CloudAccountAzure, error) {
+	AzureSpec := models.CloudAccountAzureSpecification{}
+	AzureSpec.Name = &name
+	AzureSpec.Description = description
+	AzureSpec.SubscriptionID = &subscriptionID
+	AzureSpec.TenantID = &tenantID
+	AzureSpec.ClientApplicationID = &clientApplicationID
+	AzureSpec.ClientApplicationSecretKey = &clientApplicationSecretKey
+	AzureSpec.RegionIds = strings.Split(regions, ",")
+	AzureSpec.Tags = helpers.StringToTags(tags)
+
+	createResp, err := APIClient.SDKClient.CloudAccount.CreateAzureCloudAccount(cloud_account.NewCreateAzureCloudAccountParams().WithBody(&AzureSpec))
 	if err != nil {
 		return nil, err
 	}

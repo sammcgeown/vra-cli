@@ -13,7 +13,7 @@
 
 |                  | Get              | Create           | Update           | Delete           | Import           | Export           | Testing          | Help Messages    | Docs             | Input Validation |
 |------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|
-| Cloud Account    |:white_check_mark:|                  |                  |:white_check_mark:|                  |                  |                  |                  |                  |                  |
+| Cloud Account    |:white_check_mark:|vSphere, NSX, AWS, Azure|                  |:white_check_mark:|                  |                  |                  |                  |                  |                  |
 | Cloud Template   |:white_check_mark:|:white_check_mark:|                  |:white_check_mark:|                  |                  |                  |                  |                  |                  |
 | Data Collector*  |:white_check_mark:|                  |                  |                  |                  |                  |                  |                  |                  |                  |
 | Deployment       |:white_check_mark:|                  |                  |:white_check_mark:|                  |                  |                  |                  |                  |                  |

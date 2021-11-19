@@ -15,11 +15,17 @@ import (
 )
 
 var (
-	cloudaccounttype   string
-	tags               string
+	cloudaccounttype string
+	tags             string
+	regions          string
+	// AWS
 	awsaccesskeyid     string
 	awssecretaccesskey string
-	awsregions         string
+	// Azure
+	subscriptionID string
+	tenantID       string
+	clientID       string
+	clientSecret   string
 	// vSphere
 	fqdn            string
 	username        string
@@ -126,20 +132,68 @@ Create a new AWS Cloud Account:
 		// 	}
 		// }
 		if cloudaccounttype == "aws" {
-			newAccount, err := cloudassembly.CreateCloudAccountAWS(APIClient, name, awsaccesskeyid, awssecretaccesskey, awsregions, tags)
+			newAccount, err := cloudassembly.CreateCloudAccountAWS(
+				APIClient,
+				name,
+				awsaccesskeyid,
+				awssecretaccesskey,
+				regions,
+				tags,
+			)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			helpers.PrettyPrint(newAccount)
+		} else if cloudaccounttype == "azure" {
+			newAccount, err := cloudassembly.CreateCloudAccountAzure(
+				APIClient,
+				name,
+				description,
+				subscriptionID,
+				tenantID,
+				clientID,
+				clientSecret,
+				regions,
+				tags,
+			)
 			if err != nil {
 				log.Fatalln(err)
 			}
 			helpers.PrettyPrint(newAccount)
 		} else if cloudaccounttype == "vsphere" {
 
-			newAccount, err := cloudassembly.CreateCloudAccountvSphere(APIClient, name, description, fqdn, username, password, nsxaccount, cloudproxy, tags, insecure, createcloudzone)
+			newAccount, err := cloudassembly.CreateCloudAccountvSphere(
+				APIClient,
+				name,
+				description,
+				fqdn,
+				username,
+				password,
+				nsxaccount,
+				cloudproxy,
+				tags,
+				insecure,
+				createcloudzone,
+			)
 			if err != nil {
 				log.Fatalln(err)
 			}
 			helpers.PrettyPrint(newAccount)
 		} else if cloudaccounttype == "nsxt" {
-			newAccount, err := cloudassembly.CreateCloudAccountNsxT(APIClient, name, description, fqdn, username, password, vccloudaccount, cloudproxy, tags, nsxtglobal, nsxtmanager, insecure)
+			newAccount, err := cloudassembly.CreateCloudAccountNsxT(
+				APIClient,
+				name,
+				description,
+				fqdn,
+				username,
+				password,
+				vccloudaccount,
+				cloudproxy,
+				tags,
+				nsxtglobal,
+				nsxtmanager,
+				insecure,
+			)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -192,14 +246,21 @@ func init() {
 	// Create
 	createCmd.AddCommand(createCloudAccountCmd)
 	createCloudAccountCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Cloud Account")
+	createCloudAccountCmd.Flags().StringVarP(&description, "description", "d", "", "Decscription of the Cloud Account")
 	createCloudAccountCmd.Flags().StringVarP(&cloudaccounttype, "type", "t", "", "Type of the Cloud Account")
+	createCloudAccountCmd.MarkFlagRequired("type")
 	createCloudAccountCmd.Flags().StringVar(&tags, "tags", "", "List of Tags (comma separated e.g. \"name1:value2,name2:value2\") to apply to the Cloud Account")
 	createCloudAccountCmd.Flags().StringVar(&cloudproxy, "cloudproxy", "", "vRA Cloud only - ID of the Data Collector (Cloud Proxy) (use: vra-cli get datacollector)")
 	createCloudAccountCmd.Flags().BoolVar(&insecure, "insecure", false, "Ignore Self-Signed Certificates")
+	createCloudAccountCmd.Flags().StringVar(&regions, "regions", "", "List of Regions (comma separated) of the Cloud Account")
+	// Create Azure Cloud Account
+	createCloudAccountCmd.Flags().StringVar(&subscriptionID, "subscriptionid", "", "Azure Subscription ID")
+	createCloudAccountCmd.Flags().StringVar(&tenantID, "tenantid", "", "Azure Tenant ID")
+	createCloudAccountCmd.Flags().StringVar(&clientID, "clientid", "", "Azure Client Application ID")
+	createCloudAccountCmd.Flags().StringVar(&clientSecret, "clientsecret", "", "Azure Client Application Secret ID")
 	// Create AWS Cloud Account
 	createCloudAccountCmd.Flags().StringVar(&awsaccesskeyid, "awsaccesskeyid", "", "AWS Access Key ID of the Cloud Account")
 	createCloudAccountCmd.Flags().StringVar(&awssecretaccesskey, "awssecretaccesskey", "", "AWS Secret Access Key of the Cloud Account")
-	createCloudAccountCmd.Flags().StringVar(&awsregions, "awsregions", "", "List of AWS Regions (comma separated) of the Cloud Account")
 	// Create vSphere Cloud Account
 	createCloudAccountCmd.Flags().StringVar(&fqdn, "fqdn", "", "vCenter Server FQDN")
 	createCloudAccountCmd.Flags().StringVar(&username, "username", "", "User Name")
