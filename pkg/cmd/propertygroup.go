@@ -36,13 +36,13 @@ var getPropertyGroupCmd = &cobra.Command{
 			if APIClient.Output == "table" {
 				// Print result table
 				table := tablewriter.NewWriter(os.Stdout)
-				table.SetHeader([]string{"Id", "Name", "Project", "Description", "Properties"})
+				table.SetHeader([]string{"Id", "Name", "Type", "Project", "Description", "Properties"})
 				for _, c := range response {
 					var propertyList []string
 					for _, value := range c.Properties {
 						propertyList = append(propertyList, value.Title+"("+value.Type+")")
 					}
-					table.Append([]string{c.ID, c.Name, c.ProjectName, c.Description, strings.Join(propertyList, "\n")})
+					table.Append([]string{c.ID, c.Name, c.Type, c.ProjectName, c.Description, strings.Join(propertyList, "\n")})
 				}
 				table.Render()
 			} else if APIClient.Output == "export" {

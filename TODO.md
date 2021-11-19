@@ -18,7 +18,7 @@
 | Data Collector*  |:white_check_mark:|                  |                  |                  |                  |                  |                  |                  |                  |                  |
 | Deployment       |:white_check_mark:|                  |                  |:white_check_mark:|                  |                  |                  |                  |                  |                  |
 | Project          |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |                  |                  |                  |                  |                  |
-| Property Groups  |                  |                  |                  |                  |                  |                  |                  |                  |                  |                  |
+| Property Groups  |:white_check_mark:|                  |                  |                  |                  |                  |                  |                  |                  |                  |
 | Custom Resources |                  |                  |                  |                  |                  |                  |                  |                  |                  |                  |
 | Resource Actions |                  |                  |                  |                  |                  |                  |                  |                  |                  |                  |
 
