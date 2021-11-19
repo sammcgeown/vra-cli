@@ -26,6 +26,9 @@ Get Data Collector by ID:
 Get all Data Collectors:
   vra-cli get datacollector`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if APIClient.Config.Server != "api.mgmt.cloud.vmware.com" {
+			log.Fatalln("Data Collectors (Cloud Proxies) are only supported on vRealize Automation Cloud")
+		}
 		dataCollectors, err := cloudassembly.GetDataCollector(APIClient, id)
 		if err != nil {
 			log.Fatalln(err)

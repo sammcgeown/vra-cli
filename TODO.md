@@ -15,7 +15,7 @@
 |------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|
 | Cloud Account    |:white_check_mark:|vSphere, NSX, AWS, Azure|                  |:white_check_mark:|                  |                  |                  |                  |:white_check_mark:|:white_check_mark:|
 | Cloud Template   |:white_check_mark:|:white_check_mark:|                  |:white_check_mark:|                  |                  |                  |                  |                  |                  |
-| Data Collector*  |:white_check_mark:|                  |                  |                  |                  |                  |                  |                  |                  |                  |
+| Data Collector*  |:white_check_mark:| *N/A*            | *N/A*            | *N/A*            | *N/A*            | *N/A*            |                  |:white_check_mark:|                  |:white_check_mark:|
 | Deployment       |:white_check_mark:|                  |                  |:white_check_mark:|                  |                  |                  |                  |                  |                  |
 | Project          |:white_check_mark:|:white_check_mark:|:white_check_mark:|:white_check_mark:|                  |                  |                  |                  |                  |                  |
 | Property Groups  |:white_check_mark:|                  |                  |                  |                  |                  |                  |                  |                  |                  |
