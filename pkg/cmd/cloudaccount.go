@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 package cmd
 
 import (
+	"errors"
 	"os"
 
 	"github.com/olekukonko/tablewriter"
@@ -117,10 +118,45 @@ var createCloudAccountCmd = &cobra.Command{
 	Long: `Create a Cloud Account.
 
 Create a new AWS Cloud Account:
-  vra-cli create cloudaccount --name spc-47-aws --type aws --awsaccesskeyid <AWS Access Key ID> \
-    --awssecretaccesskey <AWS Secret Access Key> --tags "cloud:aws,env:staging" \
-	--awsregions "us-west-1,us-west-2"`,
+  vra-cli create cloudaccount --name <name> --description <description> --type aws --awsaccesskeyid <AWS Access Key ID> \
+    --awssecretaccesskey <AWS Secret Access Key> --tags "<tag:value>,<tag:value>" \
+	--regions "<region>,<region>"
+	
+Create a new Azure Cloud Account:
+  vra-cli create cloudaccount --name <name> --description <description> --type azure \
+    --subscriptionid <subscription ID> --tenantid <tenant ID> --clientid <client ID> \
+	 --clientsecret <client secret> --tags "<tag:value>,<tag:value>" \
+	 --regions "<region>,<region>"`,
 	Args: func(cmd *cobra.Command, args []string) error {
+		switch cloudaccounttype {
+		case "aws":
+			if awsaccesskeyid == "" ||
+				awssecretaccesskey == "" {
+				return errors.New("--awsaccesskeyid and --awssecretaccesskey are required for AWS Cloud Accounts")
+			}
+		case "azure":
+			if subscriptionID == "" ||
+				tenantID == "" ||
+				clientID == "" ||
+				clientSecret == "" {
+				return errors.New("--subscriptionID, --tenantID, --clientID, and --clientSecret are required for Azure Cloud Accounts")
+			}
+		case "vsphere":
+			if fqdn == "" ||
+				username == "" ||
+				password == "" {
+				return errors.New("--fqdn, --username, and --password are required for vSphere Cloud Accounts")
+			}
+		case "nsxt":
+			if fqdn == "" ||
+				username == "" ||
+				password == "" {
+				return errors.New("--fqdn, --username, and --password are required for NSX-T Accounts")
+			}
+		default:
+			return errors.New("--type is required (aws/azure/vsphere/nsxt)")
+		}
+
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -161,7 +197,6 @@ Create a new AWS Cloud Account:
 			}
 			helpers.PrettyPrint(newAccount)
 		} else if cloudaccounttype == "vsphere" {
-
 			newAccount, err := cloudassembly.CreateCloudAccountvSphere(
 				APIClient,
 				name,
@@ -246,6 +281,7 @@ func init() {
 	// Create
 	createCmd.AddCommand(createCloudAccountCmd)
 	createCloudAccountCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the Cloud Account")
+	createCloudAccountCmd.MarkFlagRequired("name")
 	createCloudAccountCmd.Flags().StringVarP(&description, "description", "d", "", "Decscription of the Cloud Account")
 	createCloudAccountCmd.Flags().StringVarP(&cloudaccounttype, "type", "t", "", "Type of the Cloud Account")
 	createCloudAccountCmd.MarkFlagRequired("type")
